@@ -1,0 +1,35 @@
+#ifndef _KERNEL_GLOBAL_H
+#define _KERNEL_GLOBAL_H
+#include "stdint.h"
+
+//定义描述符和选择子相关属性 之前在boot.inc中定义的常量 C中无法用
+#define RPL0 0
+#define RPL1 1
+#define RPL2 2
+#define RPL3 3
+
+#define TI_GDT 0
+#define TI_LDT 1
+
+//定义带运算的宏时要用括号保证运算顺序
+#define SELECTOR_K_CODE     ((1 << 3) + (TI_GDT << 2) + RPL0)
+#define SELECTOR_K_DATA     ((2 << 3) + (TI_GDT << 2) + RPL0)
+#define SELECTOR_K_STACK    SELECTOR_K_DATA
+#define SELECTOR_K_GS       ((3 << 3) + (TI_GDT << 2) + RPL0)
+
+//idt描述符的属性8bit
+#define IDT_DESC_P          1
+#define IDT_DESC_DPL0       0
+#define IDT_DESC_DPL3       3
+#define IDT_DESC_32_TYPE    0xE
+#define IDT_DESC_16_TYPE    0x6
+
+#define IDT_DESC_ATTR_DPL0  ((IDT_DESC_P << 7) + (IDT_DESC_DPL0 << 5) + IDT_DESC_32_TYPE)
+#define IDT_DESC_ATTR_DPL3  ((IDT_DESC_P << 7) + (IDT_DESC_DPL3 << 5) + IDT_DESC_32_TYPE)
+
+#define NULL ((void*)0)
+#define bool int
+#define true 1
+#define false 0
+
+#endif
