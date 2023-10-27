@@ -38,3 +38,25 @@ struct intr_stack {
     void* esp;
     uint32_t ss;
 };
+
+//线程自己的栈
+struct thread_stack {
+    uint32_t ebp;
+    uint32_t ebx;
+    uint32_t edi;
+    uint32_t esi;
+
+    void (eip*) (thread_func* func, void* func_arg);
+
+    void (*unused_retaddr);
+    thread_func* function;
+    void* func_arg;
+}
+
+struct task_struct {
+    uint32_t* self_kstack;//线程栈
+    enum task_status status;
+    uint8_t priority;
+    char name[16];
+    uint32_t stack_magic;//检测栈溢出
+}
