@@ -4,13 +4,20 @@
 #include "stdint.h"
 #include "memory.h"
 
+void k_thread_a(void*);
+
 int main(void) {
     put_str("I am kernel\n");
     init_all();
-    void* addr = get_kernel_pages(3);
-    put_str("\nget_kernel_pages start vaddr is:0x");
-    put_int((uint32_t)addr);
-    put_char('\n');
-    ASSERT(1==2);
+    
+    thread_start("k_thread_a", 31, k_thread_a, "argA ");
+
     return 0;
+}
+
+void k_thread_a(void* arg) {
+    char* para = arg;
+    while(1) {
+        put_str(para);
+    }
 }

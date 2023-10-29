@@ -2,8 +2,7 @@
 #define _THREAD_THREAD_H
 #include "stdint.h"
 
-//typedef用于自定义数据类型
-typedef void thread_func(void*);
+typedef void (*thread_func)(void*);
 
 //定义线程状态
 enum task_status {
@@ -29,7 +28,7 @@ struct intr_stack {
     uint32_t gs;
     uint32_t fs;
     uint32_t es;
-    uint32_t gs;
+    uint32_t ds;
     uint32_t err_code;
     void (*eip) (void);
     uint32_t cs;
@@ -46,12 +45,12 @@ struct thread_stack {
     uint32_t edi;
     uint32_t esi;
 
-    void (eip*) (thread_func* func, void* func_arg);
+    void (*eip)(thread_func func, void* func_arg);
 
-    void (*unused_retaddr);
-    thread_func* function;
+    void* unused_retaddr;
+    thread_func function;
     void* func_arg;
-}
+};
 
 struct task_struct {
     uint32_t* self_kstack;//线程栈
@@ -59,4 +58,9 @@ struct task_struct {
     uint8_t priority;
     char name[16];
     uint32_t stack_magic;//检测栈溢出
-}
+};
+
+void init_thread(struct task_struct* pthread, char* name, int prio);
+void thread_create(struct task_struct* pthread, thread_func function, void* func_arg);
+struct task_struct* thread_start(char* name, int prio, thread_func function, void* func_arg);
+#endif
