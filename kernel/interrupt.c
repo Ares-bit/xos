@@ -87,12 +87,31 @@ static void general_intr_handler(uint8_t vec_nr)
     if (vec_nr == 0x27 || vec_nr == 0x2f) {//IRQ7和IRQ15会产生伪中断 无需处理
         return;
     }
-    put_str("int vector: 0x");
-    put_int(vec_nr);
-    put_char('\n');
+
+    //清空前4行内容以输出异常信息
+    set_cursor(0);
+    int cursor_pos = 0;
+    while (cursor_pos < 320) {
+        put_char(' ');
+        cursor_pos++;
+    }
+
+    set_cursor(0);
+    put_str("-------  exception message begin  -------\n");
+    set_cursor(88);
+    put_str(intr_name[vec_nr]);
+    if (vec_nr == 14) {//PAGEFAULT
+        int page_fault_vaddr = 0;
+        asm volatile("mov %%cr2,%0" : "=r"(page_fault_vaddr));
+        put_str("\npage fault addr is 0x");
+        put_int(page_fault_vaddr);
+    }
+    put_str("-------   exception message end   -------\n");
+    //能进中断处理程序就表示已经处在关中断情况下 所以不会再调度线程 while会一直卡住
+    while(1);
 }
 
-//注册前20个中断
+//注册前0x21个中断
 static void exception_init(void)
 {
     int i;

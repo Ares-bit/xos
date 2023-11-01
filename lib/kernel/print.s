@@ -149,6 +149,7 @@ put_str:
 section .data
 put_int_buffer dq 0
 
+section .text
 global put_int
 ;打印32位整型
 put_int:
@@ -210,4 +211,34 @@ put_int:
     cmp edi,8
     jl .put_each_num
     popad
+    ret
+
+section .text
+global set_cursor
+set_cursor:
+    push eax
+    push edx
+    push ebx
+
+    mov ebp,esp
+
+    mov ebx,[ebp + 3 * 4]
+
+    mov dx,0x03d4
+    mov al,0x0e
+    out dx,al
+    mov dx,0x03d5
+    mov al,bh
+    out dx,al
+
+    mov dx,0x03d4
+    mov al,0x0f
+    out dx,al
+    mov dx,0x03d5
+    mov al,bl
+    out dx,al
+
+    pop ebx
+    pop edx
+    pop eax
     ret
