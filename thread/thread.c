@@ -90,3 +90,30 @@ static void make_main_thread(void)
 
     ASSERT(!elem_find(&thread_all_list, &main_thread))
 }
+
+void schedule(void)
+{   
+    //进调度后一定得是关中断状态
+    ASSERT(intr_get_status() == INTR_OFF);
+
+    struct task_struct* cur = running_thread();
+    //如果当前进程是正在运行状态 则不允许其同时出现在就绪队列
+    if (cur->status == TASK_RUNNING) {
+        ASSERT(!elem_find(&thread_ready_list, &cur->general_tag));
+        list_append(&thread_ready_list, &cur->general_tag);
+        cur->ticks = cur->priority;//一个线程能被换下CPU 说明其ticks已减为0
+        cur->status = TASK_READY;//看着就只牵扯到就绪队列 全部队列没用到啊
+    } else {
+        //如果当前线程不是RUNNING状态什么都不做 后面会置除READY和RUNNING外的状态吗
+    }
+
+    //如果就绪队列为空则报错
+    ASSERT(!list_empty(&thread_ready_list));
+    thread_tag = NULL;
+    thread_tag = list_pop(&thread_ready_list);
+    //通过next的tag找到PCB起始地址
+    struct task_struct* next = elem2entry(struct task_struct, general_tag, thread_tag);
+    next->status = TASK_RUNNING;
+    //保存cur 切换到next
+    switch_to(cur, next);
+}

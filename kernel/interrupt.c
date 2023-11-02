@@ -143,6 +143,12 @@ static void exception_init(void)
     intr_name[19] = "#XF SIMD Floating-Point Exception";
 }
 
+//256个中断 8B能表示完
+void register_handler(uint8_t vector_no, intr_handler function)
+{
+    idt_table[vector_no] = function;
+}
+
 //开中断并返回开中断前的状态
 enum intr_status intr_enable() {
     enum intr_status old_status;
