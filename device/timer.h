@@ -1,4 +1,4 @@
-#ifndef _DEVICE_TIME_H
-#define _DEVICE_TIME_H
+#ifndef __DEVICE_TIME_H
+#define __DEVICE_TIME_H
 void timer_init(void);
 #endif

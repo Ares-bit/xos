@@ -96,10 +96,10 @@ put_char:
 
     ;最后一行清空
     mov ecx,80
-    mov bx,3840
+    mov ebx,3840
 .cls:
-    mov word [gs:bx],0x0720
-    add bx,2
+    mov word [gs:ebx],0x0720
+    add ebx,2
     loop .cls
     mov bx,1920
 
@@ -192,7 +192,7 @@ put_int:
     je .full0
 
 .go_on_skip:
-    mov cl,[ebx+edi]
+   mov cl, [put_int_buffer+edi]
     inc edi
     cmp cl,'0'
     je .skip_prefix_0
@@ -207,22 +207,17 @@ put_int:
     call put_char
     add esp,4
     inc edi
-    mov cl,[ebx+edi]
+    mov cl,[put_int_buffer+edi]
     cmp edi,8
     jl .put_each_num
     popad
     ret
 
-section .text
 global set_cursor
 set_cursor:
-    push eax
-    push edx
-    push ebx
+    pushad
 
-    mov ebp,esp
-
-    mov ebx,[ebp + 3 * 4]
+    mov bx,[esp + 9*4]
 
     mov dx,0x03d4
     mov al,0x0e
@@ -238,7 +233,5 @@ set_cursor:
     mov al,bl
     out dx,al
 
-    pop ebx
-    pop edx
-    pop eax
+    popad
     ret

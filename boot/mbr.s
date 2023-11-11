@@ -47,15 +47,16 @@ rd_disk_m_16:
      mov dx,0x1f3
      out dx,al
 
-     shr eax,8
-     mov dx,0x1f4
-     out dx,al
+      mov cl,8
+      shr eax,cl
+      mov dx,0x1f4
+      out dx,al
 
-     shr eax,8
+     shr eax,cl
      mov dx,0x1f5
      out dx,al
 
-     shr eax,8
+     shr eax,cl
      mov dx,0x1f6
      and al,0x0f
      or al,0xe0

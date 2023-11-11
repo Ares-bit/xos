@@ -3,6 +3,9 @@
 #include "string.h"
 #include "global.h"
 #include "memory.h"
+#include "interrupt.h"
+#include "debug.h"
+#include "print.h"
 
 #define PG_SIZE 4096
 
@@ -17,9 +20,9 @@ extern void switch_to(struct task_struct* cur, struct task_struct* next);
 struct task_struct* running_thread()
 {
     uint32_t esp;
-    asm volatile("mov %%esp,%0": "=g"(esp));
+    asm ("mov %%esp,%0": "=g"(esp));
     return (struct task_struct*)(esp & 0xfffff000);
-}
+};
 
 static void kernel_thread(thread_func function, void* func_arg)
 {
@@ -88,7 +91,8 @@ static void make_main_thread(void)
     main_thread = running_thread();
     init_thread(main_thread, "main", 31);
 
-    ASSERT(!elem_find(&thread_all_list, &main_thread))
+    ASSERT(!elem_find(&thread_all_list, &main_thread->all_list_tag));
+    list_append(&thread_all_list, &main_thread->all_list_tag);
 }
 
 void schedule(void)
@@ -116,4 +120,13 @@ void schedule(void)
     next->status = TASK_RUNNING;
     //保存cur 切换到next
     switch_to(cur, next);
+}
+
+void thread_init(void)
+{
+    put_str("thread_init start\n");
+    list_init(&thread_ready_list);
+    list_init(&thread_all_list);
+    make_main_thread();
+    put_str("thread_init done\n");
 }

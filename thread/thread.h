@@ -1,6 +1,7 @@
-#ifndef _THREAD_THREAD_H
-#define _THREAD_THREAD_H
+#ifndef __THREAD_THREAD_H
+#define __THREAD_THREAD_H
 #include "stdint.h"
+#include "list.h"
 
 typedef void (*thread_func)(void*);
 
@@ -57,15 +58,18 @@ struct task_struct {
     enum task_status status;
     uint8_t priority;
     char name[16];
-    uint32_t stack_magic;//检测栈溢出
     uint8_t ticks;//每次在处理器上执行的时间滴答数
     uint32_t elapsed_ticks;//此任务已经占用了多少滴答
     struct list_elem general_tag;//一般队列
     struct list_elem all_list_tag;//线程队列
     uint32_t* pgdir;//进程页表虚拟地址
+    uint32_t stack_magic;//检测栈溢出
 };
 
 void init_thread(struct task_struct* pthread, char* name, int prio);
 void thread_create(struct task_struct* pthread, thread_func function, void* func_arg);
 struct task_struct* thread_start(char* name, int prio, thread_func function, void* func_arg);
+void thread_init(void);
+struct task_struct* running_thread(void);
+void schedule(void);
 #endif

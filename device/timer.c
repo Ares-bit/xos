@@ -2,6 +2,9 @@
 #include "print.h"
 #include "timer.h"
 #include "stdint.h"
+#include "thread.h"
+#include "debug.h"
+#include "interrupt.h"
 
 #define IRQ0_FREQUENCY      100
 #define INPUT_FREQUENCY     1193180
@@ -21,13 +24,13 @@ static void frequency_set(uint8_t counter_port, uint8_t counter_no, uint8_t rwl,
     outb(PIT_CONTROL_PORT, (uint8_t)(counter_no << 6 | rwl << 4 | counter_mode << 1));
     //再分两次写计数初值
     outb(counter_port, (uint8_t)counter_value);
-    outb(counter_port, (uint8_t)(counter_value >> 8));
+    outb(counter_port, (uint8_t)counter_value >> 8);
 }
 
 //时钟中断处理函数
 static void intr_timer_handler(void)
 {
-    struct task_struct* cur_thread = running_thread();
+    struct task_struct* cur_thread = (struct task_struct*)running_thread();
     //检查栈溢出
     ASSERT(cur_thread->stack_magic == 0x20001212);
 

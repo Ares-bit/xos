@@ -1,6 +1,5 @@
 %include "boot.inc"
 section loader vstart=LOADER_BASE_ADDR
-LOADER_STACK_TOP equ LOADER_BASE_ADDR
 
 GDT_BASE:
     dd 0x00000000
@@ -64,9 +63,8 @@ loader_start:
     jge .next_ards
     mov edx,eax
 .next_ards:
-    add bx,20
-    loop .find_max_mem_area
-    jmp .mem_get_ok
+   loop .find_max_mem_area
+   jmp .mem_get_ok
 
 .e820_failed_so_try_e801:
     mov ax,0xe801
@@ -86,7 +84,7 @@ loader_start:
     mov ax,bx
     mul ecx
     add esi,eax
-    mov esi,edx
+    mov edx,esi
     jmp .mem_get_ok
 
 .e801_failed_so_try88:
@@ -255,7 +253,6 @@ set_up_page:
 
     mov ecx,256
     mov esi,0
-    xor edx,edx
     mov edx,PG_P|PG_RW_W|PG_US_U
 .create_pte:
     mov [ebx+esi*4],edx

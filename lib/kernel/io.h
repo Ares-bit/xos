@@ -1,5 +1,5 @@
-#ifndef _KERNEL_IO_H
-#define _KERNEL_IO_H
+#ifndef __KERNEL_IO_H
+#define __KERNEL_IO_H
 #include "stdint.h"
 
 //向端口中写入1B

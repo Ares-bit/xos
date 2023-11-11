@@ -1,5 +1,5 @@
-#ifndef _KERNEL_BITMAP_H
-#define _KERNEL_BITMAP_H
+#ifndef __LIB_KERNEL_BITMAP_H
+#define __LIB_KERNEL_BITMAP_H
 #include "global.h"
 
 #define BITMAP_MASK 1//判断某位是否为1

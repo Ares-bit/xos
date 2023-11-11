@@ -1,5 +1,5 @@
-#ifndef _LIB_KERNEL_LIST_H
-#define _LIB_KERNEL_LIST_H
+#ifndef __LIB_KERNEL_LIST_H
+#define __LIB_KERNEL_LIST_H
 #include "global.h"
 
 #define offset(struct_type, member) (int)(&((struct_type*)0)->member)
@@ -15,7 +15,7 @@ struct list_elem {
 struct list {
     struct list_elem head;
     struct list_elem tail;
-}
+};
 
 typedef bool (function)(struct list_elem* elem, int arg);
 

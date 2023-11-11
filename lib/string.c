@@ -23,7 +23,7 @@ void memcpy(void *dst_, const void *src_, uint32_t size)
     }
 }
 
-int memcmp(const void *a_, void *b_, uint32_t size)
+int memcmp(const void *a_, const void *b_, uint32_t size)
 {
     ASSERT(a_ != NULL && b_ != NULL);
     const uint8_t *a = a_;

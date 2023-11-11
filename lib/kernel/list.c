@@ -49,7 +49,7 @@ void list_remove(struct list_elem* pelem)
 //将元素从队首pop出来
 struct list_elem* list_pop(struct list* plist)
 {
-    struct elem* = plist->head.next;
+    struct list_elem* elem = plist->head.next;
 
     list_remove(elem);
     return elem;
@@ -98,5 +98,5 @@ uint32_t list_len(struct list* plist)
 
 bool list_empty(struct list* plist)
 {
-    return plist->head.next == &plist->tail ? true : false;
+    return (plist->head.next == &plist->tail ? true : false);
 }

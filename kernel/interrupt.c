@@ -71,7 +71,7 @@ static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler 
 }
 
 //初始化idt
-static void idst_desc_init(void) {
+static void idt_desc_init(void) {
     int i;
 
     for (i = 0; i < IDT_DESC_CNT; i++) {
@@ -102,11 +102,11 @@ static void general_intr_handler(uint8_t vec_nr)
     put_str(intr_name[vec_nr]);
     if (vec_nr == 14) {//PAGEFAULT
         int page_fault_vaddr = 0;
-        asm volatile("mov %%cr2,%0" : "=r"(page_fault_vaddr));
+        asm ("mov %%cr2,%0" : "=r"(page_fault_vaddr));
         put_str("\npage fault addr is 0x");
         put_int(page_fault_vaddr);
     }
-    put_str("-------   exception message end   -------\n");
+    put_str("\n-------   exception message end   -------\n");
     //能进中断处理程序就表示已经处在关中断情况下 所以不会再调度线程 while会一直卡住
     while(1);
 }
@@ -130,7 +130,7 @@ static void exception_init(void)
     intr_name[6] = "#UD Invalid Opcode Exception";
     intr_name[7] = "#NM Device Not Available Exception";
     intr_name[8] = "#DF Double Fault Exception";
-    intr_name[9] = "Coprocess Segment Overrun";
+    intr_name[9] = "Coprocessor Segment Overrun";
     intr_name[10] = "#TS Invalid TSS Exception";
     intr_name[11] = "#NP Segment Not Present";
     intr_name[12] = "#SS Stack Fault Exception";
@@ -167,7 +167,7 @@ enum intr_status intr_disable() {
     enum intr_status old_status;
     if (INTR_ON == intr_get_status()) {
         old_status = INTR_ON;
-        asm volatile("cli");
+        asm volatile("cli": : : "memory");
         return old_status;
     } else {
         old_status = INTR_OFF;
@@ -176,7 +176,7 @@ enum intr_status intr_disable() {
 }
 
 enum intr_status intr_set_status(enum intr_status status) {
-    return (EFLAGS_IF & status) ? intr_enable() : intr_disable();
+    return status & INTR_ON ? intr_enable() : intr_disable();
 }
 
 enum intr_status intr_get_status() {
@@ -187,7 +187,7 @@ enum intr_status intr_get_status() {
 
 void idt_init(void) {
     put_str("idt_init start\n");
-    idst_desc_init();
+    idt_desc_init();
     exception_init();
     pic_init();
 

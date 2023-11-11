@@ -1,5 +1,5 @@
-#ifndef _KERNEL_GLOBAL_H
-#define _KERNEL_GLOBAL_H
+#ifndef __KERNEL_GLOBAL_H
+#define __KERNEL_GLOBAL_H
 #include "stdint.h"
 
 //定义描述符和选择子相关属性 之前在boot.inc中定义的常量 C中无法用

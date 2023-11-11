@@ -1,5 +1,5 @@
-#ifndef _KERNEL_MEMORY_H
-#define _KERNEL_MEMORY_H
+#ifndef __KERNEL_MEMORY_H
+#define __KERNEL_MEMORY_H
 #include "stdint.h"
 #include "bitmap.h"
 //虚拟地址池
