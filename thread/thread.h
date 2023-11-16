@@ -3,7 +3,7 @@
 #include "stdint.h"
 #include "list.h"
 
-typedef void (*thread_func)(void*);
+typedef void thread_func(void*);
 
 //定义线程状态
 enum task_status {
@@ -46,10 +46,10 @@ struct thread_stack {
     uint32_t edi;
     uint32_t esi;
 
-    void (*eip)(thread_func func, void* func_arg);
+	void (*eip) (thread_func* func, void* func_arg);
 
-    void* unused_retaddr;
-    thread_func function;
+   	void (*unused_retaddr);
+    thread_func* function;
     void* func_arg;
 };
 

@@ -144,8 +144,8 @@ LOAD build/switch.o
                 0x00000000c0001bb0                intr_exit
  *fill*         0x00000000c0001ffa        0x6 90909090
  .text          0x00000000c0002000      0x1a0 build/print.o
-                0x00000000c0002000                put_char
-                0x00000000c00020d7                put_str
+                0x00000000c0002000                put_str
+                0x00000000c0002024                put_char
                 0x00000000c00020fb                put_int
                 0x00000000c000217c                set_cursor
  .text          0x00000000c00021a0       0xa5 build/debug.o

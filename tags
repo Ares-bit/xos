@@ -156,8 +156,8 @@ edi	thread/thread.h	/^    uint32_t edi;$/;"	m	struct:intr_stack
 edi	thread/thread.h	/^    uint32_t edi;$/;"	m	struct:thread_stack
 edx	thread/thread.h	/^    uint32_t edx;$/;"	m	struct:intr_stack
 eflags	thread/thread.h	/^    uint32_t eflags;$/;"	m	struct:intr_stack
+eip	thread/thread.h	/^	void (*eip) (thread_func* func, void* func_arg);$/;"	m	struct:thread_stack
 eip	thread/thread.h	/^    void (*eip) (void);$/;"	m	struct:intr_stack
-eip	thread/thread.h	/^    void (*eip)(thread_func func, void* func_arg);$/;"	m	struct:thread_stack
 elapsed_ticks	thread/thread.h	/^    uint32_t elapsed_ticks;\/\/此任务已经占用了多少滴答$/;"	m	struct:task_struct
 elem2entry	lib/kernel/list.h	6;"	d
 elem_find	lib/kernel/list.c	/^bool elem_find(struct list* plist, struct list_elem* obj_elem)$/;"	f
@@ -180,7 +180,7 @@ func_arg	thread/thread.h	/^    void* func_arg;$/;"	m	struct:thread_stack
 func_offset_high_word	kernel/interrupt.c	/^    uint16_t    func_offset_high_word;\/\/中断处理程序偏移地址高16位$/;"	m	struct:gate_desc	file:
 func_offset_low_word	kernel/interrupt.c	/^    uint16_t    func_offset_low_word;\/\/中断处理程序偏移地址低16位$/;"	m	struct:gate_desc	file:
 function	lib/kernel/list.h	/^typedef bool (function)(struct list_elem* elem, int arg);$/;"	t
-function	thread/thread.h	/^    thread_func function;$/;"	m	struct:thread_stack
+function	thread/thread.h	/^    thread_func* function;$/;"	m	struct:thread_stack
 gate_desc	kernel/interrupt.c	/^struct gate_desc {$/;"	s	file:
 gdt_ptr	boot/loader.s	/^gdt_ptr:$/;"	l
 general_intr_handler	kernel/interrupt.c	/^static void general_intr_handler(uint8_t vec_nr)$/;"	f	file:
@@ -307,7 +307,7 @@ task_status	thread/thread.h	/^enum task_status {$/;"	g
 task_struct	thread/thread.h	/^struct task_struct {$/;"	s
 thread_all_list	thread/thread.c	/^struct list thread_all_list;$/;"	v	typeref:struct:list
 thread_create	thread/thread.c	/^void thread_create(struct task_struct* pthread, thread_func function, void* func_arg)$/;"	f
-thread_func	thread/thread.h	/^typedef void (*thread_func)(void*);$/;"	t
+thread_func	thread/thread.h	/^typedef void thread_func(void*);$/;"	t
 thread_init	thread/thread.c	/^void thread_init(void)$/;"	f
 thread_ready_list	thread/thread.c	/^struct list thread_ready_list;$/;"	v	typeref:struct:list
 thread_stack	thread/thread.h	/^struct thread_stack {$/;"	s
@@ -323,7 +323,7 @@ uint16_t	lib/stdint.h	/^typedef unsigned short int uint16_t;$/;"	t
 uint32_t	lib/stdint.h	/^typedef unsigned int uint32_t;$/;"	t
 uint64_t	lib/stdint.h	/^typedef unsigned long long int uint64_t;$/;"	t
 uint8_t	lib/stdint.h	/^typedef unsigned char uint8_t;$/;"	t
-unused_retaddr	thread/thread.h	/^    void* unused_retaddr;$/;"	m	struct:thread_stack
+unused_retaddr	thread/thread.h	/^   	void (*unused_retaddr);$/;"	m	struct:thread_stack
 user_pool	kernel/memory.c	/^struct pool kernel_pool, user_pool;$/;"	v	typeref:struct:
 vaddr_bitmap	kernel/memory.h	/^    struct bitmap vaddr_bitmap;\/\/虚拟内存位图$/;"	m	struct:virtual_addr	typeref:struct:virtual_addr::bitmap
 vaddr_get	kernel/memory.c	/^static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt)$/;"	f	file:
