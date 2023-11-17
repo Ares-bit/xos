@@ -130,3 +130,31 @@ void thread_init(void)
     make_main_thread();
     put_str("thread_init done\n");
 }
+
+void thread_block(enum task_status stat)
+{
+    //输入状态必须是这三种才可以
+    ASSERT(stat == TASK_BLOCKED || stat == TASK_WAITING || stat = TASK_HANGING);
+    enum intr_status old_status = intr_disable();
+    struct task_struct* cur_thread = running_thread();
+    cur_thread->status = stat;
+    schedule();//将当前线程换下处理器
+    //当线程解除阻塞，再次上处理器后，才能执行下边这句
+    intr_set_status(old_status);
+}
+
+void thread_unblock(struct task_struct* pthread)
+{
+    enum old_status = intr_disable();
+    ASSERT(pthread->status == TASK_BLOCKED || pthread->status == TASK_WAITING || pthread->status == TASK_HANGING);
+    if (pthread->status != TASK_READY) {
+        ASSERT(!elem_find(&thread_ready_list, &pthread->general_tag));
+        if (elem_find(&thread_ready_list, &pthread->general_tag)) {
+            PANIC("thread_unblock: blocked thread in ready_list\n");
+        }
+        //挂到队列最前边，尽快调度
+        list_push(&thread_ready_list, &pthread->general_tag);
+        pthread->status = TASK_READY;
+    }
+    intr_set_status(old_status);
+}
