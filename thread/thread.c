@@ -55,11 +55,11 @@ void init_thread(struct task_struct* pthread, char* name, int prio)
         pthread->status = TASK_READY;
     }
 
+   pthread->self_kstack = (uint32_t*)((uint32_t)pthread + PG_SIZE);
     pthread->priority = prio;
     pthread->ticks = prio;
     pthread->elapsed_ticks = 0;
     pthread->pgdir = NULL;
-    pthread->self_kstack = (uint32_t*)((uint32_t)pthread + PG_SIZE);
     pthread->stack_magic = 0x20001212;
 }
 
@@ -122,19 +122,10 @@ void schedule(void)
     switch_to(cur, next);
 }
 
-void thread_init(void)
-{
-    put_str("thread_init start\n");
-    list_init(&thread_ready_list);
-    list_init(&thread_all_list);
-    make_main_thread();
-    put_str("thread_init done\n");
-}
 
 void thread_block(enum task_status stat)
 {
-    //输入状态必须是这三种才可以
-    ASSERT(stat == TASK_BLOCKED || stat == TASK_WAITING || stat = TASK_HANGING);
+   	ASSERT(((stat == TASK_BLOCKED) || (stat == TASK_WAITING) || (stat == TASK_HANGING)));
     enum intr_status old_status = intr_disable();
     struct task_struct* cur_thread = running_thread();
     cur_thread->status = stat;
@@ -145,8 +136,8 @@ void thread_block(enum task_status stat)
 
 void thread_unblock(struct task_struct* pthread)
 {
-    enum old_status = intr_disable();
-    ASSERT(pthread->status == TASK_BLOCKED || pthread->status == TASK_WAITING || pthread->status == TASK_HANGING);
+    enum intr_status old_status = intr_disable();
+   	ASSERT(((pthread->status == TASK_BLOCKED) || (pthread->status == TASK_WAITING) || (pthread->status == TASK_HANGING)));
     if (pthread->status != TASK_READY) {
         ASSERT(!elem_find(&thread_ready_list, &pthread->general_tag));
         if (elem_find(&thread_ready_list, &pthread->general_tag)) {
@@ -157,4 +148,12 @@ void thread_unblock(struct task_struct* pthread)
         pthread->status = TASK_READY;
     }
     intr_set_status(old_status);
+}
+void thread_init(void)
+{
+    put_str("thread_init start\n");
+    list_init(&thread_ready_list);
+    list_init(&thread_all_list);
+    make_main_thread();
+    put_str("thread_init done\n");
 }

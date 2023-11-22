@@ -118,18 +118,20 @@ VECTOR	kernel/kernel.s	/^VECTOR 0x1e,ERROR_CODE$/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x1f,ZERO $/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x20,ZERO/;"	l
 VIDEO_DESC	boot/loader.s	/^VIDEO_DESC:$/;"	l
+__DEVICE_CONSOLE_H	device/console.h	2;"	d
 __DEVICE_TIME_H	device/timer.h	2;"	d
 __KERNEL_DEBUG_H	kernel/debug.h	2;"	d
 __KERNEL_GLOBAL_H	kernel/global.h	2;"	d
 __KERNEL_INIT_H	kernel/init.h	2;"	d
 __KERNEL_INTERRUPT_H	kernel/interrupt.h	2;"	d
-__KERNEL_IO_H	lib/kernel/io.h	2;"	d
 __KERNEL_MEMORY_H	kernel/memory.h	2;"	d
 __LIB_KERNEL_BITMAP_H	lib/kernel/bitmap.h	2;"	d
+__LIB_KERNEL_IO_H	lib/kernel/io.h	2;"	d
 __LIB_KERNEL_LIST_H	lib/kernel/list.h	2;"	d
 __LIB_KERNEL_PRINT_H	lib/kernel/print.h	2;"	d
 __LIB_STDINT_H	lib/stdint.h	2;"	d
 __LIB_STRING_H	lib/string.h	2;"	d
+__THREAD_SYNC_H	thread/sync.h	2;"	d
 __THREAD_THREAD_H	thread/thread.h	2;"	d
 all_list_tag	thread/thread.h	/^    struct list_elem all_list_tag;\/\/线程队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
 ards_buf	boot/loader.s	/^ards_buf times 244 db 0$/;"	l
@@ -139,10 +141,17 @@ bitmap	lib/kernel/bitmap.h	/^struct bitmap {$/;"	s
 bitmap_init	lib/kernel/bitmap.c	/^void bitmap_init(struct bitmap* btmp)$/;"	f
 bitmap_scan	lib/kernel/bitmap.c	/^int bitmap_scan(struct bitmap* btmp, uint32_t cnt)$/;"	f
 bitmap_scan_test	lib/kernel/bitmap.c	/^bool bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx)$/;"	f
-bitmap_set	lib/kernel/bitmap.c	/^void bitmap_set(struct bitmap* btmp, uint32_t bit_idx, uint8_t value)$/;"	f
+bitmap_set	lib/kernel/bitmap.c	/^void bitmap_set(struct bitmap* btmp, uint32_t bit_idx, int8_t value)$/;"	f
 bits	lib/kernel/bitmap.h	/^    uint8_t* bits;\/\/位图首地址$/;"	m	struct:bitmap
 bool	kernel/global.h	31;"	d
 btmp_bytes_len	lib/kernel/bitmap.h	/^    uint32_t btmp_bytes_len;\/\/bitmap以字节为单位$/;"	m	struct:bitmap
+console_acquire	device/console.c	/^void console_acquire()$/;"	f
+console_init	device/console.c	/^void console_init()$/;"	f
+console_lock	device/console.c	/^static struct lock console_lock;$/;"	v	typeref:struct:lock	file:
+console_put_char	device/console.c	/^void console_put_char(uint8_t char_asci)$/;"	f
+console_put_int	device/console.c	/^void console_put_int(uint32_t num)$/;"	f
+console_put_str	device/console.c	/^void console_put_str(char* str)$/;"	f
+console_release	device/console.c	/^void console_release()$/;"	f
 cs	thread/thread.h	/^    uint32_t cs;$/;"	m	struct:intr_stack
 dcount	kernel/interrupt.c	/^    uint8_t     dcount;\/\/门描述符高32位的低8位 固定全0$/;"	m	struct:gate_desc	file:
 ds	thread/thread.h	/^    uint32_t ds;$/;"	m	struct:intr_stack
@@ -195,6 +204,8 @@ global	lib/kernel/print.s	/^global set_cursor$/;"	l
 global	thread/switch.s	/^global switch_to$/;"	l
 gs	thread/thread.h	/^    uint32_t gs;$/;"	m	struct:intr_stack
 head	lib/kernel/list.h	/^    struct list_elem head;$/;"	m	struct:list	typeref:struct:list::list_elem
+holder	thread/sync.h	/^    struct task_struct* holder;\/\/锁持有者$/;"	m	struct:lock	typeref:struct:lock::task_struct
+holder_repeat_nr	thread/sync.h	/^    uint32_t holder_repeat_nr;\/\/锁持有者重复申请锁的次数$/;"	m	struct:lock
 idt	kernel/interrupt.c	/^static struct gate_desc idt[IDT_DESC_CNT];$/;"	v	typeref:struct:gate_desc	file:
 idt_desc_init	kernel/interrupt.c	/^static void idt_desc_init(void) {$/;"	f	file:
 idt_init	kernel/interrupt.c	/^void idt_init(void) {$/;"	f
@@ -237,6 +248,10 @@ list_push	lib/kernel/list.c	/^void list_push(struct list* plist, struct list_ele
 list_remove	lib/kernel/list.c	/^void list_remove(struct list_elem* pelem)$/;"	f
 list_traversal	lib/kernel/list.c	/^struct list_elem* list_traversal(struct list* plist, function func, int arg)$/;"	f
 loader_start	boot/loader.s	/^loader_start:$/;"	l
+lock	thread/sync.h	/^struct lock {$/;"	s
+lock_acquire	thread/sync.c	/^void lock_acquire(struct lock* plock)$/;"	f
+lock_init	thread/sync.c	/^void lock_init(struct lock* plock)$/;"	f
+lock_release	thread/sync.c	/^void lock_release(struct lock* plock)$/;"	f
 main	kernel/main.c	/^int main(void) {$/;"	f
 main_thread	thread/thread.c	/^struct task_struct* main_thread;$/;"	v	typeref:struct:task_struct
 make_idt_desc	kernel/interrupt.c	/^static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function_offset)$/;"	f	file:
@@ -269,7 +284,7 @@ pool_flags	kernel/memory.h	/^enum pool_flags {$/;"	g
 pool_size	kernel/memory.c	/^    uint32_t pool_size;\/\/内存池字节容量$/;"	m	struct:pool	file:
 pop	kernel/kernel.s	/^    pop ds$/;"	d
 prev	lib/kernel/list.h	/^    struct list_elem* prev;$/;"	m	struct:list_elem	typeref:struct:list_elem::list_elem
-priority	thread/thread.h	/^    uint8_t priority;$/;"	m	struct:task_struct
+priority	thread/thread.h	/^   uint8_t priority;$/;"	m	struct:task_struct
 pte_ptr	kernel/memory.c	/^uint32_t* pte_ptr(uint32_t vaddr)$/;"	f
 push	kernel/kernel.s	/^    push ds$/;"	d
 put_char	lib/kernel/print.s	/^put_char:$/;"	l
@@ -289,6 +304,11 @@ section	lib/kernel/print.s	/^section .text$/;"	l
 section	thread/switch.s	/^section .text$/;"	l
 selector	kernel/interrupt.c	/^    uint16_t    selector;\/\/段选择子$/;"	m	struct:gate_desc	file:
 self_kstack	thread/thread.h	/^    uint32_t* self_kstack;\/\/线程栈$/;"	m	struct:task_struct
+sema_down	thread/sync.c	/^void sema_down(struct semaphore* psema)$/;"	f
+sema_init	thread/sync.c	/^void sema_init(struct semaphore* psema, uint8_t value)$/;"	f
+sema_up	thread/sync.c	/^void sema_up(struct semaphore* psema)$/;"	f
+semaphore	thread/sync.h	/^    struct semaphore semaphore;$/;"	m	struct:lock	typeref:struct:lock::semaphore
+semaphore	thread/sync.h	/^struct semaphore {$/;"	s
 set_cursor	lib/kernel/print.s	/^set_cursor:$/;"	l
 set_up_page	boot/loader.s	/^set_up_page:$/;"	l
 ss	thread/thread.h	/^    uint32_t ss;$/;"	m	struct:intr_stack
@@ -306,6 +326,7 @@ tail	lib/kernel/list.h	/^    struct list_elem tail;$/;"	m	struct:list	typeref:st
 task_status	thread/thread.h	/^enum task_status {$/;"	g
 task_struct	thread/thread.h	/^struct task_struct {$/;"	s
 thread_all_list	thread/thread.c	/^struct list thread_all_list;$/;"	v	typeref:struct:list
+thread_block	thread/thread.c	/^void thread_block(enum task_status stat)$/;"	f
 thread_create	thread/thread.c	/^void thread_create(struct task_struct* pthread, thread_func function, void* func_arg)$/;"	f
 thread_func	thread/thread.h	/^typedef void thread_func(void*);$/;"	t
 thread_init	thread/thread.c	/^void thread_init(void)$/;"	f
@@ -313,6 +334,7 @@ thread_ready_list	thread/thread.c	/^struct list thread_ready_list;$/;"	v	typeref
 thread_stack	thread/thread.h	/^struct thread_stack {$/;"	s
 thread_start	thread/thread.c	/^struct task_struct* thread_start(char* name, int prio, thread_func function, void* func_arg)$/;"	f
 thread_tag	thread/thread.c	/^static struct list_elem* thread_tag;$/;"	v	typeref:struct:list_elem	file:
+thread_unblock	thread/thread.c	/^void thread_unblock(struct task_struct* pthread)$/;"	f
 ticks	device/timer.c	/^uint32_t ticks;$/;"	v
 ticks	thread/thread.h	/^    uint8_t ticks;\/\/每次在处理器上执行的时间滴答数$/;"	m	struct:task_struct
 timer_init	device/timer.c	/^void timer_init() {$/;"	f
@@ -328,5 +350,7 @@ user_pool	kernel/memory.c	/^struct pool kernel_pool, user_pool;$/;"	v	typeref:st
 vaddr_bitmap	kernel/memory.h	/^    struct bitmap vaddr_bitmap;\/\/虚拟内存位图$/;"	m	struct:virtual_addr	typeref:struct:virtual_addr::bitmap
 vaddr_get	kernel/memory.c	/^static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt)$/;"	f	file:
 vaddr_start	kernel/memory.h	/^    uint32_t vaddr_start;\/\/起始虚拟地址$/;"	m	struct:virtual_addr
+value	thread/sync.h	/^    uint8_t value;$/;"	m	struct:semaphore
 vec_no	thread/thread.h	/^    uint32_t vec_no;$/;"	m	struct:intr_stack
 virtual_addr	kernel/memory.h	/^struct virtual_addr {$/;"	s
+waiters	thread/sync.h	/^    struct list waiters;$/;"	m	struct:semaphore	typeref:struct:semaphore::list

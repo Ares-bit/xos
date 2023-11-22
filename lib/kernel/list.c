@@ -15,12 +15,18 @@ void list_insert_before(struct list_elem* before, struct list_elem* elem)
     //操作时要先获取原中断状态
     enum intr_status old_status = intr_disable();
 
-    before->prev->next = elem;
-    elem->next = before;
-    elem->prev = before->prev;
-    before->prev = elem;
-    //恢复原中断状态
-    intr_set_status(old_status);
+/* 将before前驱元素的后继元素更新为elem, 暂时使before脱离链表*/ 
+   before->prev->next = elem; 
+
+/* 更新elem自己的前驱结点为before的前驱,
+ * 更新elem自己的后继结点为before, 于是before又回到链表 */
+   elem->prev = before->prev;
+   elem->next = before;
+
+/* 更新before的前驱结点为elem */
+   before->prev = elem;
+
+   intr_set_status(old_status);
 }
 
 //将元素加到队列首
@@ -40,8 +46,8 @@ void list_remove(struct list_elem* pelem)
 {
     enum intr_status old_status = intr_disable();
 
-    pelem->next->prev = pelem->prev;
     pelem->prev->next = pelem->next;
+	pelem->next->prev = pelem->prev;
 
     intr_set_status(old_status);
 }
