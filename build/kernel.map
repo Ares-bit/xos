@@ -128,25 +128,25 @@ LOAD build/sync.o
 .text           0x00000000c0001500     0x24eb
  *(.text.unlikely .text.*_unlikely)
  *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x00000000c0001500       0xc5 build/main.o
+ .text          0x00000000c0001500       0xa7 build/main.o
                 0x00000000c0001500                main
-                0x00000000c000157f                k_thread_a
-                0x00000000c00015a2                k_thread_b
- *fill*         0x00000000c00015c5        0x3 90909090
- .text          0x00000000c00015c8       0x2d build/init.o
-                0x00000000c00015c8                init_all
- *fill*         0x00000000c00015f5        0x3 90909090
- .text          0x00000000c00015f8      0x43f build/interrupt.o
-                0x00000000c000193d                register_handler
-                0x00000000c0001959                intr_enable
-                0x00000000c0001981                intr_disable
-                0x00000000c00019a9                intr_set_status
-                0x00000000c00019b6                intr_get_status
-                0x00000000c00019d9                idt_init
- *fill*         0x00000000c0001a37        0x1 90909090
- .text          0x00000000c0001a38      0x195 build/timer.o
-                0x00000000c0001b6d                timer_init
- *fill*         0x00000000c0001bcd        0x3 90909090
+                0x00000000c0001575                k_thread_a
+                0x00000000c000158e                k_thread_b
+ *fill*         0x00000000c00015a7        0x1 90909090
+ .text          0x00000000c00015a8       0x2d build/init.o
+                0x00000000c00015a8                init_all
+ *fill*         0x00000000c00015d5        0x3 90909090
+ .text          0x00000000c00015d8      0x452 build/interrupt.o
+                0x00000000c000191d                register_handler
+                0x00000000c0001939                intr_enable
+                0x00000000c0001962                intr_disable
+                0x00000000c000198b                intr_set_status
+                0x00000000c00019a9                intr_get_status
+                0x00000000c00019cc                idt_init
+ *fill*         0x00000000c0001a2a        0x2 90909090
+ .text          0x00000000c0001a2c      0x195 build/timer.o
+                0x00000000c0001b61                timer_init
+ *fill*         0x00000000c0001bc1        0xf 90909090
  .text          0x00000000c0001bd0      0x44a build/kernel.o
                 0x00000000c0001bd0                intr_exit
  *fill*         0x00000000c000201a        0x6 90909090
@@ -170,39 +170,39 @@ LOAD build/sync.o
                 0x00000000c00027e7                bitmap_scan_test
                 0x00000000c0002829                bitmap_scan
                 0x00000000c0002977                bitmap_set
- .text          0x00000000c0002a30      0x444 build/string.o
+ .text          0x00000000c0002a30      0x448 build/string.o
                 0x00000000c0002a30                memset
                 0x00000000c0002a8c                memcpy
                 0x00000000c0002af4                memcmp
                 0x00000000c0002b84                strcpy
                 0x00000000c0002be7                strlen
-                0x00000000c0002c3d                strcmp
-                0x00000000c0002cc4                strchr
-                0x00000000c0002d24                strrchr
-                0x00000000c0002d8d                strcat
-                0x00000000c0002e07                strchrs
- .text          0x00000000c0002e74      0x58f build/thread.o
-                0x00000000c0002e74                running_thread
-                0x00000000c0002e9f                thread_create
-                0x00000000c0002f15                init_thread
-                0x00000000c0002fb0                thread_start
-                0x00000000c000312b                schedule
-                0x00000000c0003254                thread_block
-                0x00000000c00032bb                thread_unblock
-                0x00000000c00033c6                thread_init
- *fill*         0x00000000c0003403        0x1 90909090
- .text          0x00000000c0003404      0x1e4 build/list.o
-                0x00000000c0003404                list_init
-                0x00000000c0003431                list_insert_before
-                0x00000000c0003472                list_push
-                0x00000000c000348f                list_append
-                0x00000000c00034ac                list_remove
-                0x00000000c00034e2                list_pop
-                0x00000000c0003501                elem_find
-                0x00000000c000353c                list_traversal
-                0x00000000c000359a                list_len
-                0x00000000c00035cf                list_empty
- *fill*         0x00000000c00035e8        0x8 90909090
+                0x00000000c0002c41                strcmp
+                0x00000000c0002cc8                strchr
+                0x00000000c0002d28                strrchr
+                0x00000000c0002d91                strcat
+                0x00000000c0002e0b                strchrs
+ .text          0x00000000c0002e78      0x58e build/thread.o
+                0x00000000c0002e78                running_thread
+                0x00000000c0002ea3                thread_create
+                0x00000000c0002f19                init_thread
+                0x00000000c0002fb4                thread_start
+                0x00000000c000312f                schedule
+                0x00000000c0003257                thread_block
+                0x00000000c00032be                thread_unblock
+                0x00000000c00033c9                thread_init
+ *fill*         0x00000000c0003406        0x2 90909090
+ .text          0x00000000c0003408      0x1e4 build/list.o
+                0x00000000c0003408                list_init
+                0x00000000c0003435                list_insert_before
+                0x00000000c0003476                list_push
+                0x00000000c0003493                list_append
+                0x00000000c00034b0                list_remove
+                0x00000000c00034e6                list_pop
+                0x00000000c0003505                elem_find
+                0x00000000c0003540                list_traversal
+                0x00000000c000359e                list_len
+                0x00000000c00035d3                list_empty
+ *fill*         0x00000000c00035ec        0x4 90909090
  .text          0x00000000c00035f0       0x15 build/switch.o
                 0x00000000c00035f0                switch_to
  *fill*         0x00000000c0003605        0x3 90909090

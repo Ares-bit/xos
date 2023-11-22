@@ -51,7 +51,7 @@ uint32_t strlen(const char* str)
 {
     ASSERT(str != NULL);
     const char *p = str;
-    while (p++);
+    while (*p++);
     return p - str - 1;
 }
 

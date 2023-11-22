@@ -34,8 +34,8 @@ IDT_DESC_DPL0	kernel/global.h	22;"	d
 IDT_DESC_DPL3	kernel/global.h	23;"	d
 IDT_DESC_P	kernel/global.h	21;"	d
 INPUT_FREQUENCY	device/timer.c	10;"	d	file:
-INTR_OFF	kernel/interrupt.h	/^    INTR_OFF$/;"	e	enum:intr_status
-INTR_ON	kernel/interrupt.h	/^    INTR_ON,$/;"	e	enum:intr_status
+INTR_OFF	kernel/interrupt.h	/^    INTR_OFF,$/;"	e	enum:intr_status
+INTR_ON	kernel/interrupt.h	/^    INTR_ON$/;"	e	enum:intr_status
 IRQ0_FREQUENCY	device/timer.c	9;"	d	file:
 K_HEAP_START	kernel/memory.c	15;"	d	file:
 LD	makefile	/^LD = ld$/;"	m
