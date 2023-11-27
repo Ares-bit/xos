@@ -14,13 +14,13 @@ int main(void) {
    put_str("I am kernel\n");
    init_all();
 
-   thread_start("k_thread_a", 31, k_thread_a, "argA ");
-   thread_start("k_thread_b", 8, k_thread_b, "argB ");
+   //thread_start("k_thread_a", 31, k_thread_a, "argA ");
+   //thread_start("k_thread_b", 8, k_thread_b, "argB ");
     //打开时钟中断
     intr_enable();
-    while (1) {
-        console_put_str("Main ");
-    }
+    while (1);// {
+        //console_put_str("Main ");
+    //}
 
     return 0;
 }

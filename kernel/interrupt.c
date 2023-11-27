@@ -9,7 +9,7 @@
 #define PIC_S_CTRL  0xa0
 #define PIC_S_DATA  0xa1
 
-#define IDT_DESC_CNT 0x21
+#define IDT_DESC_CNT 0x30 //支持的总中断数
 
 #define EFLAGS_IF   0x00000200
 #define GET_EFLAGS(EFLAGS_VAR)  asm volatile("pushfl; popl %0" : "=g"(EFLAGS_VAR))
@@ -53,8 +53,8 @@ static void pic_init(void)
     outb(PIC_S_DATA, 0x02);//ICW3 连接到主片IR2
     outb(PIC_S_DATA, 0x01);//ICW4 8086模式 手动EOI
 
-    //打开主片IR0 屏蔽主从其他所有中断 OCW1
-    outb(PIC_M_DATA, 0xfe);
+    //打开主片IR0 IR1 屏蔽主从其他所有中断 OCW1
+    outb(PIC_M_DATA, 0xfd);//测试键盘，先只打开键盘
     outb(PIC_S_DATA, 0xff);
 
     put_str("pic_init done\n");

@@ -37,6 +37,7 @@ INPUT_FREQUENCY	device/timer.c	10;"	d	file:
 INTR_OFF	kernel/interrupt.h	/^    INTR_OFF,$/;"	e	enum:intr_status
 INTR_ON	kernel/interrupt.h	/^    INTR_ON$/;"	e	enum:intr_status
 IRQ0_FREQUENCY	device/timer.c	9;"	d	file:
+KBD_BUF_PORT	device/keyboard.c	7;"	d	file:
 K_HEAP_START	kernel/memory.c	15;"	d	file:
 LD	makefile	/^LD = ld$/;"	m
 LDFLAGS	makefile	/^LDFLAGS = -melf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)\/kernel.map$/;"	m
@@ -115,10 +116,26 @@ VECTOR	kernel/kernel.s	/^VECTOR 0x1b,ERROR_CODE $/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x1c,ZERO$/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x1d,ERROR_CODE$/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x1e,ERROR_CODE$/;"	l
-VECTOR	kernel/kernel.s	/^VECTOR 0x1f,ZERO $/;"	l
-VECTOR	kernel/kernel.s	/^VECTOR 0x20,ZERO/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x1f,ZERO$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x20,ZERO    ;时钟中断$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x21,ZERO    ;键盘中断$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x22,ZERO    ;级联$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x23,ZERO    ;串口2$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x24,ZERO    ;串口1$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x25,ZERO    ;并口2$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x26,ZERO    ;软盘$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x27,ZERO    ;并口1$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x28,ZERO    ;实时时钟$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x29,ZERO    ;重定向$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x2a,ZERO    ;保留$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x2b,ZERO    ;保留$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x2c,ZERO    ;ps\/2鼠标$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x2d,ZERO    ;fpu浮点单元异常$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x2e,ZERO    ;硬盘$/;"	l
+VECTOR	kernel/kernel.s	/^VECTOR 0x2f,ZERO    ;保留/;"	l
 VIDEO_DESC	boot/loader.s	/^VIDEO_DESC:$/;"	l
 __DEVICE_CONSOLE_H	device/console.h	2;"	d
+__DEVICE_KEYBOARD_H	device/keyboard.h	2;"	d
 __DEVICE_TIME_H	device/timer.h	2;"	d
 __KERNEL_DEBUG_H	kernel/debug.h	2;"	d
 __KERNEL_GLOBAL_H	kernel/global.h	2;"	d
@@ -224,6 +241,7 @@ intr_entry_table	kernel/kernel.s	/^intr_entry_table:$/;"	l
 intr_exit	kernel/kernel.s	/^intr_exit:$/;"	l
 intr_get_status	kernel/interrupt.c	/^enum intr_status intr_get_status() {$/;"	f
 intr_handler	kernel/interrupt.h	/^typedef void* intr_handler;$/;"	t
+intr_keyboard_handler	device/keyboard.c	/^static void intr_keyboard_handler()$/;"	f	file:
 intr_name	kernel/interrupt.c	/^char* intr_name[IDT_DESC_CNT];$/;"	v
 intr_set_status	kernel/interrupt.c	/^enum intr_status intr_set_status(enum intr_status status) {$/;"	f
 intr_stack	thread/thread.h	/^struct intr_stack {$/;"	s
@@ -236,6 +254,7 @@ kernel_init	boot/loader.s	/^kernel_init:$/;"	l
 kernel_pool	kernel/memory.c	/^struct pool kernel_pool, user_pool;$/;"	v	typeref:struct:pool
 kernel_thread	thread/thread.c	/^static void kernel_thread(thread_func function, void* func_arg)$/;"	f	file:
 kernel_vaddr	kernel/memory.c	/^struct virtual_addr kernel_vaddr;\/\/内核虚拟内存池$/;"	v	typeref:struct:virtual_addr
+keyboard_init	device/keyboard.c	/^void keyboard_init()$/;"	f
 list	lib/kernel/list.h	/^struct list {$/;"	s
 list_append	lib/kernel/list.c	/^void list_append(struct list* plist, struct list_elem* elem)$/;"	f
 list_elem	lib/kernel/list.h	/^struct list_elem {$/;"	s
