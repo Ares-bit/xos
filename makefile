@@ -74,7 +74,7 @@ $(BUILD_DIR)/sync.o: thread/sync.c thread/sync.h lib/stdint.h lib/kernel/list.h 
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/keyboard.o: device/keyboard.c device/keyboard.h kernel/interrupt.h \
-	lib/kernel/print.h lib/kernel/io.h lib/stdint.h
+	lib/kernel/print.h lib/kernel/io.h lib/stdint.h kernel/global.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译
