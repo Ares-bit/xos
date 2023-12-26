@@ -37,7 +37,7 @@ INPUT_FREQUENCY	device/timer.c	10;"	d	file:
 INTR_OFF	kernel/interrupt.h	/^    INTR_OFF,$/;"	e	enum:intr_status
 INTR_ON	kernel/interrupt.h	/^    INTR_ON$/;"	e	enum:intr_status
 IRQ0_FREQUENCY	device/timer.c	9;"	d	file:
-KBD_BUF_PORT	device/keyboard.c	7;"	d	file:
+KBD_BUF_PORT	device/keyboard.c	8;"	d	file:
 K_HEAP_START	kernel/memory.c	15;"	d	file:
 LD	makefile	/^LD = ld$/;"	m
 LDFLAGS	makefile	/^LDFLAGS = -melf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)\/kernel.map$/;"	m
@@ -151,9 +151,16 @@ __LIB_STRING_H	lib/string.h	2;"	d
 __THREAD_SYNC_H	thread/sync.h	2;"	d
 __THREAD_THREAD_H	thread/thread.h	2;"	d
 all_list_tag	thread/thread.h	/^    struct list_elem all_list_tag;\/\/线程队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
+alt_l_char	device/keyboard.c	23;"	d	file:
+alt_l_make	device/keyboard.c	30;"	d	file:
+alt_r_break	device/keyboard.c	32;"	d	file:
+alt_r_char	device/keyboard.c	24;"	d	file:
+alt_r_make	device/keyboard.c	31;"	d	file:
+alt_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
 ards_buf	boot/loader.s	/^ards_buf times 244 db 0$/;"	l
 ards_nr	boot/loader.s	/^ards_nr dw 0$/;"	d
 attribute	kernel/interrupt.c	/^    uint8_t     attribute;\/\/门描述符P+DPL+S+TYPE共8位$/;"	m	struct:gate_desc	file:
+backspace	device/keyboard.c	12;"	d	file:
 bitmap	lib/kernel/bitmap.h	/^struct bitmap {$/;"	s
 bitmap_init	lib/kernel/bitmap.c	/^void bitmap_init(struct bitmap* btmp)$/;"	f
 bitmap_scan	lib/kernel/bitmap.c	/^int bitmap_scan(struct bitmap* btmp, uint32_t cnt)$/;"	f
@@ -162,6 +169,10 @@ bitmap_set	lib/kernel/bitmap.c	/^void bitmap_set(struct bitmap* btmp, uint32_t b
 bits	lib/kernel/bitmap.h	/^    uint8_t* bits;\/\/位图首地址$/;"	m	struct:bitmap
 bool	kernel/global.h	31;"	d
 btmp_bytes_len	lib/kernel/bitmap.h	/^    uint32_t btmp_bytes_len;\/\/bitmap以字节为单位$/;"	m	struct:bitmap
+caps_lock_char	device/keyboard.c	25;"	d	file:
+caps_lock_make	device/keyboard.c	36;"	d	file:
+caps_lock_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
+char_invisible	device/keyboard.c	18;"	d	file:
 console_acquire	device/console.c	/^void console_acquire()$/;"	f
 console_init	device/console.c	/^void console_init()$/;"	f
 console_lock	device/console.c	/^static struct lock console_lock;$/;"	v	typeref:struct:lock	file:
@@ -170,7 +181,14 @@ console_put_int	device/console.c	/^void console_put_int(uint32_t num)$/;"	f
 console_put_str	device/console.c	/^void console_put_str(char* str)$/;"	f
 console_release	device/console.c	/^void console_release()$/;"	f
 cs	thread/thread.h	/^    uint32_t cs;$/;"	m	struct:intr_stack
+ctrl_l_char	device/keyboard.c	19;"	d	file:
+ctrl_l_make	device/keyboard.c	33;"	d	file:
+ctrl_r_break	device/keyboard.c	35;"	d	file:
+ctrl_r_char	device/keyboard.c	20;"	d	file:
+ctrl_r_make	device/keyboard.c	34;"	d	file:
+ctrl_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
 dcount	kernel/interrupt.c	/^    uint8_t     dcount;\/\/门描述符高32位的低8位 固定全0$/;"	m	struct:gate_desc	file:
+delete	device/keyboard.c	15;"	d	file:
 ds	thread/thread.h	/^    uint32_t ds;$/;"	m	struct:intr_stack
 eax	thread/thread.h	/^    uint32_t eax;$/;"	m	struct:intr_stack
 ebp	thread/thread.h	/^    uint32_t ebp;$/;"	m	struct:intr_stack
@@ -187,14 +205,17 @@ eip	thread/thread.h	/^    void (*eip) (void);$/;"	m	struct:intr_stack
 elapsed_ticks	thread/thread.h	/^    uint32_t elapsed_ticks;\/\/此任务已经占用了多少滴答$/;"	m	struct:task_struct
 elem2entry	lib/kernel/list.h	6;"	d
 elem_find	lib/kernel/list.c	/^bool elem_find(struct list* plist, struct list_elem* obj_elem)$/;"	f
+enter	device/keyboard.c	14;"	d	file:
 enter_kernel	boot/loader.s	/^enter_kernel:$/;"	l
 err_code	thread/thread.h	/^    uint32_t err_code;$/;"	m	struct:intr_stack
 es	thread/thread.h	/^    uint32_t es;$/;"	m	struct:intr_stack
+esc	device/keyboard.c	11;"	d	file:
 esi	thread/thread.h	/^    uint32_t esi;$/;"	m	struct:intr_stack
 esi	thread/thread.h	/^    uint32_t esi;$/;"	m	struct:thread_stack
 esp	thread/thread.h	/^    void* esp;$/;"	m	struct:intr_stack
 esp_dummy	thread/thread.h	/^    uint32_t esp_dummy;\/\/pushad会压入esp popad时会忽略掉$/;"	m	struct:intr_stack
 exception_init	kernel/interrupt.c	/^static void exception_init(void)$/;"	f	file:
+ext_scancode	device/keyboard.c	/^static bool ext_scancode;$/;"	v	file:
 extern	kernel/kernel.s	/^extern idt_table$/;"	l
 extern	kernel/kernel.s	/^extern put_str$/;"	l
 f	makefile	/^	dd if=$(BUILD_DIR)\/kernel.bin \\$/;"	m
@@ -241,7 +262,7 @@ intr_entry_table	kernel/kernel.s	/^intr_entry_table:$/;"	l
 intr_exit	kernel/kernel.s	/^intr_exit:$/;"	l
 intr_get_status	kernel/interrupt.c	/^enum intr_status intr_get_status() {$/;"	f
 intr_handler	kernel/interrupt.h	/^typedef void* intr_handler;$/;"	t
-intr_keyboard_handler	device/keyboard.c	/^static void intr_keyboard_handler()$/;"	f	file:
+intr_keyboard_handler	device/keyboard.c	/^static void intr_keyboard_handler(void)$/;"	f	file:
 intr_name	kernel/interrupt.c	/^char* intr_name[IDT_DESC_CNT];$/;"	v
 intr_set_status	kernel/interrupt.c	/^enum intr_status intr_set_status(enum intr_status status) {$/;"	f
 intr_stack	thread/thread.h	/^struct intr_stack {$/;"	s
@@ -255,6 +276,7 @@ kernel_pool	kernel/memory.c	/^struct pool kernel_pool, user_pool;$/;"	v	typeref:
 kernel_thread	thread/thread.c	/^static void kernel_thread(thread_func function, void* func_arg)$/;"	f	file:
 kernel_vaddr	kernel/memory.c	/^struct virtual_addr kernel_vaddr;\/\/内核虚拟内存池$/;"	v	typeref:struct:virtual_addr
 keyboard_init	device/keyboard.c	/^void keyboard_init()$/;"	f
+keymap	device/keyboard.c	/^static char keymap[][2] = {$/;"	v	file:
 list	lib/kernel/list.h	/^struct list {$/;"	s
 list_append	lib/kernel/list.c	/^void list_append(struct list* plist, struct list_elem* elem)$/;"	f
 list_elem	lib/kernel/list.h	/^struct list_elem {$/;"	s
@@ -330,6 +352,11 @@ semaphore	thread/sync.h	/^    struct semaphore semaphore;$/;"	m	struct:lock	type
 semaphore	thread/sync.h	/^struct semaphore {$/;"	s
 set_cursor	lib/kernel/print.s	/^set_cursor:$/;"	l
 set_up_page	boot/loader.s	/^set_up_page:$/;"	l
+shift_l_char	device/keyboard.c	21;"	d	file:
+shift_l_make	device/keyboard.c	28;"	d	file:
+shift_r_char	device/keyboard.c	22;"	d	file:
+shift_r_make	device/keyboard.c	29;"	d	file:
+shift_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
 ss	thread/thread.h	/^    uint32_t ss;$/;"	m	struct:intr_stack
 stack_magic	thread/thread.h	/^    uint32_t stack_magic;\/\/检测栈溢出$/;"	m	struct:task_struct
 status	thread/thread.h	/^    enum task_status status;$/;"	m	struct:task_struct	typeref:enum:task_struct::task_status
@@ -341,6 +368,7 @@ strcpy	lib/string.c	/^char* strcpy(char* dst_, const char* src_)$/;"	f
 strlen	lib/string.c	/^uint32_t strlen(const char* str)$/;"	f
 strrchr	lib/string.c	/^char* strrchr(const char* str, const uint8_t ch)$/;"	f
 switch_to	thread/switch.s	/^switch_to:$/;"	l
+tab	device/keyboard.c	13;"	d	file:
 tail	lib/kernel/list.h	/^    struct list_elem tail;$/;"	m	struct:list	typeref:struct:list::list_elem
 task_status	thread/thread.h	/^enum task_status {$/;"	g
 task_struct	thread/thread.h	/^struct task_struct {$/;"	s

@@ -15,7 +15,7 @@ void lock_init(struct lock* plock)
 {
     plock->holder = NULL;
     plock->holder_repeat_nr = 0;
-   sema_init(&plock->semaphore, 1);  // 信号量初值为1
+    sema_init(&plock->semaphore, 1);  // 信号量初值为1
 }
 
 void sema_down(struct semaphore* psema)
