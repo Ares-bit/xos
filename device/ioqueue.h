@@ -17,4 +17,9 @@ struct ioqueue {
     int32_t tail;//队尾指针 数组下标
 };
 
+void ioqueue_init(struct ioqueue* ioq);
+bool ioq_full(struct ioqueue* ioq);
+bool ioq_empty(struct ioqueue* ioq);
+char ioq_getchar(struct ioqueue* ioq);
+void ioq_putchar(struct ioqueue* ioq, char byte);
 #endif

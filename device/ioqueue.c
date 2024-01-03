@@ -2,6 +2,7 @@
 #include "global.h"
 #include "debug.h"
 #include "interrupt.h"
+#include "print.h"
 
 void ioqueue_init(struct ioqueue* ioq)
 {
@@ -24,7 +25,7 @@ bool ioq_full(struct ioqueue* ioq)
     return (next_pos(ioq->head) == ioq->tail);
 }
 
-static bool ioq_empty(struct ioqueue* ioq)
+bool ioq_empty(struct ioqueue* ioq)
 {
     ASSERT(intr_get_status() == INTR_OFF);
     return (ioq->head == ioq->tail);
@@ -34,6 +35,7 @@ static void ioq_wait(struct task_struct** waiter)
 {
     ASSERT(*waiter == NULL && waiter != NULL);
     *waiter = running_thread();
+    put_int(*waiter);
     thread_block(TASK_BLOCKED);
 }
 
@@ -65,7 +67,7 @@ char ioq_getchar(struct ioqueue* ioq)
 }
 
 void ioq_putchar(struct ioqueue* ioq, char byte)
-{
+{   
     while (ioq_full(ioq)) {
         lock_acquire(&ioq->lock);
         ioq_wait(&ioq->producer);
@@ -75,7 +77,7 @@ void ioq_putchar(struct ioqueue* ioq, char byte)
     ioq->buf[ioq->head] = byte;
     ioq->head = next_pos(ioq->head);
 
-    if (ioq->consumer !+ NULL) {
+    if (ioq->consumer != NULL) {
         ioq_wakeup(&ioq->consumer);
     }
 }
