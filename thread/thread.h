@@ -57,7 +57,7 @@ struct task_struct {
     uint32_t* self_kstack;//线程栈
     enum task_status status;
     char name[16];
-   uint8_t priority;
+    uint8_t priority;
     uint8_t ticks;//每次在处理器上执行的时间滴答数
     uint32_t elapsed_ticks;//此任务已经占用了多少滴答
     struct list_elem general_tag;//一般队列
