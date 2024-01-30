@@ -19,20 +19,38 @@ COUNTER0_NO	device/timer.c	13;"	d	file:
 COUNTER0_PORT	device/timer.c	12;"	d	file:
 COUNTER0_VALUE	device/timer.c	11;"	d	file:
 DATA_DESC	boot/loader.s	/^DATA_DESC:$/;"	l
+DESC_AVL	kernel/global.h	41;"	d
+DESC_DPL_0	kernel/global.h	43;"	d
+DESC_DPL_1	kernel/global.h	44;"	d
+DESC_DPL_2	kernel/global.h	45;"	d
+DESC_DPL_3	kernel/global.h	46;"	d
+DESC_D_32	kernel/global.h	39;"	d
+DESC_G_4K	kernel/global.h	38;"	d
+DESC_L	kernel/global.h	40;"	d
+DESC_P	kernel/global.h	42;"	d
+DESC_S_CODE	kernel/global.h	47;"	d
+DESC_S_DATA	kernel/global.h	48;"	d
+DESC_S_SYS	kernel/global.h	49;"	d
+DESC_TYPE_CODE	kernel/global.h	50;"	d
+DESC_TYPE_DATA	kernel/global.h	51;"	d
+DESC_TYPE_TSS	kernel/global.h	52;"	d
 EFLAGS_IF	kernel/interrupt.c	14;"	d	file:
 ENTRY_POINT	makefile	/^ENTRY_POINT = 0xc0001500$/;"	m
+GDT_ATTR_HIGH	kernel/global.h	54;"	d
 GDT_BASE	boot/loader.s	/^GDT_BASE:$/;"	l
+GDT_CODE_ATTR_LOW_DPL3	kernel/global.h	55;"	d
+GDT_DATA_ATTR_LOW_DPL3	kernel/global.h	56;"	d
 GDT_LIMIT	boot/loader.s	/^GDT_LIMIT equ GDT_SIZE-1$/;"	d
 GDT_SIZE	boot/loader.s	/^GDT_SIZE equ $-GDT_BASE$/;"	d
 GET_EFLAGS	kernel/interrupt.c	15;"	d	file:
-IDT_DESC_16_TYPE	kernel/global.h	25;"	d
-IDT_DESC_32_TYPE	kernel/global.h	24;"	d
-IDT_DESC_ATTR_DPL0	kernel/global.h	27;"	d
-IDT_DESC_ATTR_DPL3	kernel/global.h	28;"	d
+IDT_DESC_16_TYPE	kernel/global.h	32;"	d
+IDT_DESC_32_TYPE	kernel/global.h	31;"	d
+IDT_DESC_ATTR_DPL0	kernel/global.h	34;"	d
+IDT_DESC_ATTR_DPL3	kernel/global.h	35;"	d
 IDT_DESC_CNT	kernel/interrupt.c	12;"	d	file:
-IDT_DESC_DPL0	kernel/global.h	22;"	d
-IDT_DESC_DPL3	kernel/global.h	23;"	d
-IDT_DESC_P	kernel/global.h	21;"	d
+IDT_DESC_DPL0	kernel/global.h	29;"	d
+IDT_DESC_DPL3	kernel/global.h	30;"	d
+IDT_DESC_P	kernel/global.h	28;"	d
 INPUT_FREQUENCY	device/timer.c	10;"	d	file:
 INTR_OFF	kernel/interrupt.h	/^    INTR_OFF,$/;"	e	enum:intr_status
 INTR_ON	kernel/interrupt.h	/^    INTR_ON$/;"	e	enum:intr_status
@@ -41,9 +59,9 @@ KBD_BUF_PORT	device/keyboard.c	9;"	d	file:
 K_HEAP_START	kernel/memory.c	15;"	d	file:
 LD	makefile	/^LD = ld$/;"	m
 LDFLAGS	makefile	/^LDFLAGS = -melf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)\/kernel.map$/;"	m
-LIBS	makefile	/^LIBS = -I lib\/ -I lib\/kernel\/ -I lib\/user\/ -I device\/ -I kernel\/ -I thread\/$/;"	m
+LIBS	makefile	/^LIBS = -I lib\/ -I lib\/kernel\/ -I lib\/user\/ -I device\/ -I kernel\/ -I thread\/ -I userprog\/$/;"	m
 MEM_BITMAP_BASE	kernel/memory.c	12;"	d	file:
-NULL	kernel/global.h	30;"	d
+NULL	kernel/global.h	63;"	d
 OBJS	makefile	/^OBJS = $(BUILD_DIR)\/main.o $(BUILD_DIR)\/init.o $(BUILD_DIR)\/interrupt.o \\$/;"	m
 PANIC	kernel/debug.h	6;"	d
 PDE_IDX	kernel/memory.c	18;"	d	file:
@@ -55,6 +73,7 @@ PG_RW_R	kernel/memory.h	21;"	d
 PG_RW_W	kernel/memory.h	22;"	d
 PG_SIZE	kernel/memory.c	9;"	d	file:
 PG_SIZE	thread/thread.c	10;"	d	file:
+PG_SIZE	userprog/tss.c	8;"	d	file:
 PG_US_S	kernel/memory.h	23;"	d
 PG_US_U	kernel/memory.h	24;"	d
 PIC_M_CTRL	kernel/interrupt.c	7;"	d	file:
@@ -71,10 +90,14 @@ RPL3	kernel/global.h	9;"	d
 SECTION	boot/mbr.s	/^SECTION MBR vstart=0x7c00$/;"	l
 SELECTOR_CODE	boot/loader.s	/^SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0$/;"	d
 SELECTOR_DATA	boot/loader.s	/^SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0$/;"	d
-SELECTOR_K_CODE	kernel/global.h	15;"	d
-SELECTOR_K_DATA	kernel/global.h	16;"	d
-SELECTOR_K_GS	kernel/global.h	18;"	d
-SELECTOR_K_STACK	kernel/global.h	17;"	d
+SELECTOR_K_CODE	kernel/global.h	16;"	d
+SELECTOR_K_DATA	kernel/global.h	17;"	d
+SELECTOR_K_GS	kernel/global.h	19;"	d
+SELECTOR_K_STACK	kernel/global.h	18;"	d
+SELECTOR_TSS	kernel/global.h	20;"	d
+SELECTOR_U_CODE	kernel/global.h	23;"	d
+SELECTOR_U_DATA	kernel/global.h	24;"	d
+SELECTOR_U_STACK	kernel/global.h	25;"	d
 SELECTOR_VIDEO	boot/loader.s	/^SELECTOR_VIDEO equ (0x0003<<3) + TI_GDT + RPL0$/;"	d
 SELECTOR_VIDEO	lib/kernel/print.s	/^SELECTOR_VIDEO equ (0x0003 << 3) + TI_GDT + RPL0$/;"	d
 TASK_BLOCKED	thread/thread.h	/^    TASK_BLOCKED,$/;"	e	enum:task_status
@@ -85,6 +108,9 @@ TASK_RUNNING	thread/thread.h	/^    TASK_RUNNING,$/;"	e	enum:task_status
 TASK_WAITING	thread/thread.h	/^    TASK_WAITING,$/;"	e	enum:task_status
 TI_GDT	kernel/global.h	11;"	d
 TI_LDT	kernel/global.h	12;"	d
+TSS_ATTR_HIGH	kernel/global.h	60;"	d
+TSS_ATTR_LOW	kernel/global.h	61;"	d
+TSS_DESC_D	kernel/global.h	59;"	d
 VECTOR	kernel/kernel.s	/^VECTOR 0x00,ZERO$/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x01,ZERO$/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x02,ZERO$/;"	l
@@ -151,6 +177,7 @@ __LIB_STDINT_H	lib/stdint.h	2;"	d
 __LIB_STRING_H	lib/string.h	2;"	d
 __THREAD_SYNC_H	thread/sync.h	2;"	d
 __THREAD_THREAD_H	thread/thread.h	2;"	d
+__USERPROG_TSS_H	userprog/tss.h	2;"	d
 all_list_tag	thread/thread.h	/^    struct list_elem all_list_tag;\/\/线程队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
 alt_l_char	device/keyboard.c	24;"	d	file:
 alt_l_make	device/keyboard.c	31;"	d	file:
@@ -160,15 +187,20 @@ alt_r_make	device/keyboard.c	32;"	d	file:
 alt_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
 ards_buf	boot/loader.s	/^ards_buf times 244 db 0$/;"	l
 ards_nr	boot/loader.s	/^ards_nr dw 0$/;"	d
+attr_low_byte	kernel/global.h	/^    uint8_t attr_low_byte;$/;"	m	struct:gdt_desc
 attribute	kernel/interrupt.c	/^    uint8_t     attribute;\/\/门描述符P+DPL+S+TYPE共8位$/;"	m	struct:gate_desc	file:
+backlink	userprog/tss.c	/^    uint32_t backlink;$/;"	m	struct:tss	file:
 backspace	device/keyboard.c	13;"	d	file:
+base_high_byte	kernel/global.h	/^    uint8_t base_high_byte;$/;"	m	struct:gdt_desc
+base_low_word	kernel/global.h	/^    uint16_t base_low_word;$/;"	m	struct:gdt_desc
+base_mid_byte	kernel/global.h	/^    uint8_t base_mid_byte;$/;"	m	struct:gdt_desc
 bitmap	lib/kernel/bitmap.h	/^struct bitmap {$/;"	s
 bitmap_init	lib/kernel/bitmap.c	/^void bitmap_init(struct bitmap* btmp)$/;"	f
 bitmap_scan	lib/kernel/bitmap.c	/^int bitmap_scan(struct bitmap* btmp, uint32_t cnt)$/;"	f
 bitmap_scan_test	lib/kernel/bitmap.c	/^bool bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx)$/;"	f
 bitmap_set	lib/kernel/bitmap.c	/^void bitmap_set(struct bitmap* btmp, uint32_t bit_idx, int8_t value)$/;"	f
 bits	lib/kernel/bitmap.h	/^    uint8_t* bits;\/\/位图首地址$/;"	m	struct:bitmap
-bool	kernel/global.h	31;"	d
+bool	kernel/global.h	64;"	d
 btmp_bytes_len	lib/kernel/bitmap.h	/^    uint32_t btmp_bytes_len;\/\/bitmap以字节为单位$/;"	m	struct:bitmap
 buf	device/ioqueue.h	/^    char buf[bufsize];$/;"	m	struct:ioqueue
 bufsize	device/ioqueue.h	7;"	d
@@ -184,7 +216,9 @@ console_put_int	device/console.c	/^void console_put_int(uint32_t num)$/;"	f
 console_put_str	device/console.c	/^void console_put_str(char* str)$/;"	f
 console_release	device/console.c	/^void console_release()$/;"	f
 consumer	device/ioqueue.h	/^    struct task_struct* consumer;$/;"	m	struct:ioqueue	typeref:struct:ioqueue::task_struct
+cr3	userprog/tss.c	/^    uint32_t cr3;$/;"	m	struct:tss	file:
 cs	thread/thread.h	/^    uint32_t cs;$/;"	m	struct:intr_stack
+cs	userprog/tss.c	/^    uint32_t cs;$/;"	m	struct:tss	file:
 ctrl_l_char	device/keyboard.c	20;"	d	file:
 ctrl_l_make	device/keyboard.c	34;"	d	file:
 ctrl_r_break	device/keyboard.c	36;"	d	file:
@@ -194,18 +228,27 @@ ctrl_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock
 dcount	kernel/interrupt.c	/^    uint8_t     dcount;\/\/门描述符高32位的低8位 固定全0$/;"	m	struct:gate_desc	file:
 delete	device/keyboard.c	16;"	d	file:
 ds	thread/thread.h	/^    uint32_t ds;$/;"	m	struct:intr_stack
+ds	userprog/tss.c	/^    uint32_t ds;$/;"	m	struct:tss	file:
 eax	thread/thread.h	/^    uint32_t eax;$/;"	m	struct:intr_stack
+eax	userprog/tss.c	/^    uint32_t eax;$/;"	m	struct:tss	file:
 ebp	thread/thread.h	/^    uint32_t ebp;$/;"	m	struct:intr_stack
 ebp	thread/thread.h	/^    uint32_t ebp;$/;"	m	struct:thread_stack
+ebp	userprog/tss.c	/^    uint32_t ebp;$/;"	m	struct:tss	file:
 ebx	thread/thread.h	/^    uint32_t ebx;$/;"	m	struct:intr_stack
 ebx	thread/thread.h	/^    uint32_t ebx;$/;"	m	struct:thread_stack
+ebx	userprog/tss.c	/^    uint32_t ebx;$/;"	m	struct:tss	file:
 ecx	thread/thread.h	/^    uint32_t ecx;$/;"	m	struct:intr_stack
+ecx	userprog/tss.c	/^    uint32_t ecx;$/;"	m	struct:tss	file:
 edi	thread/thread.h	/^    uint32_t edi;$/;"	m	struct:intr_stack
 edi	thread/thread.h	/^    uint32_t edi;$/;"	m	struct:thread_stack
+edi	userprog/tss.c	/^    uint32_t edi;$/;"	m	struct:tss	file:
 edx	thread/thread.h	/^    uint32_t edx;$/;"	m	struct:intr_stack
+edx	userprog/tss.c	/^    uint32_t edx;$/;"	m	struct:tss	file:
 eflags	thread/thread.h	/^    uint32_t eflags;$/;"	m	struct:intr_stack
+eflags	userprog/tss.c	/^    uint32_t eflags;$/;"	m	struct:tss	file:
 eip	thread/thread.h	/^	void (*eip) (thread_func* func, void* func_arg);$/;"	m	struct:thread_stack
 eip	thread/thread.h	/^    void (*eip) (void);$/;"	m	struct:intr_stack
+eip	userprog/tss.c	/^    uint32_t (*eip) (void);$/;"	m	struct:tss	file:
 elapsed_ticks	thread/thread.h	/^    uint32_t elapsed_ticks;\/\/此任务已经占用了多少滴答$/;"	m	struct:task_struct
 elem2entry	lib/kernel/list.h	6;"	d
 elem_find	lib/kernel/list.c	/^bool elem_find(struct list* plist, struct list_elem* obj_elem)$/;"	f
@@ -213,10 +256,16 @@ enter	device/keyboard.c	15;"	d	file:
 enter_kernel	boot/loader.s	/^enter_kernel:$/;"	l
 err_code	thread/thread.h	/^    uint32_t err_code;$/;"	m	struct:intr_stack
 es	thread/thread.h	/^    uint32_t es;$/;"	m	struct:intr_stack
+es	userprog/tss.c	/^    uint32_t es;$/;"	m	struct:tss	file:
 esc	device/keyboard.c	12;"	d	file:
 esi	thread/thread.h	/^    uint32_t esi;$/;"	m	struct:intr_stack
 esi	thread/thread.h	/^    uint32_t esi;$/;"	m	struct:thread_stack
+esi	userprog/tss.c	/^    uint32_t esi;$/;"	m	struct:tss	file:
 esp	thread/thread.h	/^    void* esp;$/;"	m	struct:intr_stack
+esp	userprog/tss.c	/^    uint32_t esp;$/;"	m	struct:tss	file:
+esp0	userprog/tss.c	/^    uint32_t* esp0;$/;"	m	struct:tss	file:
+esp1	userprog/tss.c	/^    uint32_t* esp1;$/;"	m	struct:tss	file:
+esp2	userprog/tss.c	/^    uint32_t* esp2;$/;"	m	struct:tss	file:
 esp_dummy	thread/thread.h	/^    uint32_t esp_dummy;\/\/pushad会压入esp popad时会忽略掉$/;"	m	struct:intr_stack
 exception_init	kernel/interrupt.c	/^static void exception_init(void)$/;"	f	file:
 ext_scancode	device/keyboard.c	/^static bool ext_scancode;$/;"	v	file:
@@ -224,15 +273,17 @@ extern	kernel/kernel.s	/^extern idt_table$/;"	l
 extern	kernel/kernel.s	/^extern put_str$/;"	l
 f	makefile	/^	dd if=$(BUILD_DIR)\/kernel.bin \\$/;"	m
 f	makefile	/^	dd if=$(BUILD_DIR)\/loader.bin of=\/home\/xuxingyuan\/bochs\/hd60M.img \\$/;"	m
-false	kernel/global.h	33;"	d
+false	kernel/global.h	66;"	d
 frequency_set	device/timer.c	/^static void frequency_set(uint8_t counter_port, uint8_t counter_no, uint8_t rwl,$/;"	f	file:
 fs	thread/thread.h	/^    uint32_t fs;$/;"	m	struct:intr_stack
+fs	userprog/tss.c	/^    uint32_t fs;$/;"	m	struct:tss	file:
 func_arg	thread/thread.h	/^    void* func_arg;$/;"	m	struct:thread_stack
 func_offset_high_word	kernel/interrupt.c	/^    uint16_t    func_offset_high_word;\/\/中断处理程序偏移地址高16位$/;"	m	struct:gate_desc	file:
 func_offset_low_word	kernel/interrupt.c	/^    uint16_t    func_offset_low_word;\/\/中断处理程序偏移地址低16位$/;"	m	struct:gate_desc	file:
 function	lib/kernel/list.h	/^typedef bool (function)(struct list_elem* elem, int arg);$/;"	t
 function	thread/thread.h	/^    thread_func* function;$/;"	m	struct:thread_stack
 gate_desc	kernel/interrupt.c	/^struct gate_desc {$/;"	s	file:
+gdt_desc	kernel/global.h	/^struct gdt_desc {$/;"	s
 gdt_ptr	boot/loader.s	/^gdt_ptr:$/;"	l
 general_intr_handler	kernel/interrupt.c	/^static void general_intr_handler(uint8_t vec_nr)$/;"	f	file:
 general_tag	thread/thread.h	/^    struct list_elem general_tag;\/\/一般队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
@@ -245,6 +296,7 @@ global	lib/kernel/print.s	/^global put_str$/;"	l
 global	lib/kernel/print.s	/^global set_cursor$/;"	l
 global	thread/switch.s	/^global switch_to$/;"	l
 gs	thread/thread.h	/^    uint32_t gs;$/;"	m	struct:intr_stack
+gs	userprog/tss.c	/^    uint32_t gs;$/;"	m	struct:tss	file:
 head	device/ioqueue.h	/^    int32_t head;\/\/队首指针 数组下标$/;"	m	struct:ioqueue
 head	lib/kernel/list.h	/^    struct list_elem head;$/;"	m	struct:list	typeref:struct:list::list_elem
 holder	thread/sync.h	/^    struct task_struct* holder;\/\/锁持有者$/;"	m	struct:lock	typeref:struct:lock::task_struct
@@ -274,6 +326,7 @@ intr_stack	thread/thread.h	/^struct intr_stack {$/;"	s
 intr_status	kernel/interrupt.h	/^enum intr_status{$/;"	g
 intr_str	kernel/kernel.s	/^intr_str db "interrupt occur!",0xa,0$/;"	d
 intr_timer_handler	device/timer.c	/^static void intr_timer_handler(void)$/;"	f	file:
+io_base	userprog/tss.c	/^    uint16_t io_base;$/;"	m	struct:tss	file:
 ioq_empty	device/ioqueue.c	/^bool ioq_empty(struct ioqueue* ioq)$/;"	f
 ioq_full	device/ioqueue.c	/^bool ioq_full(struct ioqueue* ioq)$/;"	f
 ioq_getchar	device/ioqueue.c	/^char ioq_getchar(struct ioqueue* ioq)$/;"	f
@@ -291,6 +344,9 @@ kernel_thread	thread/thread.c	/^static void kernel_thread(thread_func function, 
 kernel_vaddr	kernel/memory.c	/^struct virtual_addr kernel_vaddr;\/\/内核虚拟内存池$/;"	v	typeref:struct:virtual_addr
 keyboard_init	device/keyboard.c	/^void keyboard_init()$/;"	f
 keymap	device/keyboard.c	/^static char keymap[][2] = {$/;"	v	file:
+ldt	userprog/tss.c	/^    uint32_t ldt;$/;"	m	struct:tss	file:
+limit_high_attr_high	kernel/global.h	/^    uint8_t limit_high_attr_high;$/;"	m	struct:gdt_desc
+limit_low_word	kernel/global.h	/^    uint16_t limit_low_word;$/;"	m	struct:gdt_desc
 list	lib/kernel/list.h	/^struct list {$/;"	s
 list_append	lib/kernel/list.c	/^void list_append(struct list* plist, struct list_elem* elem)$/;"	f
 list_elem	lib/kernel/list.h	/^struct list_elem {$/;"	s
@@ -310,6 +366,7 @@ lock_init	thread/sync.c	/^void lock_init(struct lock* plock)$/;"	f
 lock_release	thread/sync.c	/^void lock_release(struct lock* plock)$/;"	f
 main	kernel/main.c	/^int main(void) {$/;"	f
 main_thread	thread/thread.c	/^struct task_struct* main_thread;$/;"	v	typeref:struct:task_struct
+make_gdt_desc	userprog/tss.c	/^static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit, uint8_t attr_low, uint8_t attr_high)$/;"	f	file:
 make_idt_desc	kernel/interrupt.c	/^static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function_offset)$/;"	f	file:
 make_main_thread	thread/thread.c	/^static void make_main_thread(void)$/;"	f	file:
 malloc_page	kernel/memory.c	/^void* malloc_page(enum pool_flags pf, uint32_t pg_cnt)$/;"	f
@@ -341,7 +398,7 @@ pool_flags	kernel/memory.h	/^enum pool_flags {$/;"	g
 pool_size	kernel/memory.c	/^    uint32_t pool_size;\/\/内存池字节容量$/;"	m	struct:pool	file:
 pop	kernel/kernel.s	/^    pop ds$/;"	d
 prev	lib/kernel/list.h	/^    struct list_elem* prev;$/;"	m	struct:list_elem	typeref:struct:list_elem::list_elem
-priority	thread/thread.h	/^   uint8_t priority;$/;"	m	struct:task_struct
+priority	thread/thread.h	/^    uint8_t priority;$/;"	m	struct:task_struct
 producer	device/ioqueue.h	/^    struct task_struct* producer;$/;"	m	struct:ioqueue	typeref:struct:ioqueue::task_struct
 pte_ptr	kernel/memory.c	/^uint32_t* pte_ptr(uint32_t vaddr)$/;"	f
 push	kernel/kernel.s	/^    push ds$/;"	d
@@ -375,6 +432,10 @@ shift_r_char	device/keyboard.c	23;"	d	file:
 shift_r_make	device/keyboard.c	30;"	d	file:
 shift_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
 ss	thread/thread.h	/^    uint32_t ss;$/;"	m	struct:intr_stack
+ss	userprog/tss.c	/^    uint32_t ss;$/;"	m	struct:tss	file:
+ss0	userprog/tss.c	/^    uint32_t ss0;$/;"	m	struct:tss	file:
+ss1	userprog/tss.c	/^    uint32_t ss1;$/;"	m	struct:tss	file:
+ss2	userprog/tss.c	/^    uint32_t ss2;$/;"	m	struct:tss	file:
 stack_magic	thread/thread.h	/^    uint32_t stack_magic;\/\/检测栈溢出$/;"	m	struct:task_struct
 status	thread/thread.h	/^    enum task_status status;$/;"	m	struct:task_struct	typeref:enum:task_struct::task_status
 strcat	lib/string.c	/^char* strcat(char* dst_, const char* src_)$/;"	f
@@ -405,12 +466,17 @@ ticks	thread/thread.h	/^    uint8_t ticks;\/\/每次在处理器上执行的时�
 timer_init	device/timer.c	/^void timer_init() {$/;"	f
 times	boot/loader.s	/^times 60 dq 0$/;"	l
 total_mem_bytes	boot/loader.s	/^total_mem_bytes dd 0$/;"	d
-true	kernel/global.h	32;"	d
+trace	userprog/tss.c	/^    uint16_t trace;\/\/我感觉这玩意应该是16位的$/;"	m	struct:tss	file:
+true	kernel/global.h	65;"	d
+tss	userprog/tss.c	/^static struct tss tss;$/;"	v	typeref:struct:tss	file:
+tss	userprog/tss.c	/^struct tss {$/;"	s	file:
+tss_init	userprog/tss.c	/^void tss_init() {$/;"	f
 uint16_t	lib/stdint.h	/^typedef unsigned short int uint16_t;$/;"	t
 uint32_t	lib/stdint.h	/^typedef unsigned int uint32_t;$/;"	t
 uint64_t	lib/stdint.h	/^typedef unsigned long long int uint64_t;$/;"	t
 uint8_t	lib/stdint.h	/^typedef unsigned char uint8_t;$/;"	t
 unused_retaddr	thread/thread.h	/^   	void (*unused_retaddr);$/;"	m	struct:thread_stack
+update_tss_esp	userprog/tss.c	/^void update_tss_esp(struct task_struct* pthread) {$/;"	f
 user_pool	kernel/memory.c	/^struct pool kernel_pool, user_pool;$/;"	v	typeref:struct:
 vaddr_bitmap	kernel/memory.h	/^    struct bitmap vaddr_bitmap;\/\/虚拟内存位图$/;"	m	struct:virtual_addr	typeref:struct:virtual_addr::bitmap
 vaddr_get	kernel/memory.c	/^static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt)$/;"	f	file:

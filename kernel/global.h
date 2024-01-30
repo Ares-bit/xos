@@ -65,7 +65,7 @@
 #define true 1
 #define false 0
 
-struct gdc_desc {
+struct gdt_desc {
     uint16_t limit_low_word;
     uint16_t base_low_word;
     uint8_t base_mid_byte;

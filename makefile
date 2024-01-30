@@ -3,7 +3,7 @@ ENTRY_POINT = 0xc0001500
 AS = nasm
 CC = gcc
 LD = ld
-LIBS = -I lib/ -I lib/kernel/ -I lib/user/ -I device/ -I kernel/ -I thread/
+LIBS = -I lib/ -I lib/kernel/ -I lib/user/ -I device/ -I kernel/ -I thread/ -I userprog/
 ASFLAGS = -f elf
 ASBINLIB = -I boot/include/
 CFLAGS = -m32 -Wall $(LIBS) -c -fno-builtin -W -Wstrict-prototypes \
@@ -14,7 +14,7 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/debug.o $(BUILD_DIR)/memory.o $(BUILD_DIR)/bitmap.o \
 	$(BUILD_DIR)/string.o $(BUILD_DIR)/thread.o $(BUILD_DIR)/list.o \
     $(BUILD_DIR)/switch.o  $(BUILD_DIR)/console.o $(BUILD_DIR)/sync.o \
-	$(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o
+	$(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o $(BUILD_DIR)/tss.o
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.s
@@ -31,7 +31,8 @@ $(BUILD_DIR)/main.o: kernel/main.c lib/kernel/print.h \
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/init.o: kernel/init.c kernel/init.h lib/kernel/print.h \
-	lib/stdint.h kernel/interrupt.h device/timer.h
+	lib/stdint.h kernel/interrupt.h device/timer.h thread/thread.h \
+	device/console.h device/keyboard.h userprog/tss.h kernel/memory.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/interrupt.o: kernel/interrupt.c kernel/interrupt.h \
@@ -57,7 +58,6 @@ $(BUILD_DIR)/memory.o: kernel/memory.c kernel/memory.h lib/stdint.h \
 	lib/kernel/print.h
 	$(CC) $(CFLAGS) $< -o $@
 
-
 $(BUILD_DIR)/thread.o: thread/thread.c thread/thread.h lib/stdint.h lib/string.h \
 	kernel/global.h kernel/memory.h lib/kernel/list.h kernel/debug.h lib/kernel/print.h
 	$(CC) $(CFLAGS) $< -o $@
@@ -79,6 +79,10 @@ $(BUILD_DIR)/keyboard.o: device/keyboard.c device/keyboard.h kernel/interrupt.h 
 
 $(BUILD_DIR)/ioqueue.o: device/ioqueue.c device/ioqueue.h kernel/global.h kernel/debug.h \
 	kernel/interrupt.h lib/kernel/print.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/tss.o: userprog/tss.c userprog/tss.h kernel/global.h lib/kernel/print.h lib/stdint.h \
+	lib/string.h thread/thread.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译
