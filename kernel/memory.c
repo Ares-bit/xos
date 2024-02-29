@@ -5,6 +5,7 @@
 #include "debug.h"
 #include "string.h"
 #include "global.h"
+#include "thread.h"
 
 #define PG_SIZE 4096
 
@@ -23,6 +24,7 @@ struct pool {
     struct bitmap pool_bitmap;//物理内存位图
     uint32_t phy_addr_start;//内存池管理的物理内存起始地址
     uint32_t pool_size;//内存池字节容量
+    struct lock lock;
 };
 
 struct pool kernel_pool, user_pool;
@@ -44,7 +46,19 @@ static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt)
         }
         vaddr_start = kernel_vaddr.vaddr_start + bit_idx_start * PG_SIZE;
     } else {
+        struct task_struct* cur = running_thread();
+        //在用户内存池中搜索连续个页
+        bit_idx_start = bitmap_scan(&cur->userprog_vaddr, pg_cnt);
+        if (bit_idx_start == -1) {
+            return NULL;
+        }
 
+        while (cnt < pg_cnt) {
+            bitmap_set(&cur->userprog_vaddr.vaddr_bitmap, bit_idx_start + cnt++, 1);
+        }
+        vaddr_start = cur->userprog_vaddr.vaddr_start + bit_idx_start * PG_SIZE;
+        //start_process已经在0xc0000000-PG_SIZE处给用户分配了3级栈
+        ASSERT((uint32_t)vaddr_start < (0xc0000000 - PG_SIZE));
     }
     return (void*)vaddr_start;
 }
