@@ -60,10 +60,19 @@
 #define TSS_ATTR_HIGH   ((DESC_G_4K << 7) + (TSS_DESC_D << 6) + (DESC_L << 5) + (DESC_AVL << 4))
 #define TSS_ATTR_LOW    ((DESC_P << 7) + (DESC_DPL_0 << 5) + (DESC_S_SYS << 4) + DESC_TYPE_TSS)
 
+#define EFLAGS_MBS      (1 << 1)
+#define EFLAGS_IF_1     (1 << 9)
+#define EFLAGS_IF_0     0
+#define EFLAGS_IOPL_3   (3 << 12)
+#define EFLAGS_IOPL_0   0
+
 #define NULL ((void*)0)
+#define DIV_ROUND_UP(X, STEP)   ((X + STEP - 1) / (STEP))
 #define bool int
 #define true 1
 #define false 0
+
+#define PG_SIZE 4096
 
 struct gdt_desc {
     uint16_t limit_low_word;

@@ -6,6 +6,7 @@
 #include "string.h"
 #include "global.h"
 #include "thread.h"
+#include "sync.h"
 
 #define PG_SIZE 4096
 
@@ -48,7 +49,7 @@ static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt)
     } else {
         struct task_struct* cur = running_thread();
         //在用户内存池中搜索连续个页
-        bit_idx_start = bitmap_scan(&cur->userprog_vaddr, pg_cnt);
+        bit_idx_start = bitmap_scan(&cur->userprog_vaddr.vaddr_bitmap, pg_cnt);
         if (bit_idx_start == -1) {
             return NULL;
         }
@@ -159,6 +160,57 @@ void* get_kernel_pages(uint32_t pg_cnt)
     return vaddr;
 }
 
+void* get_user_pages(uint32_t pg_cnt)
+{
+    lock_acquire(&user_pool.lock);
+    void* vaddr = malloc_page(PF_USER, pg_cnt);
+    if (vaddr != NULL) {
+        memset(vaddr, 0, pg_cnt * PG_SIZE);
+    }
+    lock_release(&user_pool.lock);
+    return vaddr;
+}
+
+//此函数为申请物理页面，并置位进程虚拟地址位图
+//get_a_page只分配一页，没搞明白为什么要弄这么多重复功能的内存分配函数呢？
+void get_a_page(enum pool_flags pf, uint32_t vaddr)
+{
+    //这是物理地址池，所以所有线程共用一个全局的
+    struct pool* mem_pool = pf & PF_KERNEL ? &kernel_pool : &user_pool;
+
+    lock_acquire(&mem_pool->lock);
+    struct task_struct* cur = running_thread();
+    int32_t bit_idx = -1;
+
+    if (cur->pgdir != NULL && pf == PF_USER) {
+        bit_idx = (vaddr - cur->userprog_vaddr.vaddr_start) / PG_SIZE;
+        ASSERT(bit_idx > 0);
+        bitmap_set(&cur->userprog_vaddr.vaddr_bitmap, bit_idx, 1);
+    } else if (cur->pgdir == NULL && pf == PF_KERNEL) {
+        bit_idx = (vaddr - kernel_vaddr.vaddr_start) / PG_SIZE;
+        ASSERT(bit_idx > 0);
+        bitmap_set(&kernel_vaddr.vaddr_bitmap, bit_idx, 1);
+    } else {
+        PANIC("get a page:not allow kernel alloc userspace or user alloc kernelspace by get_a_page");
+    }
+
+    void* page_phyaddr = palloc(mem_pool);
+    if (page_phyaddr == NULL) {
+        return NULL;
+    }
+    page_table_add((void*)vaddr, page_phyaddr);
+    lock_release(&mem_pool->lock);
+
+    return (void*)vaddr;
+}
+
+//虚拟地址映射到物理地址：找到虚拟地址所在页表，找到对应的页表项，其中存储的就是实际物理地址
+uint32_t addr_v2p(uint32_t vaddr)
+{
+    uint32_t* pte = pte_ptr(vaddr);
+    return ((*pte & 0xfffff000) + (vaddr & 0x00000fff));
+}
+
 static void mem_pool_init(uint32_t all_mem) {
     put_str("mem_pool_init start\n");
     //统计物理内存
@@ -183,12 +235,14 @@ static void mem_pool_init(uint32_t all_mem) {
     kernel_pool.pool_size = kernel_free_pages * PG_SIZE;
     kernel_pool.pool_bitmap.btmp_bytes_len = kbm_length;
     kernel_pool.pool_bitmap.bits = (void*)MEM_BITMAP_BASE;
+    lock_init(&kernel_pool.lock);
 
     //user pool初始化
     user_pool.phy_addr_start = up_start;
     user_pool.pool_size = user_free_pages * PG_SIZE;
     user_pool.pool_bitmap.btmp_bytes_len = ubm_length;
     user_pool.pool_bitmap.bits = (void*)(MEM_BITMAP_BASE + kbm_length);
+    lock_init(&user_pool.lock);
 
     put_str("kernel_pool_bitmap_start:0x");
     put_int((int)kernel_pool.pool_bitmap.bits);

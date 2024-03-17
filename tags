@@ -56,22 +56,22 @@ INTR_OFF	kernel/interrupt.h	/^    INTR_OFF,$/;"	e	enum:intr_status
 INTR_ON	kernel/interrupt.h	/^    INTR_ON$/;"	e	enum:intr_status
 IRQ0_FREQUENCY	device/timer.c	9;"	d	file:
 KBD_BUF_PORT	device/keyboard.c	9;"	d	file:
-K_HEAP_START	kernel/memory.c	15;"	d	file:
+K_HEAP_START	kernel/memory.c	17;"	d	file:
 LD	makefile	/^LD = ld$/;"	m
 LDFLAGS	makefile	/^LDFLAGS = -melf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)\/kernel.map$/;"	m
 LIBS	makefile	/^LIBS = -I lib\/ -I lib\/kernel\/ -I lib\/user\/ -I device\/ -I kernel\/ -I thread\/ -I userprog\/$/;"	m
-MEM_BITMAP_BASE	kernel/memory.c	12;"	d	file:
+MEM_BITMAP_BASE	kernel/memory.c	14;"	d	file:
 NULL	kernel/global.h	63;"	d
 OBJS	makefile	/^OBJS = $(BUILD_DIR)\/main.o $(BUILD_DIR)\/init.o $(BUILD_DIR)\/interrupt.o \\$/;"	m
 PANIC	kernel/debug.h	6;"	d
-PDE_IDX	kernel/memory.c	18;"	d	file:
+PDE_IDX	kernel/memory.c	20;"	d	file:
 PF_KERNEL	kernel/memory.h	/^    PF_KERNEL = 1,$/;"	e	enum:pool_flags
 PF_USER	kernel/memory.h	/^    PF_USER = 2$/;"	e	enum:pool_flags
 PG_P_0	kernel/memory.h	20;"	d
 PG_P_1	kernel/memory.h	19;"	d
 PG_RW_R	kernel/memory.h	21;"	d
 PG_RW_W	kernel/memory.h	22;"	d
-PG_SIZE	kernel/memory.c	9;"	d	file:
+PG_SIZE	kernel/memory.c	11;"	d	file:
 PG_SIZE	thread/thread.c	10;"	d	file:
 PG_SIZE	userprog/tss.c	8;"	d	file:
 PG_US_S	kernel/memory.h	23;"	d
@@ -81,7 +81,7 @@ PIC_M_DATA	kernel/interrupt.c	8;"	d	file:
 PIC_S_CTRL	kernel/interrupt.c	9;"	d	file:
 PIC_S_DATA	kernel/interrupt.c	10;"	d	file:
 PIT_CONTROL_PORT	device/timer.c	16;"	d	file:
-PTE_IDX	kernel/memory.c	19;"	d	file:
+PTE_IDX	kernel/memory.c	21;"	d	file:
 READ_WRITE_LATCH	device/timer.c	15;"	d	file:
 RPL0	kernel/global.h	6;"	d
 RPL1	kernel/global.h	7;"	d
@@ -178,6 +178,7 @@ __LIB_STRING_H	lib/string.h	2;"	d
 __THREAD_SYNC_H	thread/sync.h	2;"	d
 __THREAD_THREAD_H	thread/thread.h	2;"	d
 __USERPROG_TSS_H	userprog/tss.h	2;"	d
+addr_v2p	kernel/memory.c	/^uint32_t addr_v2p(uint32_t vaddr)$/;"	f
 all_list_tag	thread/thread.h	/^    struct list_elem all_list_tag;\/\/线程队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
 alt_l_char	device/keyboard.c	24;"	d	file:
 alt_l_make	device/keyboard.c	31;"	d	file:
@@ -287,7 +288,9 @@ gdt_desc	kernel/global.h	/^struct gdt_desc {$/;"	s
 gdt_ptr	boot/loader.s	/^gdt_ptr:$/;"	l
 general_intr_handler	kernel/interrupt.c	/^static void general_intr_handler(uint8_t vec_nr)$/;"	f	file:
 general_tag	thread/thread.h	/^    struct list_elem general_tag;\/\/一般队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
+get_a_page	kernel/memory.c	/^void get_a_page(enum pool_flags pf, uint32_t vaddr)$/;"	f
 get_kernel_pages	kernel/memory.c	/^void* get_kernel_pages(uint32_t pg_cnt)$/;"	f
+get_user_pages	kernel/memory.c	/^void* get_user_pages(uint32_t pg_cnt)$/;"	f
 global	kernel/kernel.s	/^global intr_entry_table$/;"	l
 global	kernel/kernel.s	/^global intr_exit$/;"	l
 global	lib/kernel/print.s	/^global put_char;导出put_char符号$/;"	l
@@ -360,6 +363,7 @@ list_remove	lib/kernel/list.c	/^void list_remove(struct list_elem* pelem)$/;"	f
 list_traversal	lib/kernel/list.c	/^struct list_elem* list_traversal(struct list* plist, function func, int arg)$/;"	f
 loader_start	boot/loader.s	/^loader_start:$/;"	l
 lock	device/ioqueue.h	/^    struct lock lock;$/;"	m	struct:ioqueue	typeref:struct:ioqueue::lock
+lock	kernel/memory.c	/^    struct lock lock;$/;"	m	struct:pool	typeref:struct:pool::lock	file:
 lock	thread/sync.h	/^struct lock {$/;"	s
 lock_acquire	thread/sync.c	/^void lock_acquire(struct lock* plock)$/;"	f
 lock_init	thread/sync.c	/^void lock_init(struct lock* plock)$/;"	f
@@ -478,6 +482,7 @@ uint8_t	lib/stdint.h	/^typedef unsigned char uint8_t;$/;"	t
 unused_retaddr	thread/thread.h	/^   	void (*unused_retaddr);$/;"	m	struct:thread_stack
 update_tss_esp	userprog/tss.c	/^void update_tss_esp(struct task_struct* pthread) {$/;"	f
 user_pool	kernel/memory.c	/^struct pool kernel_pool, user_pool;$/;"	v	typeref:struct:
+userprog_vaddr	thread/thread.h	/^    struct virtual_addr userprog_vaddr;\/\/用户进程虚拟地址空间$/;"	m	struct:task_struct	typeref:struct:task_struct::virtual_addr
 vaddr_bitmap	kernel/memory.h	/^    struct bitmap vaddr_bitmap;\/\/虚拟内存位图$/;"	m	struct:virtual_addr	typeref:struct:virtual_addr::bitmap
 vaddr_get	kernel/memory.c	/^static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt)$/;"	f	file:
 vaddr_start	kernel/memory.h	/^    uint32_t vaddr_start;\/\/起始虚拟地址$/;"	m	struct:virtual_addr
