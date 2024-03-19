@@ -6,6 +6,7 @@
 #include "console.h"
 #include "string.h"
 #include "bitmap.h"
+#include "process.h"
 
 extern void intr_exit(void);
 
