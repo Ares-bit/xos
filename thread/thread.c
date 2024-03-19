@@ -6,6 +6,7 @@
 #include "interrupt.h"
 #include "debug.h"
 #include "print.h"
+#include "process.h"
 
 #define PG_SIZE 4096
 
@@ -118,6 +119,10 @@ void schedule(void)
     //通过next的tag找到PCB起始地址
     struct task_struct* next = elem2entry(struct task_struct, general_tag, thread_tag);
     next->status = TASK_RUNNING;
+
+    //激活进程或线程
+    process_activate(next);
+
     //保存cur 切换到next
     switch_to(cur, next);
 }
