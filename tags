@@ -19,6 +19,7 @@ COUNTER0_NO	device/timer.c	13;"	d	file:
 COUNTER0_PORT	device/timer.c	12;"	d	file:
 COUNTER0_VALUE	device/timer.c	11;"	d	file:
 DATA_DESC	boot/loader.s	/^DATA_DESC:$/;"	l
+DEFAULT_PRIO	userprog/process.h	5;"	d
 DESC_AVL	kernel/global.h	41;"	d
 DESC_DPL_0	kernel/global.h	43;"	d
 DESC_DPL_1	kernel/global.h	44;"	d
@@ -34,7 +35,13 @@ DESC_S_SYS	kernel/global.h	49;"	d
 DESC_TYPE_CODE	kernel/global.h	50;"	d
 DESC_TYPE_DATA	kernel/global.h	51;"	d
 DESC_TYPE_TSS	kernel/global.h	52;"	d
+DIV_ROUND_UP	kernel/global.h	70;"	d
 EFLAGS_IF	kernel/interrupt.c	14;"	d	file:
+EFLAGS_IF_0	kernel/global.h	65;"	d
+EFLAGS_IF_1	kernel/global.h	64;"	d
+EFLAGS_IOPL_0	kernel/global.h	67;"	d
+EFLAGS_IOPL_3	kernel/global.h	66;"	d
+EFLAGS_MBS	kernel/global.h	63;"	d
 ENTRY_POINT	makefile	/^ENTRY_POINT = 0xc0001500$/;"	m
 GDT_ATTR_HIGH	kernel/global.h	54;"	d
 GDT_BASE	boot/loader.s	/^GDT_BASE:$/;"	l
@@ -61,7 +68,7 @@ LD	makefile	/^LD = ld$/;"	m
 LDFLAGS	makefile	/^LDFLAGS = -melf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)\/kernel.map$/;"	m
 LIBS	makefile	/^LIBS = -I lib\/ -I lib\/kernel\/ -I lib\/user\/ -I device\/ -I kernel\/ -I thread\/ -I userprog\/$/;"	m
 MEM_BITMAP_BASE	kernel/memory.c	14;"	d	file:
-NULL	kernel/global.h	63;"	d
+NULL	kernel/global.h	69;"	d
 OBJS	makefile	/^OBJS = $(BUILD_DIR)\/main.o $(BUILD_DIR)\/init.o $(BUILD_DIR)\/interrupt.o \\$/;"	m
 PANIC	kernel/debug.h	6;"	d
 PDE_IDX	kernel/memory.c	20;"	d	file:
@@ -71,8 +78,9 @@ PG_P_0	kernel/memory.h	20;"	d
 PG_P_1	kernel/memory.h	19;"	d
 PG_RW_R	kernel/memory.h	21;"	d
 PG_RW_W	kernel/memory.h	22;"	d
+PG_SIZE	kernel/global.h	75;"	d
 PG_SIZE	kernel/memory.c	11;"	d	file:
-PG_SIZE	thread/thread.c	10;"	d	file:
+PG_SIZE	thread/thread.c	11;"	d	file:
 PG_SIZE	userprog/tss.c	8;"	d	file:
 PG_US_S	kernel/memory.h	23;"	d
 PG_US_U	kernel/memory.h	24;"	d
@@ -111,6 +119,8 @@ TI_LDT	kernel/global.h	12;"	d
 TSS_ATTR_HIGH	kernel/global.h	60;"	d
 TSS_ATTR_LOW	kernel/global.h	61;"	d
 TSS_DESC_D	kernel/global.h	59;"	d
+USER_STACK3_VADDR	userprog/process.h	4;"	d
+USER_VADDR_START	userprog/process.h	6;"	d
 VECTOR	kernel/kernel.s	/^VECTOR 0x00,ZERO$/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x01,ZERO$/;"	l
 VECTOR	kernel/kernel.s	/^VECTOR 0x02,ZERO$/;"	l
@@ -177,6 +187,7 @@ __LIB_STDINT_H	lib/stdint.h	2;"	d
 __LIB_STRING_H	lib/string.h	2;"	d
 __THREAD_SYNC_H	thread/sync.h	2;"	d
 __THREAD_THREAD_H	thread/thread.h	2;"	d
+__USERPROG_PROCESS_H	userprog/process.h	2;"	d
 __USERPROG_TSS_H	userprog/tss.h	2;"	d
 addr_v2p	kernel/memory.c	/^uint32_t addr_v2p(uint32_t vaddr)$/;"	f
 all_list_tag	thread/thread.h	/^    struct list_elem all_list_tag;\/\/线程队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
@@ -201,7 +212,7 @@ bitmap_scan	lib/kernel/bitmap.c	/^int bitmap_scan(struct bitmap* btmp, uint32_t 
 bitmap_scan_test	lib/kernel/bitmap.c	/^bool bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx)$/;"	f
 bitmap_set	lib/kernel/bitmap.c	/^void bitmap_set(struct bitmap* btmp, uint32_t bit_idx, int8_t value)$/;"	f
 bits	lib/kernel/bitmap.h	/^    uint8_t* bits;\/\/位图首地址$/;"	m	struct:bitmap
-bool	kernel/global.h	64;"	d
+bool	kernel/global.h	71;"	d
 btmp_bytes_len	lib/kernel/bitmap.h	/^    uint32_t btmp_bytes_len;\/\/bitmap以字节为单位$/;"	m	struct:bitmap
 buf	device/ioqueue.h	/^    char buf[bufsize];$/;"	m	struct:ioqueue
 bufsize	device/ioqueue.h	7;"	d
@@ -218,6 +229,8 @@ console_put_str	device/console.c	/^void console_put_str(char* str)$/;"	f
 console_release	device/console.c	/^void console_release()$/;"	f
 consumer	device/ioqueue.h	/^    struct task_struct* consumer;$/;"	m	struct:ioqueue	typeref:struct:ioqueue::task_struct
 cr3	userprog/tss.c	/^    uint32_t cr3;$/;"	m	struct:tss	file:
+create_page_dir	userprog/process.c	/^static uint32_t* create_page_dir(void)$/;"	f	file:
+create_user_vaddr_bitmap	userprog/process.c	/^static void create_user_vaddr_bitmap(struct task_struct* user_prog)$/;"	f	file:
 cs	thread/thread.h	/^    uint32_t cs;$/;"	m	struct:intr_stack
 cs	userprog/tss.c	/^    uint32_t cs;$/;"	m	struct:tss	file:
 ctrl_l_char	device/keyboard.c	20;"	d	file:
@@ -274,7 +287,7 @@ extern	kernel/kernel.s	/^extern idt_table$/;"	l
 extern	kernel/kernel.s	/^extern put_str$/;"	l
 f	makefile	/^	dd if=$(BUILD_DIR)\/kernel.bin \\$/;"	m
 f	makefile	/^	dd if=$(BUILD_DIR)\/loader.bin of=\/home\/xuxingyuan\/bochs\/hd60M.img \\$/;"	m
-false	kernel/global.h	66;"	d
+false	kernel/global.h	73;"	d
 frequency_set	device/timer.c	/^static void frequency_set(uint8_t counter_port, uint8_t counter_no, uint8_t rwl,$/;"	f	file:
 fs	thread/thread.h	/^    uint32_t fs;$/;"	m	struct:intr_stack
 fs	userprog/tss.c	/^    uint32_t fs;$/;"	m	struct:tss	file:
@@ -288,7 +301,7 @@ gdt_desc	kernel/global.h	/^struct gdt_desc {$/;"	s
 gdt_ptr	boot/loader.s	/^gdt_ptr:$/;"	l
 general_intr_handler	kernel/interrupt.c	/^static void general_intr_handler(uint8_t vec_nr)$/;"	f	file:
 general_tag	thread/thread.h	/^    struct list_elem general_tag;\/\/一般队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
-get_a_page	kernel/memory.c	/^void get_a_page(enum pool_flags pf, uint32_t vaddr)$/;"	f
+get_a_page	kernel/memory.c	/^void* get_a_page(enum pool_flags pf, uint32_t vaddr)$/;"	f
 get_kernel_pages	kernel/memory.c	/^void* get_kernel_pages(uint32_t pg_cnt)$/;"	f
 get_user_pages	kernel/memory.c	/^void* get_user_pages(uint32_t pg_cnt)$/;"	f
 global	kernel/kernel.s	/^global intr_entry_table$/;"	l
@@ -369,7 +382,7 @@ lock_acquire	thread/sync.c	/^void lock_acquire(struct lock* plock)$/;"	f
 lock_init	thread/sync.c	/^void lock_init(struct lock* plock)$/;"	f
 lock_release	thread/sync.c	/^void lock_release(struct lock* plock)$/;"	f
 main	kernel/main.c	/^int main(void) {$/;"	f
-main_thread	thread/thread.c	/^struct task_struct* main_thread;$/;"	v	typeref:struct:task_struct
+main_thread	thread/thread.h	/^struct task_struct* main_thread;$/;"	v	typeref:struct:task_struct
 make_gdt_desc	userprog/tss.c	/^static struct gdt_desc make_gdt_desc(uint32_t* desc_addr, uint32_t limit, uint8_t attr_low, uint8_t attr_high)$/;"	f	file:
 make_idt_desc	kernel/interrupt.c	/^static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function_offset)$/;"	f	file:
 make_main_thread	thread/thread.c	/^static void make_main_thread(void)$/;"	f	file:
@@ -389,6 +402,7 @@ offset	lib/kernel/list.h	5;"	d
 outb	lib/kernel/io.h	/^static inline void outb(uint16_t port, uint8_t data)$/;"	f
 outsw	lib/kernel/io.h	/^static inline void outsw(uint16_t port, const void* addr, uint32_t word_cnt)$/;"	f
 p_mode_start	boot/loader.s	/^p_mode_start:$/;"	l
+page_dir_activate	userprog/process.c	/^static void page_dir_activate(struct task_struct* p_thread)$/;"	f	file:
 page_table_add	kernel/memory.c	/^static void page_table_add(void* _vaddr, void* _page_phyaddr)$/;"	f	file:
 palloc	kernel/memory.c	/^static void* palloc(struct pool* m_pool)$/;"	f	file:
 panic_spin	kernel/debug.c	/^void panic_spin(char *file_name, int line, const char *func, const char *condition)$/;"	f
@@ -403,6 +417,8 @@ pool_size	kernel/memory.c	/^    uint32_t pool_size;\/\/内存池字节容量$/;"
 pop	kernel/kernel.s	/^    pop ds$/;"	d
 prev	lib/kernel/list.h	/^    struct list_elem* prev;$/;"	m	struct:list_elem	typeref:struct:list_elem::list_elem
 priority	thread/thread.h	/^    uint8_t priority;$/;"	m	struct:task_struct
+process_activate	userprog/process.c	/^void process_activate(struct task_struct* p_thread)$/;"	f
+process_execute	userprog/process.c	/^void process_execute(void* filename, char* name)$/;"	f
 producer	device/ioqueue.h	/^    struct task_struct* producer;$/;"	m	struct:ioqueue	typeref:struct:ioqueue::task_struct
 pte_ptr	kernel/memory.c	/^uint32_t* pte_ptr(uint32_t vaddr)$/;"	f
 push	kernel/kernel.s	/^    push ds$/;"	d
@@ -441,6 +457,7 @@ ss0	userprog/tss.c	/^    uint32_t ss0;$/;"	m	struct:tss	file:
 ss1	userprog/tss.c	/^    uint32_t ss1;$/;"	m	struct:tss	file:
 ss2	userprog/tss.c	/^    uint32_t ss2;$/;"	m	struct:tss	file:
 stack_magic	thread/thread.h	/^    uint32_t stack_magic;\/\/检测栈溢出$/;"	m	struct:task_struct
+start_process	userprog/process.c	/^static void start_process(void* filename_)$/;"	f	file:
 status	thread/thread.h	/^    enum task_status status;$/;"	m	struct:task_struct	typeref:enum:task_struct::task_status
 strcat	lib/string.c	/^char* strcat(char* dst_, const char* src_)$/;"	f
 strchr	lib/string.c	/^char* strchr(const char* str, const char ch)$/;"	f
@@ -455,12 +472,14 @@ tail	device/ioqueue.h	/^    int32_t tail;\/\/队尾指针 数组下标$/;"	m	str
 tail	lib/kernel/list.h	/^    struct list_elem tail;$/;"	m	struct:list	typeref:struct:list::list_elem
 task_status	thread/thread.h	/^enum task_status {$/;"	g
 task_struct	thread/thread.h	/^struct task_struct {$/;"	s
-thread_all_list	thread/thread.c	/^struct list thread_all_list;$/;"	v	typeref:struct:list
+test_var_a	kernel/main.c	/^int test_var_a = 0, test_var_b = 0;$/;"	v
+test_var_b	kernel/main.c	/^int test_var_a = 0, test_var_b = 0;$/;"	v
+thread_all_list	thread/thread.h	/^struct list thread_all_list;$/;"	v	typeref:struct:list
 thread_block	thread/thread.c	/^void thread_block(enum task_status stat)$/;"	f
 thread_create	thread/thread.c	/^void thread_create(struct task_struct* pthread, thread_func function, void* func_arg)$/;"	f
 thread_func	thread/thread.h	/^typedef void thread_func(void*);$/;"	t
 thread_init	thread/thread.c	/^void thread_init(void)$/;"	f
-thread_ready_list	thread/thread.c	/^struct list thread_ready_list;$/;"	v	typeref:struct:list
+thread_ready_list	thread/thread.h	/^struct list thread_ready_list;$/;"	v	typeref:struct:list
 thread_stack	thread/thread.h	/^struct thread_stack {$/;"	s
 thread_start	thread/thread.c	/^struct task_struct* thread_start(char* name, int prio, thread_func function, void* func_arg)$/;"	f
 thread_tag	thread/thread.c	/^static struct list_elem* thread_tag;$/;"	v	typeref:struct:list_elem	file:
@@ -471,10 +490,12 @@ timer_init	device/timer.c	/^void timer_init() {$/;"	f
 times	boot/loader.s	/^times 60 dq 0$/;"	l
 total_mem_bytes	boot/loader.s	/^total_mem_bytes dd 0$/;"	d
 trace	userprog/tss.c	/^    uint16_t trace;\/\/我感觉这玩意应该是16位的$/;"	m	struct:tss	file:
-true	kernel/global.h	65;"	d
+true	kernel/global.h	72;"	d
 tss	userprog/tss.c	/^static struct tss tss;$/;"	v	typeref:struct:tss	file:
 tss	userprog/tss.c	/^struct tss {$/;"	s	file:
 tss_init	userprog/tss.c	/^void tss_init() {$/;"	f
+u_prog_a	kernel/main.c	/^void u_prog_a(void) {$/;"	f
+u_prog_b	kernel/main.c	/^void u_prog_b(void) {$/;"	f
 uint16_t	lib/stdint.h	/^typedef unsigned short int uint16_t;$/;"	t
 uint32_t	lib/stdint.h	/^typedef unsigned int uint32_t;$/;"	t
 uint64_t	lib/stdint.h	/^typedef unsigned long long int uint64_t;$/;"	t

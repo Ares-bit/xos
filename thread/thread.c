@@ -10,9 +10,6 @@
 
 #define PG_SIZE 4096
 
-struct task_struct* main_thread;
-struct list thread_ready_list;
-struct list thread_all_list;
 static struct list_elem* thread_tag;
 
 extern void switch_to(struct task_struct* cur, struct task_struct* next);

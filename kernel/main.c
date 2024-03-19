@@ -36,7 +36,7 @@ int main(void) {
 void k_thread_a(void* arg) {
     char* para = arg;
     while(1) {
-        console_put_str("v_a:0x");
+        console_put_str(" v_a:0x");
         console_put_int(test_var_a);
     }
 }
@@ -44,7 +44,7 @@ void k_thread_a(void* arg) {
 void k_thread_b(void* arg) {
     char* para = arg;
     while(1) {
-        console_put_str("v_b:0x");
+        console_put_str(" v_b:0x");
         console_put_int(test_var_b);
     }
 }

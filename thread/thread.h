@@ -7,6 +7,10 @@
 
 typedef void thread_func(void*);
 
+struct list thread_ready_list;
+struct list thread_all_list;
+struct task_struct* main_thread;
+
 //定义线程状态
 enum task_status {
     TASK_RUNNING,

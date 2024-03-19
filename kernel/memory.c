@@ -110,7 +110,7 @@ static void page_table_add(void* _vaddr, void* _page_phyaddr)
             *pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
         } else {
             PANIC("pte repeat");
-            *pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+            //*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
         }
     } else {
         //如果此虚拟地址的页目录项不存在则为其分配页表
@@ -153,10 +153,14 @@ void* malloc_page(enum pool_flags pf, uint32_t pg_cnt)
 //分配全0内核页
 void* get_kernel_pages(uint32_t pg_cnt)
 {
+   lock_acquire(&kernel_pool.lock);
+
     void* vaddr = malloc_page(PF_KERNEL, pg_cnt);
     if (vaddr != NULL) {
         memset(vaddr, 0, pg_cnt * PG_SIZE);
     }
+   lock_release(&kernel_pool.lock);
+
     return vaddr;
 }
 
@@ -173,7 +177,7 @@ void* get_user_pages(uint32_t pg_cnt)
 
 //此函数为申请物理页面，并置位进程虚拟地址位图
 //get_a_page只分配一页，没搞明白为什么要弄这么多重复功能的内存分配函数呢？
-void get_a_page(enum pool_flags pf, uint32_t vaddr)
+void* get_a_page(enum pool_flags pf, uint32_t vaddr)
 {
     //这是物理地址池，所以所有线程共用一个全局的
     struct pool* mem_pool = pf & PF_KERNEL ? &kernel_pool : &user_pool;

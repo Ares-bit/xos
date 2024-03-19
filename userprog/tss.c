@@ -65,11 +65,11 @@ void tss_init() {
     tss.io_base = tss_size;
 
     //gdt段基址为0x900，tss描述符是第4个，偏移量为8B*4 = 0x20
-    *(struct gdt_desc*)(0xc0000920) = make_gdt_desc((uint32_t*)&tss, tss_size-1, TSS_ATTR_LOW, TSS_ATTR_HIGH);
+    *((struct gdt_desc*)0xc0000920) = make_gdt_desc((uint32_t*)&tss, tss_size-1, TSS_ATTR_LOW, TSS_ATTR_HIGH);
 
     //gdt中添加dpl=3的用户代码段和数据段
-    *(struct gdt_desc*)(0xc0000928) = make_gdt_desc((uint32_t*)0, 0xffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
-    *(struct gdt_desc*)(0xc0000928) = make_gdt_desc((uint32_t*)0, 0xffff, GDT_DATA_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
+    *((struct gdt_desc*)0xc0000928) = make_gdt_desc((uint32_t*)0, 0xfffff, GDT_CODE_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
+    *((struct gdt_desc*)0xc0000930) = make_gdt_desc((uint32_t*)0, 0xfffff, GDT_DATA_ATTR_LOW_DPL3, GDT_ATTR_HIGH);
 
     //没有48位，只能定义64位
     //低16位是GDT界限
@@ -78,5 +78,5 @@ void tss_init() {
     //加载gdt和tss
     asm volatile ("lgdt %0" : : "m" (gdt_operand));
     asm volatile ("ltr %w0" : : "r" (SELECTOR_TSS));
-    put_str("tss_init and ltr done");
+    put_str("tss_init and ltr done\n");
 }
