@@ -1,52 +1,45 @@
 #include "syscall.h"
 
-#define _syscall0(NUMBER) ({				       \
-   int retval;					               \
-   asm volatile (					       \
-   "int $0x80"						       \
-   : "=a" (retval)					       \
-   : "a" (NUMBER)					       \
-   : "memory"						       \
-   );							       \
-   retval;						       \
+#define _syscall0(NUMBER)           \
+({                                   \
+    int retval;                     \
+    asm volatile("int $0x80" \
+    : "=a"(retval) \
+    : "0"(NUMBER) \
+    : "memory");                      \
+    retval; \
+})//Â§ßÊã¨Âè∑Ë°®ËææÂºèËøîÂõûÂÄº‰∏∫ÊúÄÂêé‰∏Ä‰∏™Ë°®ËææÂºèÁöÑÂÄº 
+
+#define _syscall1(NUMBER, ARG1)     \
+({                                   \
+    int retval;                     \
+    asm volatile("int $0x80"     \
+    : "=a"(retval)  \
+    : "0"(NUMBER), "b"(ARG1)    \
+    : "memory");                 \
+    retval;                     \
 })
 
-/* “ª∏ˆ≤Œ ˝µƒœµÕ≥µ˜”√ */
-#define _syscall1(NUMBER, ARG1) ({			       \
-   int retval;					               \
-   asm volatile (					       \
-   "int $0x80"						       \
-   : "=a" (retval)					       \
-   : "a" (NUMBER), "b" (ARG1)				       \
-   : "memory"						       \
-   );							       \
-   retval;						       \
+#define _syscall2(NUMBER, ARG1, ARG2)     \
+({                                   \
+    int retval;                     \
+    asm volatile("int $0x80"      \
+    : "=a"(retval) \
+    : "0"(NUMBER), "b"(ARG1), "c"(ARG2) \
+    : "memory");                       \
+    retval; \
 })
 
-/* ¡Ω∏ˆ≤Œ ˝µƒœµÕ≥µ˜”√ */
-#define _syscall2(NUMBER, ARG1, ARG2) ({		       \
-   int retval;						       \
-   asm volatile (					       \
-   "int $0x80"						       \
-   : "=a" (retval)					       \
-   : "a" (NUMBER), "b" (ARG1), "c" (ARG2)		       \
-   : "memory"						       \
-   );							       \
-   retval;						       \
+#define _syscall3(NUMBER, ARG1, ARG2, ARG3)     \
+({                                   \
+    int retval;                     \
+    asm volatile("int $0x80"     \
+    : "=a"(retval) \
+    : "0"(NUMBER), "b"(ARG1), "c"(ARG2), "d"(ARG3) \
+    : "memory");                       \
+    retval;     \
 })
 
-/* »˝∏ˆ≤Œ ˝µƒœµÕ≥µ˜”√ */
-#define _syscall3(NUMBER, ARG1, ARG2, ARG3) ({		       \
-   int retval;						       \
-   asm volatile (					       \
-      "int $0x80"					       \
-      : "=a" (retval)					       \
-      : "a" (NUMBER), "b" (ARG1), "c" (ARG2), "d" (ARG3)       \
-      : "memory"					       \
-   );							       \
-   retval;						       \
-})
-
-uint32_t getpid() {
+uint32_t getpid(void) {
     return _syscall0(SYS_GETPID);
 }
