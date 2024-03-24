@@ -6,10 +6,10 @@
 #include "memory.h"
 
 typedef void thread_func(void*);
+typedef int16_t pid_t;
 
 struct list thread_ready_list;
 struct list thread_all_list;
-struct task_struct* main_thread;
 
 //定义线程状态
 enum task_status {
@@ -61,6 +61,7 @@ struct thread_stack {
 
 struct task_struct {
     uint32_t* self_kstack;//线程栈
+    pid_t pid;
     enum task_status status;
     char name[16];
     uint8_t priority;
