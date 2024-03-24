@@ -4,6 +4,9 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+ARG1	lib/user/syscall.c	/^    : [number]"i"(NUMBER), [arg0]"b"(ARG1), [arg1]"c"(ARG2), [arg2]"d"(ARG3) \\$/;"	v
+ARG2	lib/user/syscall.c	/^    : [number]"i"(NUMBER), [arg0]"b"(ARG1), [arg1]"c"(ARG2), [arg2]"d"(ARG3) \\$/;"	v
+ARG3	lib/user/syscall.c	/^    : [number]"i"(NUMBER), [arg0]"b"(ARG1), [arg1]"c"(ARG2), [arg2]"d"(ARG3) \\$/;"	v
 AS	makefile	/^AS = nasm$/;"	m
 ASBINLIB	makefile	/^ASBINLIB = -I boot\/include\/$/;"	m
 ASFLAGS	makefile	/^ASFLAGS = -f elf$/;"	m
@@ -69,6 +72,7 @@ LDFLAGS	makefile	/^LDFLAGS = -melf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUI
 LIBS	makefile	/^LIBS = -I lib\/ -I lib\/kernel\/ -I lib\/user\/ -I device\/ -I kernel\/ -I thread\/ -I userprog\/$/;"	m
 MEM_BITMAP_BASE	kernel/memory.c	14;"	d	file:
 NULL	kernel/global.h	69;"	d
+NUMBER	lib/user/syscall.c	/^    : [number]"i"(NUMBER), [arg0]"b"(ARG1), [arg1]"c"(ARG2), [arg2]"d"(ARG3) \\$/;"	v
 OBJS	makefile	/^OBJS = $(BUILD_DIR)\/main.o $(BUILD_DIR)\/init.o $(BUILD_DIR)\/interrupt.o \\$/;"	m
 PANIC	kernel/debug.h	6;"	d
 PDE_IDX	kernel/memory.c	20;"	d	file:
@@ -196,7 +200,8 @@ __USERPROG_TSS_H	userprog/tss.h	2;"	d
 _syscall0	lib/user/syscall.c	3;"	d	file:
 _syscall1	lib/user/syscall.c	13;"	d	file:
 _syscall2	lib/user/syscall.c	23;"	d	file:
-_syscall3	lib/user/syscall.c	33;"	d	file:
+_syscall3	lib/user/syscall.c	34;"	d	file:
+_syscall3	lib/user/syscall.c	44;"	d	file:
 addr_v2p	kernel/memory.c	/^uint32_t addr_v2p(uint32_t vaddr)$/;"	f
 all_list_tag	thread/thread.h	/^    struct list_elem all_list_tag;\/\/线程队列$/;"	m	struct:task_struct	typeref:struct:task_struct::list_elem
 allocate_pid	thread/thread.c	/^static pid_t allocate_pid(void)$/;"	f	file:
@@ -314,7 +319,6 @@ general_tag	thread/thread.h	/^    struct list_elem general_tag;\/\/一般队列$
 get_a_page	kernel/memory.c	/^void* get_a_page(enum pool_flags pf, uint32_t vaddr)$/;"	f
 get_kernel_pages	kernel/memory.c	/^void* get_kernel_pages(uint32_t pg_cnt)$/;"	f
 get_user_pages	kernel/memory.c	/^void* get_user_pages(uint32_t pg_cnt)$/;"	f
-getpid	lib/user/syscall.c	/^uint32_t getpid(void) {$/;"	f
 global	kernel/kernel.s	/^global intr_entry_table$/;"	l
 global	kernel/kernel.s	/^global intr_exit$/;"	l
 global	kernel/kernel.s	/^global syscall_handler$/;"	l

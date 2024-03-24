@@ -106,7 +106,6 @@ VECTOR 0x2f,ZERO    ;保留
 extern syscall_table
 section .text
 global syscall_handler
-
 syscall_handler:
     push 0
     push ds
@@ -126,3 +125,28 @@ syscall_handler:
 
     mov [esp + 8 * 4], eax
     jmp intr_exit
+
+; syscall_handler:
+;     push 0
+;     push ds
+;     push es
+;     push fs
+;     push gs
+;     pushad
+
+;     push 0x80
+
+;     ;获取3级esp
+;     mov ebx, [esp + 4 + 48 + 4 + 12]
+
+;     ;取出参数
+;     push dword [ebx + 12];第3个参数
+;     push dword [ebx + 8];第2个参数
+;     push dword [ebx + 4];第1个参数
+;     mov edx, [ebx]
+
+;     call [syscall_table + edx * 4]
+;     add esp, 12     ;跨过参数
+
+;     mov [esp + 8 * 4], eax
+;     jmp intr_exit
