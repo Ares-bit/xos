@@ -33,7 +33,7 @@ int main(void) {
     console_put_int(sys_getpid());
     console_put_char('\n');
     thread_start("consumer_a", 31, k_thread_a, "argA");
-    thread_start("consumer_b", 31, k_thread_b, "argB");   
+    thread_start("consumer_b", 31, k_thread_b, "argB");
 
     while (1);// {
         //console_put_str("Main ");
@@ -72,7 +72,8 @@ void k_thread_b(void* arg) {
 
 void u_prog_a(void) {
     //prog_a_pid = getpid();
-    printf(" prog_a_pid:0x%x\n", getpid());
+    char* name = "prog_a";
+    printf("I am %s, my pid:%d%c\n", name, getpid(), '\n');
     while(1) {
         //test_var_a++;
     }
@@ -80,7 +81,8 @@ void u_prog_a(void) {
 
 void u_prog_b(void) {
     //prog_b_pid = getpid();
-    printf(" prog_b_pid:0x%x\n", getpid());
+    char* name = "prog_b";
+    printf("I am %s, my pid:%d%c\n", name, getpid(), '\n');
     while(1) {
         //test_var_b++;
     }

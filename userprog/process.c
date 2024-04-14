@@ -71,7 +71,7 @@ static uint32_t* create_page_dir(void)
         return NULL;
     }
 
-    //此时仍是内核再运行，故0xfffff000虚拟地址会找到内核页目录表的物理地址
+    //此时仍是内核再运行 故0xfffff000虚拟地址会找到内核页目录表的物理地址
     memcpy((uint32_t*)((uint32_t)page_dir_vaddr + 0x300 * 4), \
         (uint32_t*)(0xfffff000 + 0x300 * 4), 1024);
 
