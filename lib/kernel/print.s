@@ -112,8 +112,8 @@ put_char:
 .roll_screen:
     cld
     mov ecx,960
-    mov esi,0xb80a0
-    mov edi,0xb8000
+    mov esi, 0xc00b80a0
+    mov edi, 0xc00b8000
     rep movsd
 
     ;最后一行清空
@@ -168,11 +168,11 @@ put_int:
     and edx,0x0000000f
 
     cmp edx,9
-    jg .isA2F
+    jg .is_A2F
     add edx,'0'
     jmp .store
 
-.isA2F:
+.is_A2F:
     sub edx,10
     add edx,'A'
 
