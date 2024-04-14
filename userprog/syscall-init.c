@@ -14,7 +14,7 @@ uint32_t sys_getpid(void) {
     return running_thread()->pid;
 }
 
-uint32_t write(char* str) {
+uint32_t sys_write(char* str) {
     console_put_str(str);
     return strlen(str);
 }
