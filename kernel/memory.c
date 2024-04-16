@@ -32,6 +32,14 @@ struct pool kernel_pool, user_pool;
 
 struct virtual_addr kernel_vaddr;//内核虚拟内存池
 
+struct arena {
+    struct mem_block_desc *desc;
+    uint32_t cnt;
+    bool large;//large == true时cnt表示页框数，否则表示空闲mem_block数
+};
+
+struct mem_block_desc k_block_descs[DESC_CNT];
+
 //在pf池中申请pg_cnt个虚拟页
 static void* vaddr_get(enum pool_flags pf, uint32_t pg_cnt)
 {
@@ -273,9 +281,22 @@ static void mem_pool_init(uint32_t all_mem) {
     put_str("mem_init done\n");
 }
 
+//初始化7种描述符
+void block_desc_init(struct mem_block_desc* desc_array)
+{
+    uint16_t desc_idx, block_size = 16;
+    for (desc_idx = 0; desc_idx < DESC_CNT; desc_idx++) {
+        desc_array[desc_idx].block_size = block_size;
+        desc_array[desc_idx].blocks_per_arena = (PG_SIZE - sizeof(struct arena)) / block_size;
+        list_init(&desc_array[desc_idx].free_list);
+        block_size *= 2;
+    }
+}
+
 void mem_init() {
     put_str("mem_init start\n");
-    uint32_t mem_bytes_total = *(uint32_t*)(0xb00);
+    uint32_t mem_bytes_total = *(uint32_t*)(0xb00);//之前boot存在这个地址里的
     mem_pool_init(mem_bytes_total);
+    block_desc_init(k_block_descs);
     put_str("mem_init done\n");
 }

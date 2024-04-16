@@ -25,8 +25,21 @@ enum pool_flags {
 
 extern struct pool kernel_pool, user_pool;
 
-void mem_init(void);
+//内存块，使每个arena指向描述符
+struct mem_block {
+    struct list_elem free_elem;
+};
 
+//内存块描述符
+struct mem_block_desc {
+    uint32_t block_size;
+    uint32_t blocks_per_arena;
+    struct list free_list;//双向链表把mem_block穿起来
+};
+
+#define DESC_CNT 7
+
+void mem_init(void);
 void* get_kernel_pages(uint32_t pg_cnt);
 uint32_t addr_v2p(uint32_t vaddr);
 void* get_a_page(enum pool_flags pf, uint32_t vaddr);
