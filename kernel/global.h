@@ -67,6 +67,7 @@
 #define EFLAGS_IOPL_0   0
 
 #define NULL ((void*)0)
+//等于(x-1)/step + 1向上取整了
 #define DIV_ROUND_UP(X, STEP)   ((X + STEP - 1) / (STEP))
 #define bool int
 #define true 1
