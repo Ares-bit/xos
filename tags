@@ -24,6 +24,7 @@ COUNTER0_VALUE	device/timer.c	11;"	d	file:
 DATA_DESC	boot/loader.s	/^DATA_DESC:$/;"	l
 DEFAULT_PRIO	userprog/process.h	5;"	d
 DESC_AVL	kernel/global.h	41;"	d
+DESC_CNT	kernel/memory.h	41;"	d
 DESC_DPL_0	kernel/global.h	43;"	d
 DESC_DPL_1	kernel/global.h	44;"	d
 DESC_DPL_2	kernel/global.h	45;"	d
@@ -38,7 +39,7 @@ DESC_S_SYS	kernel/global.h	49;"	d
 DESC_TYPE_CODE	kernel/global.h	50;"	d
 DESC_TYPE_DATA	kernel/global.h	51;"	d
 DESC_TYPE_TSS	kernel/global.h	52;"	d
-DIV_ROUND_UP	kernel/global.h	70;"	d
+DIV_ROUND_UP	kernel/global.h	71;"	d
 EFLAGS_IF	kernel/interrupt.c	14;"	d	file:
 EFLAGS_IF_0	kernel/global.h	65;"	d
 EFLAGS_IF_1	kernel/global.h	64;"	d
@@ -66,34 +67,34 @@ INTR_OFF	kernel/interrupt.h	/^    INTR_OFF,$/;"	e	enum:intr_status
 INTR_ON	kernel/interrupt.h	/^    INTR_ON$/;"	e	enum:intr_status
 IRQ0_FREQUENCY	device/timer.c	9;"	d	file:
 KBD_BUF_PORT	device/keyboard.c	9;"	d	file:
-K_HEAP_START	kernel/memory.c	17;"	d	file:
+K_HEAP_START	kernel/memory.c	18;"	d	file:
 LD	makefile	/^LD = ld$/;"	m
 LDFLAGS	makefile	/^LDFLAGS = -melf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)\/kernel.map$/;"	m
 LIBS	makefile	/^LIBS = -I lib\/ -I lib\/kernel\/ -I lib\/user\/ -I device\/ -I kernel\/ -I thread\/ -I userprog\/$/;"	m
-MEM_BITMAP_BASE	kernel/memory.c	14;"	d	file:
+MEM_BITMAP_BASE	kernel/memory.c	15;"	d	file:
 NULL	kernel/global.h	69;"	d
 NUMBER	lib/user/syscall.c	/^    : [number]"i"(NUMBER), [arg0]"b"(ARG1), [arg1]"c"(ARG2), [arg2]"d"(ARG3) \\$/;"	v
 OBJS	makefile	/^OBJS = $(BUILD_DIR)\/main.o $(BUILD_DIR)\/init.o $(BUILD_DIR)\/interrupt.o \\$/;"	m
 PANIC	kernel/debug.h	6;"	d
-PDE_IDX	kernel/memory.c	20;"	d	file:
+PDE_IDX	kernel/memory.c	21;"	d	file:
 PF_KERNEL	kernel/memory.h	/^    PF_KERNEL = 1,$/;"	e	enum:pool_flags
 PF_USER	kernel/memory.h	/^    PF_USER = 2$/;"	e	enum:pool_flags
-PG_P_0	kernel/memory.h	20;"	d
-PG_P_1	kernel/memory.h	19;"	d
-PG_RW_R	kernel/memory.h	21;"	d
-PG_RW_W	kernel/memory.h	22;"	d
-PG_SIZE	kernel/global.h	75;"	d
-PG_SIZE	kernel/memory.c	11;"	d	file:
+PG_P_0	kernel/memory.h	21;"	d
+PG_P_1	kernel/memory.h	20;"	d
+PG_RW_R	kernel/memory.h	22;"	d
+PG_RW_W	kernel/memory.h	23;"	d
+PG_SIZE	kernel/global.h	76;"	d
+PG_SIZE	kernel/memory.c	12;"	d	file:
 PG_SIZE	thread/thread.c	12;"	d	file:
 PG_SIZE	userprog/tss.c	8;"	d	file:
-PG_US_S	kernel/memory.h	23;"	d
-PG_US_U	kernel/memory.h	24;"	d
+PG_US_S	kernel/memory.h	24;"	d
+PG_US_U	kernel/memory.h	25;"	d
 PIC_M_CTRL	kernel/interrupt.c	7;"	d	file:
 PIC_M_DATA	kernel/interrupt.c	8;"	d	file:
 PIC_S_CTRL	kernel/interrupt.c	9;"	d	file:
 PIC_S_DATA	kernel/interrupt.c	10;"	d	file:
 PIT_CONTROL_PORT	device/timer.c	16;"	d	file:
-PTE_IDX	kernel/memory.c	21;"	d	file:
+PTE_IDX	kernel/memory.c	22;"	d	file:
 READ_WRITE_LATCH	device/timer.c	15;"	d	file:
 RPL0	kernel/global.h	6;"	d
 RPL1	kernel/global.h	7;"	d
@@ -215,6 +216,8 @@ alt_r_make	device/keyboard.c	32;"	d	file:
 alt_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
 ards_buf	boot/loader.s	/^ards_buf times 244 db 0$/;"	l
 ards_nr	boot/loader.s	/^ards_nr dw 0$/;"	d
+arena	kernel/memory.c	/^struct arena {$/;"	s	file:
+arena2block	kernel/memory.c	/^static struct mem_block* arena2block(struct arena* a, uint32_t idx)$/;"	f	file:
 attr_low_byte	kernel/global.h	/^    uint8_t attr_low_byte;$/;"	m	struct:gdt_desc
 attribute	kernel/interrupt.c	/^    uint8_t     attribute;\/\/门描述符P+DPL+S+TYPE共8位$/;"	m	struct:gate_desc	file:
 backlink	userprog/tss.c	/^    uint32_t backlink;$/;"	m	struct:tss	file:
@@ -228,7 +231,11 @@ bitmap_scan	lib/kernel/bitmap.c	/^int bitmap_scan(struct bitmap* btmp, uint32_t 
 bitmap_scan_test	lib/kernel/bitmap.c	/^bool bitmap_scan_test(struct bitmap* btmp, uint32_t bit_idx)$/;"	f
 bitmap_set	lib/kernel/bitmap.c	/^void bitmap_set(struct bitmap* btmp, uint32_t bit_idx, int8_t value)$/;"	f
 bits	lib/kernel/bitmap.h	/^    uint8_t* bits;\/\/位图首地址$/;"	m	struct:bitmap
-bool	kernel/global.h	71;"	d
+block2arena	kernel/memory.c	/^static struct arena* block2arena(struct mem_block* b)$/;"	f	file:
+block_desc_init	kernel/memory.c	/^void block_desc_init(struct mem_block_desc* desc_array)$/;"	f
+block_size	kernel/memory.h	/^    uint32_t block_size;$/;"	m	struct:mem_block_desc
+blocks_per_arena	kernel/memory.h	/^    uint32_t blocks_per_arena;$/;"	m	struct:mem_block_desc
+bool	kernel/global.h	72;"	d
 btmp_bytes_len	lib/kernel/bitmap.h	/^    uint32_t btmp_bytes_len;\/\/bitmap以字节为单位$/;"	m	struct:bitmap
 buf	device/ioqueue.h	/^    char buf[bufsize];$/;"	m	struct:ioqueue
 bufsize	device/ioqueue.h	7;"	d
@@ -236,6 +243,7 @@ caps_lock_char	device/keyboard.c	26;"	d	file:
 caps_lock_make	device/keyboard.c	37;"	d	file:
 caps_lock_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
 char_invisible	device/keyboard.c	19;"	d	file:
+cnt	kernel/memory.c	/^    uint32_t cnt;$/;"	m	struct:arena	file:
 console_acquire	device/console.c	/^void console_acquire()$/;"	f
 console_init	device/console.c	/^void console_init()$/;"	f
 console_lock	device/console.c	/^static struct lock console_lock;$/;"	v	typeref:struct:lock	file:
@@ -257,6 +265,7 @@ ctrl_r_make	device/keyboard.c	35;"	d	file:
 ctrl_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
 dcount	kernel/interrupt.c	/^    uint8_t     dcount;\/\/门描述符高32位的低8位 固定全0$/;"	m	struct:gate_desc	file:
 delete	device/keyboard.c	16;"	d	file:
+desc	kernel/memory.c	/^    struct mem_block_desc *desc;$/;"	m	struct:arena	typeref:struct:arena::mem_block_desc	file:
 ds	thread/thread.h	/^    uint32_t ds;$/;"	m	struct:intr_stack
 ds	userprog/tss.c	/^    uint32_t ds;$/;"	m	struct:tss	file:
 eax	thread/thread.h	/^    uint32_t eax;$/;"	m	struct:intr_stack
@@ -304,7 +313,9 @@ extern	kernel/kernel.s	/^extern put_str$/;"	l
 extern	kernel/kernel.s	/^extern syscall_table$/;"	l
 f	makefile	/^	dd if=$(BUILD_DIR)\/kernel.bin \\$/;"	m
 f	makefile	/^	dd if=$(BUILD_DIR)\/loader.bin of=\/home\/xuxingyuan\/bochs\/hd60M.img \\$/;"	m
-false	kernel/global.h	73;"	d
+false	kernel/global.h	74;"	d
+free_elem	kernel/memory.h	/^    struct list_elem free_elem;$/;"	m	struct:mem_block	typeref:struct:mem_block::list_elem
+free_list	kernel/memory.h	/^    struct list free_list;\/\/双向链表把mem_block穿起来$/;"	m	struct:mem_block_desc	typeref:struct:mem_block_desc::list
 frequency_set	device/timer.c	/^static void frequency_set(uint8_t counter_port, uint8_t counter_no, uint8_t rwl,$/;"	f	file:
 fs	thread/thread.h	/^    uint32_t fs;$/;"	m	struct:intr_stack
 fs	userprog/tss.c	/^    uint32_t fs;$/;"	m	struct:tss	file:
@@ -370,6 +381,7 @@ ioq_wakeup	device/ioqueue.c	/^static void ioq_wakeup(struct task_struct** waiter
 ioqueue	device/ioqueue.h	/^struct ioqueue {$/;"	s
 ioqueue_init	device/ioqueue.c	/^void ioqueue_init(struct ioqueue* ioq)$/;"	f
 itoa	lib/stdio.c	/^static void itoa(uint32_t value, char** buf_ptr_addr, uint8_t base)$/;"	f	file:
+k_block_descs	kernel/memory.c	/^struct mem_block_desc k_block_descs[DESC_CNT];$/;"	v	typeref:struct:mem_block_desc
 k_thread_a	kernel/main.c	/^void k_thread_a(void* arg) {$/;"	f
 k_thread_b	kernel/main.c	/^void k_thread_b(void* arg) {$/;"	f
 kbd_buf	device/keyboard.c	/^struct ioqueue kbd_buf;$/;"	v	typeref:struct:ioqueue
@@ -379,6 +391,7 @@ kernel_thread	thread/thread.c	/^static void kernel_thread(thread_func function, 
 kernel_vaddr	kernel/memory.c	/^struct virtual_addr kernel_vaddr;\/\/内核虚拟内存池$/;"	v	typeref:struct:virtual_addr
 keyboard_init	device/keyboard.c	/^void keyboard_init()$/;"	f
 keymap	device/keyboard.c	/^static char keymap[][2] = {$/;"	v	file:
+large	kernel/memory.c	/^    bool large;\/\/large == true时cnt表示页框数，否则表示空闲mem_block数$/;"	m	struct:arena	file:
 ldt	userprog/tss.c	/^    uint32_t ldt;$/;"	m	struct:tss	file:
 limit_high_attr_high	kernel/global.h	/^    uint8_t limit_high_attr_high;$/;"	m	struct:gdt_desc
 limit_low_word	kernel/global.h	/^    uint16_t limit_low_word;$/;"	m	struct:gdt_desc
@@ -406,6 +419,8 @@ make_gdt_desc	userprog/tss.c	/^static struct gdt_desc make_gdt_desc(uint32_t* de
 make_idt_desc	kernel/interrupt.c	/^static void make_idt_desc(struct gate_desc* p_gdesc, uint8_t attr, intr_handler function_offset)$/;"	f	file:
 make_main_thread	thread/thread.c	/^static void make_main_thread(void)$/;"	f	file:
 malloc_page	kernel/memory.c	/^void* malloc_page(enum pool_flags pf, uint32_t pg_cnt)$/;"	f
+mem_block	kernel/memory.h	/^struct mem_block {$/;"	s
+mem_block_desc	kernel/memory.h	/^struct mem_block_desc {$/;"	s
 mem_cpy	boot/loader.s	/^mem_cpy:$/;"	l
 mem_init	kernel/memory.c	/^void mem_init() {$/;"	f
 mem_pool_init	kernel/memory.c	/^static void mem_pool_init(uint32_t all_mem) {$/;"	f	file:
@@ -494,6 +509,7 @@ strlen	lib/string.c	/^uint32_t strlen(const char* str)$/;"	f
 strrchr	lib/string.c	/^char* strrchr(const char* str, const uint8_t ch)$/;"	f
 switch_to	thread/switch.s	/^switch_to:$/;"	l
 sys_getpid	userprog/syscall-init.c	/^uint32_t sys_getpid(void) {$/;"	f
+sys_malloc	kernel/memory.c	/^void* sys_malloc(uint32_t size)$/;"	f
 sys_write	userprog/syscall-init.c	/^uint32_t sys_write(char* str) {$/;"	f
 syscall	userprog/syscall-init.c	/^typedef void* syscall;$/;"	t	file:
 syscall_handler	kernel/kernel.s	/^syscall_handler:$/;"	l
@@ -521,10 +537,11 @@ timer_init	device/timer.c	/^void timer_init() {$/;"	f
 times	boot/loader.s	/^times 60 dq 0$/;"	l
 total_mem_bytes	boot/loader.s	/^total_mem_bytes dd 0$/;"	d
 trace	userprog/tss.c	/^    uint16_t trace;\/\/我感觉这玩意应该是16位的$/;"	m	struct:tss	file:
-true	kernel/global.h	72;"	d
+true	kernel/global.h	73;"	d
 tss	userprog/tss.c	/^static struct tss tss;$/;"	v	typeref:struct:tss	file:
 tss	userprog/tss.c	/^struct tss {$/;"	s	file:
 tss_init	userprog/tss.c	/^void tss_init() {$/;"	f
+u_block_descs	thread/thread.h	/^    struct mem_block_desc u_block_descs[DESC_CNT];\/\/用户进程自己的内存块描述符$/;"	m	struct:task_struct	typeref:struct:task_struct::mem_block_desc
 u_prog_a	kernel/main.c	/^void u_prog_a(void) {$/;"	f
 u_prog_b	kernel/main.c	/^void u_prog_b(void) {$/;"	f
 uint16_t	lib/stdint.h	/^typedef unsigned short int uint16_t;$/;"	t

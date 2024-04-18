@@ -7,6 +7,7 @@
 #include "global.h"
 #include "thread.h"
 #include "sync.h"
+#include "interrupt.h"
 
 #define PG_SIZE 4096
 
@@ -386,14 +387,55 @@ void* sys_malloc(uint32_t size)
 
         //开始分配内存块
         b = elem2entry(struct mem_block, free_elem, list_pop(&(descs[desc_idx].free_list)));
-        memset(b, 0, dess[desc_idx].block_size);
+        memset(b, 0, descs[desc_idx].block_size);
         a = block2arena(b);
         a->cnt--;
-        lock_release(&mem_pool.lock);
+        lock_release(&mem_pool->lock);
         return (void*)b;
     }
 }
 
+//将物理地址回收到物理内存池
+void pfree(uint32_t pg_phy_addr)
+{
+    struct pool* mem_pool;
+    uint32_t bit_idx = 0;
+    if (pg_phy_addr >= user_pool.phy_addr_start) {
+        mem_pool = &user_pool;
+        bit_idx = (pg_phy_addr - user_pool.phy_addr_start) / PG_SIZE;
+    } else {
+        mem_pool = &kernel_pool;
+        bit_idx = (pg_phy_addr - kernel_pool.phy_addr_start) / PG_SIZE;
+    }
+    bitmap_set(&mem_pool->pool_bitmap, bit_idx, 0);
+}
+
+//解除页表中的映射
+static void page_table_pte_remove(uint32_t vaddr)
+{
+    uint32_t* pte = pte_ptr(vaddr);
+    *pte &= ~PG_P_1;
+    //刷TLB
+    asm volatile("invlpg %0" : : "m"(vaddr) : "memory");
+}
+
+static void vaddr_remove(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt)
+{
+    uint32_t bit_idx_start = 0, vaddr = (int32_t)_vaddrm, cnt = 0;
+
+    if (pf == PF_KERNEL) {
+        bit_idx_start = (vaddr - kernel_vaddr.vaddr_start) / PG_SIZE;
+        while (cnt < pg_cnt) {
+            bitmap_set(&kernel_vaddr.vaddr_bitmap, bit_idx_start + cnt++, 0);
+        }
+    } else {
+        struct task_struct* cur_thread = running_thread();
+        bit_idx_start = (vaddr - cur_thread->userprog_vaddr.vaddr_start) / PG_SIZE;
+        while (cnt < pg_cnt) {
+            bitmap_set(&cur_thread->userprog_vaddr.vaddr_bitmap, bit_idx_start + cnt++, 0);
+        }
+    }
+}
 
 void mem_init() {
     put_str("mem_init start\n");

@@ -58,7 +58,7 @@ $(BUILD_DIR)/string.o: lib/string.c lib/string.h kernel/global.h kernel/debug.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/memory.o: kernel/memory.c kernel/memory.h lib/stdint.h \
-	lib/kernel/print.h thread/sync.h
+	lib/kernel/print.h thread/sync.h kernel/interrupt.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/thread.o: thread/thread.c thread/thread.h lib/stdint.h lib/string.h \

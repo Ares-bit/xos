@@ -44,8 +44,11 @@ int main(void) {
 
 void k_thread_a(void* arg) {
     char* para = arg;
-    console_put_str("thread_a_pid:0x");
-    console_put_int(sys_getpid());
+    //console_put_str("thread_a_pid:0x");
+    //console_put_int(sys_getpid());
+    void* addr = sys_malloc(33);
+    console_put_str("I am thread_b, sys_malloc(33), addr is 0x");
+    console_put_int((int)addr);
     console_put_char('\n');
     // console_put_str("prog_a_pid:0x");
     // console_put_int(prog_a_pid);
@@ -58,8 +61,11 @@ void k_thread_a(void* arg) {
 
 void k_thread_b(void* arg) {
     char* para = arg;
-    console_put_str("thread_b_pid:0x");
-    console_put_int(sys_getpid());
+    //console_put_str("thread_b_pid:0x");
+    //console_put_int(sys_getpid());
+    void* addr = sys_malloc(63);
+    console_put_str("I am thread_b, sys_malloc(63), addr is 0x");
+    console_put_int((int)addr);    
     console_put_char('\n');
     // console_put_str("prog_b_pid:0x");
     // console_put_int(prog_b_pid);

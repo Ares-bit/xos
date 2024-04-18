@@ -2,6 +2,7 @@
 #define __KERNEL_MEMORY_H
 #include "stdint.h"
 #include "bitmap.h"
+#include "list.h"
 //虚拟地址池
 struct virtual_addr {
     struct bitmap vaddr_bitmap;//虚拟内存位图
