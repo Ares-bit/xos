@@ -437,6 +437,43 @@ static void vaddr_remove(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt)
     }
 }
 
+void mfree_page(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt)
+{
+    uint32_t pg_phy_addr;
+    uint32_t vaddr = (int32_t)_vaddr, page_cnt = 0;
+    ASSERT(pg_cnt >=1 && vaddr % PG_SIZE == 0);
+    //获取虚拟地址对应的物理地址
+    pg_phy_addr = addr_v2p(vaddr);
+    //确保释放的物理内存在低端1M+1KB页目录+1KB页表范围外
+    ASSERT((pg_phy_addr % PG_SIZE) == 0 && pg_phy_addr >= 0x102000);
+    if (pg_phy_addr >= user_pool.phy_addr_start) {
+        vaddr -= PG_SIZE;
+        //把vaddr起始连续pg_cnt个虚拟页都处理了
+        while (page_cnt < pg_cnt) {
+            vaddr += PG_SIZE;
+            pg_phy_addr = addr_v2p(vaddr);
+            ASSERT((pg_phy_addr % PG_SIZE) == 0 && pg_phy_addr >= user_pool.phy_addr_start);
+            pfree(pg_phy_addr);
+            page_table_pte_remove(vaddr);
+            page_cnt++;
+        }
+        vaddr_remove(pf, _vaddr, pg_cnt);
+    } else {
+        vaddr -= PG_SIZE;
+        //把vaddr起始连续pg_cnt个虚拟页都处理了
+        while (page_cnt < pg_cnt) {
+            vaddr += PG_SIZE;
+            pg_phy_addr = addr_v2p(vaddr);
+            ASSERT((pg_phy_addr % PG_SIZE) == 0 && pg_phy_addr <= user_pool.phy_addr_start \
+                                                && pg_phy_addr >= kernel_pool.phy_addr_start);
+            pfree(pg_phy_addr);
+            page_table_pte_remove(vaddr);
+            page_cnt++;
+        }
+        vaddr_remove(pf, _vaddr, pg_cnt);       
+    }
+}
+
 void mem_init() {
     put_str("mem_init start\n");
     uint32_t mem_bytes_total = *(uint32_t*)(0xb00);//之前boot存在这个地址里的
