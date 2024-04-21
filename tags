@@ -114,8 +114,10 @@ SELECTOR_U_STACK	kernel/global.h	25;"	d
 SELECTOR_VIDEO	boot/loader.s	/^SELECTOR_VIDEO equ (0x0003<<3) + TI_GDT + RPL0$/;"	d
 SELECTOR_VIDEO	lib/kernel/print.s	/^SELECTOR_VIDEO equ (0x0003 << 3) + TI_GDT + RPL0$/;"	d
 SYSCALL_NR	lib/user/syscall.h	/^enum SYSCALL_NR {$/;"	g
+SYS_FREE	lib/user/syscall.h	/^    SYS_FREE$/;"	e	enum:SYSCALL_NR
 SYS_GETPID	lib/user/syscall.h	/^    SYS_GETPID,$/;"	e	enum:SYSCALL_NR
-SYS_WRITE	lib/user/syscall.h	/^    SYS_WRITE$/;"	e	enum:SYSCALL_NR
+SYS_MALLOC	lib/user/syscall.h	/^    SYS_MALLOC,$/;"	e	enum:SYSCALL_NR
+SYS_WRITE	lib/user/syscall.h	/^    SYS_WRITE,$/;"	e	enum:SYSCALL_NR
 TASK_BLOCKED	thread/thread.h	/^    TASK_BLOCKED,$/;"	e	enum:task_status
 TASK_DIED	thread/thread.h	/^    TASK_DIED$/;"	e	enum:task_status
 TASK_HANGING	thread/thread.h	/^    TASK_HANGING,$/;"	e	enum:task_status
@@ -518,7 +520,7 @@ sys_write	userprog/syscall-init.c	/^uint32_t sys_write(char* str) {$/;"	f
 syscall	userprog/syscall-init.c	/^typedef void* syscall;$/;"	t	file:
 syscall_handler	kernel/kernel.s	/^syscall_handler:$/;"	l
 syscall_init	userprog/syscall-init.c	/^void syscall_init(void) {$/;"	f
-syscall_nr	userprog/syscall-init.c	9;"	d	file:
+syscall_nr	userprog/syscall-init.c	10;"	d	file:
 syscall_table	userprog/syscall-init.c	/^syscall syscall_table[syscall_nr];$/;"	v
 tab	device/keyboard.c	14;"	d	file:
 tail	device/ioqueue.h	/^    int32_t tail;\/\/队尾指针 数组下标$/;"	m	struct:ioqueue
