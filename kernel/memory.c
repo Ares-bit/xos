@@ -421,7 +421,7 @@ static void page_table_pte_remove(uint32_t vaddr)
 
 static void vaddr_remove(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt)
 {
-    uint32_t bit_idx_start = 0, vaddr = (int32_t)_vaddrm, cnt = 0;
+    uint32_t bit_idx_start = 0, vaddr = (int32_t)_vaddr, cnt = 0;
 
     if (pf == PF_KERNEL) {
         bit_idx_start = (vaddr - kernel_vaddr.vaddr_start) / PG_SIZE;
@@ -471,6 +471,49 @@ void mfree_page(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt)
             page_cnt++;
         }
         vaddr_remove(pf, _vaddr, pg_cnt);       
+    }
+}
+
+void sys_free(void *ptr)
+{
+    ASSERT(ptr != NULL);
+    if (ptr != NULL) {
+        enum pool_flags PF;
+        struct pool* mem_pool;
+
+        if (running_thread()->pgdir == NULL) {
+            ASSERT((uint32_t)ptr >= K_HEAP_START);
+            PF = PF_KERNEL;
+            mem_pool = &kernel_pool;
+        } else {
+            PF = PF_USER;
+            mem_pool = &user_pool;
+        }
+
+        lock_acquire(&mem_pool->lock);
+        struct mem_block* b = ptr;
+        struct arena* a = block2arena(b);
+
+        ASSERT(a->large == 0 || a->large == 1);
+        if (a->desc == NULL && a->large == true) {
+            //如果里面只用了一块，要把整个arena都还了？
+            mfree_page(PF, a, a->cnt);
+        } else {
+            //将小块内存回收到描述符里
+            list_append(&a->desc->free_list, &b->free_elem);
+            //如果还回这块时arena已经没人用了就直接释放，这样效率岂不是很低？反复创建arena
+            if (++a->cnt == a->desc->blocks_per_arena) {
+                uint32_t block_idx;
+                for (block_idx = 0; block_idx < a->desc->blocks_per_arena; block_idx++) {
+                    struct mem_block* b = arena2block(a, block_idx);
+                    ASSERT(elem_find(&a->desc->free_list, &b->free_elem));
+                    //将所有block都摘下来，只需要操作前后指针即可，不用管在哪个链表上，其实就是free list
+                    list_remove(&b->free_elem);
+                }
+                mfree_page(PF, a, 1);
+            }
+        }
+        lock_release(&mem_pool->lock);
     }
 }
 

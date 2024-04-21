@@ -46,4 +46,5 @@ uint32_t addr_v2p(uint32_t vaddr);
 void* get_a_page(enum pool_flags pf, uint32_t vaddr);
 void* get_user_pages(uint32_t pg_cnt);
 void* sys_malloc(uint32_t size);
+void sys_free(void *ptr);
 #endif
