@@ -104,6 +104,10 @@ $(BUILD_DIR)/syscall-init.o: userprog/syscall-init.c thread/thread.h lib/stdint.
 $(BUILD_DIR)/stdio.o: lib/stdio.c lib/stdio.h kernel/global.h lib/user/syscall.h lib/stdint.h lib/string.h
 	$(CC) $(CFLAGS) $< -o $@
 
+$(BUILD_DIR)/stdio-kernel.o: lib/kernel/stdio-kernel.c lib/kernel/stdio-kernel.h kernel/global.h \
+	device/console.h lib/stdio.h
+	$(CC) $(CFLAGS) $< -o $@
+
 #汇编编译
 $(BUILD_DIR)/kernel.o: kernel/kernel.s
 	$(AS) $(ASFLAGS) $< -o $@

@@ -55,8 +55,8 @@ static void pic_init(void)
     outb(PIC_S_DATA, 0x01);//ICW4 8086模式 手动EOI
 
     //打开主片IR0 IR1 屏蔽主从其他所有中断 OCW1
-    outb(PIC_M_DATA, 0xfe);//开键盘+时钟
-    outb(PIC_S_DATA, 0xff);
+    outb(PIC_M_DATA, 0xf8);//开键盘+时钟+主片IRQ2以响应从片的从盘中断
+    outb(PIC_S_DATA, 0xbf);//打开从片IRQ14
 
     put_str("pic_init done\n");
 }
