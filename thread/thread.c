@@ -14,6 +14,7 @@
 static struct list_elem* thread_tag;
 struct task_struct* main_thread;
 struct lock pid_lock;
+struct task_struct* idle_thread;
 
 extern void switch_to(struct task_struct* cur, struct task_struct* next);
 
@@ -106,6 +107,15 @@ static void make_main_thread(void)
     list_append(&thread_all_list, &main_thread->all_list_tag);
 }
 
+static void idle(void* arg UNUESD)
+{
+    while(1) {
+        thread_block(TASK_BLOCKED);
+        //执行hlt时必须要保证目前处在开中断的情况下
+        asm volatile("sti; hlt" : : : "memory");
+    }
+}
+
 void schedule(void)
 {   
     //进调度后一定得是关中断状态
@@ -123,7 +133,13 @@ void schedule(void)
     }
 
     //如果就绪队列为空则报错
-    ASSERT(!list_empty(&thread_ready_list));
+    //ASSERT(!list_empty(&thread_ready_list));
+
+    //如果就绪队列中没有可运行的任务就唤醒idle
+    if (list_empty(&thread_ready_list)) {
+        thread_unblock(idle_thread);
+    }
+
     thread_tag = NULL;
     thread_tag = list_pop(&thread_ready_list);
     //通过next的tag找到PCB起始地址
@@ -136,7 +152,6 @@ void schedule(void)
     //保存cur 切换到next
     switch_to(cur, next);
 }
-
 
 void thread_block(enum task_status stat)
 {
@@ -164,6 +179,19 @@ void thread_unblock(struct task_struct* pthread)
     }
     intr_set_status(old_status);
 }
+
+//把当前线程挂到就绪队列 主动让出CPU 调度下一个线程上CPU
+void thread_yield()
+{
+    struct task_struct* cur = running_thread();
+    enum intr_status old_status = intr_disable();
+    ASSERT(!elem_find(&thread_ready_list, &cur->general_tag));
+    list_append(&thread_ready_list, &cur->general_tag);
+    cur->status = TASK_READY;
+    schedule();
+    intr_set_status(old_status);
+}
+
 void thread_init(void)
 {
     put_str("thread_init start\n");
@@ -171,5 +199,6 @@ void thread_init(void)
     list_init(&thread_all_list);
     lock_init(&pid_lock);
     make_main_thread();
+    idle_thread = thread_create("idle", 10, idle, NULL);
     put_str("thread_init done\n");
 }
