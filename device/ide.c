@@ -102,7 +102,7 @@ static void write2sector(struct disk* hd, void* buf, uint8_t sec_cnt)
     outsw(reg_data(hd->my_channel), buf, size_in_byte / 2);
 }
 
-//等待30s
+//等待硬盘30s
 static bool busy_wait(struct disk* hd)
 {
     struct ide_channel* channel = hd->my_channel;
