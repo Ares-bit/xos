@@ -3,6 +3,7 @@
 #include "stdio-kernel.h"
 #include "stdint.h"
 #include "global.h"
+#include "io.h"
 
 //定义硬盘寄存器端口号
 #define reg_data(channel)           (channel->port_base + 0)
@@ -33,11 +34,91 @@
 #define CMD_WRITE_SECTOR            0x10
 
 //定义可读写的最大LBA地址 调试专用
-#define max_lba                     (162 * 63 * 16 - 1)
+#define MAX_LBA                     (162 * 63 * 16 - 1)
 //((80 * 1024 * 1024 / 512) - 1)  //只支持80M硬盘163,839 实际应为162*63*16-1=163295
 
 uint8_t channel_cnt;//按硬盘数计算的通道数
 struct ide_channel channels[2];//有两个ide通道
+
+//选择读写的硬盘
+static void select_disk(struct disk* hd)
+{
+    uint8_t reg_device = BIT_DEV_MBS | BIT_DEV_LBA;
+    if (hd->dev_no) {
+        reg_device |= BIT_DEV_DEV;
+    }
+    //写reg dev寄存器高4位 reg dev的低4位没有看懂？
+    outb(reg_dev(hd->my_channel), reg_device);
+}
+
+//向硬盘控制器写入起始扇区地址及要读写的扇区数，一次最多读写256扇区
+static void select_sector(struct disk *hd, uint32_t lba, uint8_t sec_cnt)
+{
+    ASSERT(lba <= MAX_LBA);
+    struct ide_channel *channel = hd->my_channel;
+
+    //cnt = 0表示读写256个扇区 不是硬盘硬件的功能 得软件实现
+    outb(reg_sect_cnt(channel), sec_cnt);
+
+    //outb %b0,%wl自动用低8位
+    outb(reg_lba_l(channel), lba);
+    outb(reg_lba_m(channel), lba >> 8);
+    outb(reg_lba_h(channel), lba >> 16);
+
+    //lba第24-27位要写入device 0-3位
+    outb(reg_dev(channel), BIT_DEV_MBS | BIT_DEV_LBA | \
+        (hd->dev_no == 1 ? BIT_DEV_DEV : 0) | lba >> 24);
+}
+
+//向通道发命令
+static void cmd_out(struct ide_channel* channel, uint8_t cmd)
+{
+    //只要想通道发了命令 就将此位置1
+    channel->expecting_intr = true;
+    outb(reg_cmd(channel), cmd);
+}
+
+//从硬盘读取sec_cnt到buf
+static void read_from_sector(struct disk* hd, void* buf, uint8_t sec_cnt)
+{
+    uint32_t size_in_byte;
+    if (sec_cnt == 0) {
+        size_in_byte = 256 * 512;
+    } else {
+        size_in_byte = sec_cnt * 512;
+    }
+    insw(reg_data(hd->my_channel), buf, size_in_byte / 2);
+}
+
+//将buf中的sec_cnt数据写入硬盘
+static void write2sector(struct disk* hd, void* buf, uint8_t sec_cnt)
+{
+    uint32_t size_in_byte;
+    if (sec_cnt == 0) {
+        size_in_byte = 256 * 512;
+    } else {
+        size_in_byte = sec_cnt * 512;
+    }
+    outsw(reg_data(hd->my_channel), buf, size_in_byte / 2);
+}
+
+//等待30s
+static bool busy_wait(struct disk* hd)
+{
+    struct ide_channel* channel = hd->my_channel;
+    uint16_t time_limit = 30 * 1000;
+    //不能直接等30ms 中间还得获取硬盘状态 动作完成得随时出来
+    while (time_limit -= 10 >= 0) {
+        //读取alt status寄存器 如果是busy状态则继续休眠 否则返回drq位状态 以看数据是否准备好
+        if (!(inb(reg_status(channel)) & BIT_ALT_STAT_BSY)) {
+            return (inb(reg_status(channel)) & BIT_ALT_STAT_DRQ);
+        } else {
+            mtime_sleep(10);
+        }
+    }
+
+    return false;
+}
 
 void ide_init()
 {

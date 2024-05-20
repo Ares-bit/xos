@@ -18,7 +18,7 @@ struct partition {
     struct list open_inodes;//本分区打开的i结点队列
 };
 
-//硬盘结构
+//硬盘结构 承前启后的结构 上可找channel 下可寻分区
 struct disk {
     char name[8];//本硬盘的名称
     struct ide_channel* my_channel;//此块硬盘归属于哪个ide通道
