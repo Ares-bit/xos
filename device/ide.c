@@ -4,6 +4,7 @@
 #include "stdint.h"
 #include "global.h"
 #include "io.h"
+#include "sync.h"
 
 //定义硬盘寄存器端口号
 #define reg_data(channel)           (channel->port_base + 0)
@@ -120,6 +121,109 @@ static bool busy_wait(struct disk* hd)
     return false;
 }
 
+//从硬盘lba地址处读取扇区到buf
+void ide_read(struct disk* hd, uint32_t lba, void* buf, uint32_t sec_cnt)
+{
+    ASSERT(lba <= MAX_LBA);
+    //此sec_cnt为32位的，传到函数里会被截断成8位
+    ASSERT(sec_cnt > 0);
+
+    lock_acquire(&hd->my_channel->lock);
+    //选择硬盘
+    select_disk(hd);
+
+    uint32_t secs_op;//每次操作的扇区数
+    uint32_t secs_done = 0;//已完成的扇区数
+    while(secs_done < sec_cnt) {
+        if (secs_done + 256 <= sec_cnt) {
+            //如果sec_cnt-256还大于等于secs_done，那就说明一次可以读最多的256
+            //也可以这样理解：第一次如果sec_cnt-256>=0就表明可以一次读256了
+            secs_op = 256;
+        } else {
+            secs_op = sec_cnt - secs_done;
+        }
+
+        //写入待读取的扇区数和起始地址 从上次读完的地址起始，读未读的这么多
+        select_sector(hd, lba + secs_done, secs_op);
+
+        //发出读取命令
+        cmd_out(hd->my_channel, CMD_READ_SECTOR);
+    
+        //现在硬盘已经开始忙了，要将自己阻塞
+        sema_down(&hd->my_channel->disk_done);
+
+        //从上面阻塞醒来后检查硬盘状态是否可读
+        if (!busy_wait(hd)) {
+            //超过30s数据还没准备好就报异常
+            char error[64];
+            sprintf(error, "%s read sector %d failed!!!!!!\n", hd->name, lba);
+            PANIC(error);
+        }
+
+        //将数据从缓冲区中读出
+        //buf地址从上次写完的地址接着写，应该是考虑有大于256的情况，这种情况才会分多次读取
+        read_from_sector(hd, (void*)((uint32_t)buf + secs_done * 512), secs_op);
+        secs_done += secs_op;
+    }
+
+    lock_release(&hd->my_channel->lock);
+}
+
+//将buf中的数据写入硬盘
+void ide_write(struct disk* hd, uint32_t lba, void* buf, uint32_t sec_cnt)
+{
+    ASSERT(lba <= MAX_LBA);
+    ASSERT(sec_cnt > 0);
+
+    lock_acquire(&hd->my_channel->lock);
+    select_disk(hd);
+    uint32_t secs_op;
+    uint32_t secs_done;
+    while(secs_done < sec_cnt) {
+        if (secs_done + 256 <= sec_cnt) {
+            secs_op = 256;
+        } else {
+            secs_op = sec_cnt - secs_done;
+        }
+
+        select_sector(hd, lba + secs_done, secs_op);
+
+        cmd_out(hd->my_channel, CMD_WRITE_SECTOR);
+
+        if (!busy_wait(hd)) {
+            char error[64];
+            sprintf(error, "%s write sector %d failed!!!!!!\n", hd->name, lba);
+            PANIC(error);           
+        }
+
+        write2sector(hd, (void*)((uint32_t)buf + secs_done * 512), secs_op);
+
+        sema_down(&hd->my_channel->disk_done);
+
+        secs_done += secs_op;
+    }
+
+    lock_release(&hd->my_channel->lock);
+}
+
+//硬盘中断处理程序
+void intr_hd_handler(uint8_t irq_no)
+{
+    //0x20+e为ide0通道的中断号，0x20+f为ide1通道的中断号
+    ASSERT(irq_no == 0x2e || irq_no == 0x2f);
+    //根据中断号获取通道数组下标来确定通道号
+    uint8_t ch_no = irq_no - 0x2e;
+    struct ide_channel* channel = &channel[ch_no];
+    ASSERT(channel->irq_no == irq_no);
+    //由于加锁保护的原因，expecting intr一定对应本次中断
+    if (channel->expecting_intr) {
+        channel->expecting_intr == false;
+        sema_up(&channel->disk_done);
+        //读取状态寄存器硬盘即认为此次中断被处理 从而可以执行新的读写
+        inb(reg_status(channel));
+    }
+}
+
 void ide_init()
 {
     printk("ide_init start\n");
@@ -148,6 +252,7 @@ void ide_init()
         lock_init(&channel->lock);
         //初始化0是为了驱动第一次请求数据时就要陷入等待
         sema_init(&channel->disk_done, 0);
+        register_handler(channel->irq_no, intr_hd_handler);
         channel_no++;
     }
     printk("ide_init done\n");

@@ -32,7 +32,7 @@ struct ide_channel {
     char name[8];//本ata通道名称
     uint16_t port_base;//本通道的起始端口号
     uint8_t irq_no;//本通道所用的中断号
-    struct lock lock;//通道锁
+    struct lock lock;//通道锁 因为主盘从盘共用同一个中断号，所以用一把锁限制
     bool expecting_intr;//表示等待硬盘的中断
     struct semaphore disk_done;//用于阻塞、唤醒驱动程序
     struct disk devices[2];//一个通道上连接两个硬盘，一主一从
