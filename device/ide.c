@@ -41,6 +41,32 @@
 uint8_t channel_cnt;//按硬盘数计算的通道数
 struct ide_channel channels[2];//有两个ide通道
 
+int32_t ext_lba_base = 0;//用于记录总扩展分区的起始lba，初始为0，partition_scan时以此为标记
+uint8_t p_no = 0, l_no = 0;//用于记录硬盘主分区和逻辑分区的下标
+struct list partition_list;//分区队列
+
+//分区表表项结构
+struct partition_table_entry {
+    uint8_t bootable;//此分区是否可引导
+    uint8_t start_head;//起始磁头号
+    uint8_t start_sec;//起始扇区号
+    uint8_t start_chs;//起始柱面号
+    uint8_t fs_type;//分区类型
+    uint8_t end_head;//结束磁头号
+    uint8_t end_sec;//结束扇区号
+    uint8_t end_chs;//结束柱面号
+    //下面两项要重点关注
+    uint32_t start_lba;//本分区起始扇区的lba地址
+    uint32_t sec_cnt;//本分区的扇区数目
+} __attribute__ ((packed));//保证此结构是16字节大小
+
+//引导扇区512B结构
+struct boot_sector {
+    uint8_t other[446];//引导代码
+    struct partition_table_entry partition_table[4];//前面要求16对齐是因为这要精确512
+    uint16_t signature;//引导扇区结束标志0x55 0xaa
+} __attribute__ ((packed));
+
 //选择读写的硬盘
 static void select_disk(struct disk* hd)
 {
@@ -205,6 +231,46 @@ void ide_write(struct disk* hd, uint32_t lba, void* buf, uint32_t sec_cnt)
     }
 
     lock_release(&hd->my_channel->lock);
+}
+
+//将dst中len个相邻字节交换位置后存入buf
+static void swap_pairs_bytes(const char* dst, char* buf, uint32_t len)
+{
+    uint8_t idx;
+    for (idx = 0; idx < len; idx += 2) {
+        buf[idx + 1] = *dst++;//dst0写到buf[1]
+        buf[idx] = *dst++;//dst[1]写到bug[0]
+    }
+    buf[idx] = '\0';
+}
+
+//获取硬盘参数
+static void identify_disk(struct disk* hd)
+{
+    char id_info[512];
+    select_disk(hd);
+    cmd_out(hd->my_channel, CMD_IDENTIFY);//两个硬盘连到同一个通道，共享一个中断
+    //先睡会，一会让中断叫醒我
+    sema_down(&hd->my_channel->disk_done);
+    if (!busy_wait(hd)) {
+        char error[64];
+        sprintf(error, "%s identify failed!!!!!!\n", hd->name);
+        PANIC(error);
+    }
+    //甚至不需要指定起始地址
+    read_from_sector(hd, id_info, 1);
+
+    char buf[64];//正好存储所需的64B信息
+    //硬盘序列号位于10字偏移量，长20，硬盘型号位于27字偏移量处，长40
+    uint8_t sn_start = 10 * 2, sn_len = 20, md_start = 27 * 2, md_len = 40;
+    swap_pairs_bytes(&id_info[sn_start], buf, sn_len);
+    printk("disk %s info:\n SN:%s\n", hd->name, buf);
+    memset(buf, 0, sizeof(buf));
+    swap_pairs_bytes(&id_info[md_start], buf, md_len);
+    printk(" MODULE:%s\n", buf);
+    uint32_t sectors = *(uint32_t*)&id_info[60 * 2];//把最后4字节用32位整型读出来
+    printk(" SECTORS:%d\n", sectors);
+    printk(" CAPACITY:%dMB\n", sectors * 512 / 1024 / 1024);
 }
 
 //硬盘中断处理程序
