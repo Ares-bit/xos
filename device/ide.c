@@ -198,6 +198,7 @@ void ide_write(struct disk* hd, uint32_t lba, void* buf, uint32_t sec_cnt)
 
         write2sector(hd, (void*)((uint32_t)buf + secs_done * 512), secs_op);
 
+        //写完硬盘应会产生中断，这与读不同，读取应该是数据准备好了会产生中断
         sema_down(&hd->my_channel->disk_done);
 
         secs_done += secs_op;
