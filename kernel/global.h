@@ -73,6 +73,8 @@
 #define true 1
 #define false 0
 
+#define UNUSED __attribute__ ((unused))
+
 #define PG_SIZE 4096
 
 struct gdt_desc {

@@ -5,6 +5,7 @@
 #include "global.h"
 #include "io.h"
 #include "sync.h"
+#include "memory.h"
 
 //定义硬盘寄存器端口号
 #define reg_data(channel)           (channel->port_base + 0)
@@ -253,6 +254,7 @@ static void identify_disk(struct disk* hd)
     cmd_out(hd->my_channel, CMD_IDENTIFY);//两个硬盘连到同一个通道，共享一个中断
     //先睡会，一会让中断叫醒我
     sema_down(&hd->my_channel->disk_done);
+    //等待数据准备好
     if (!busy_wait(hd)) {
         char error[64];
         sprintf(error, "%s identify failed!!!!!!\n", hd->name);
@@ -272,6 +274,66 @@ static void identify_disk(struct disk* hd)
     uint32_t sectors = *(uint32_t*)&id_info[60 * 2];//把最后4字节用32位整型读出来
     printk(" SECTORS:%d\n", sectors);
     printk(" CAPACITY:%dMB\n", sectors * 512 / 1024 / 1024);
+}
+
+//扫描硬盘中地址为ext_lba的扇区中的所有分区表
+static void partition_scan(struct disk* hd, uint32_t ext_lba)
+{
+    struct boot_sector* bs = sys_malloc(sizeof(struct boot_sector));//如果使用局部变量则会爆栈
+    ide_read(hd, ext_lba, bs, 1);
+    uint8_t part_idx = 0;
+    //获取扇区中分区表指针
+    struct partition_table_entry* p = bs->partition_table;
+
+    while (part_idx++ < 4) {
+        //对于扩展分区的处理，如果是0x5就表示遇到了下一个扩展分区，要递归处理
+        if (p->fs_type == 0x5) {//0x5表示下一个区域，所以要递归，真正处理下一个区域是在else里面写的
+            if (ext_lba_base != 0) {
+                //子扩展分区start lba是相对于主引导扇区中的总扩展分区地址
+                partition_scan(hd, p->start_lba + ext_lba_base);
+            } else {
+                //ext_lba_base=0表示第一次读取引导块，也就是主引导分区表
+                //记录主扩展分区的起始地址 后面所有子扩展分区都要使用这个作为基地址
+                ext_lba_base = p->start_lba;
+                partition_scan(hd, p->start_lba);
+            }
+        } else if (p->fs_type != 0) {//0x83表示主分区 0x66表示当前扩展分区 0x05表示下一个扩展分区 0为无效分区(第2、3项是全0的)
+            //对于主分区的处理
+            if (ext_lba == 0) {//如果输入起始lba地址为0则表示当前处理的是主引导分区表
+                //读取MBR中的主分区表初始化hd主分区的属性
+                hd->prim_parts[p_no].start_lba = ext_lba + p->start_lba;
+                hd->prim_parts[p_no].sec_cnt = p->sec_cnt;
+                hd->prim_parts[p_no].my_disk = hd;
+                list_append(&partition_list, &hd->prim_parts[p_no].part_tag);
+                //把sda和分区号拼起来形成分区全名
+                sprintf(hd->prim_parts[p_no].name, "%s%d", hd->name, p_no + 1);
+                p_no++;
+                ASSERT(p_no < 4);
+            } else {//如果不等于0则表示当前处理的是EBR分区表
+                //读取当前子扩展分区表初始化hd扩展分区的属性
+                hd->logic_parts[l_no].start_lba = ext_lba + p->start_lba;
+                hd->logic_parts[l_no].sec_cnt = p->sec_cnt;
+                hd->logic_parts[l_no].my_disk = hd;
+                list_append(&partition_list, &hd->logic_parts[l_no].part_tag);
+                sprintf(hd->logic_parts[l_no].name, "%s%d", hd->name, l_no + 5);
+                l_no++;
+                if (l_no >= 8) {
+                    return;
+                }
+            }
+        }
+        p++
+    }
+    sys_free(bs);
+}
+
+//打印分区队列上节点的起始lba和扇区数
+//因为list_traversal里的回调需要两个参数，但partition_info只需一个，用unused修饰表示未使用
+static bool partition_info(struct list_elem* pelem, int arg UNUSED)
+{
+    struct partition* part = elem2entry(struct partition, part_tag, pelem);
+    printk(" %s start_lba:0x%x, sec_cnt:0x%x\n", part->name, part->start_lba, part->sec_cnt);
+    return false;
 }
 
 //硬盘中断处理程序
@@ -300,7 +362,7 @@ void ide_init()
     channel_cnt = DIV_ROUND_UP(hd_cnt / 2);//根据硬盘数向上取整获得通道数
 
     struct ide_channel* channel;
-    uint8_t channel_no = 0;
+    uint8_t channel_no = 0, dev_no = 0;
     //不存在只开channel1的情况吗？这种情况channel_no从0开始岂不是错了？
     //这种情况应该是有问题，只是现在能用就行
     while (channel_no < channel_cnt) {
@@ -321,7 +383,25 @@ void ide_init()
         //初始化0是为了驱动第一次请求数据时就要陷入等待
         sema_init(&channel->disk_done, 0);
         register_handler(channel->irq_no, intr_hd_handler);
+
+        //初始化disk
+        while (dev_no < 2) {
+            struct disk* hd = &channel->devices[dev_no];
+            hd->my_channel = channel;
+            hd->dev_no = dev_no;
+            sprintf(hd->name, "sd%c", 'a' + channel_no * 2 + dev_no);
+            identify_disk(hd);
+            //dev_no=0为hd60M.img，存储内核的裸硬盘，不处理
+            if (dev_no != 0) {
+                partition_scan(hd, 0);
+            }
+            p_no = 0, l_no = 0;
+            dev_no++;
+        }
+
         channel_no++;
     }
+    printk("all partition info\n");
+    list_traversal(&partition_list, partition_info, (int)NULL);
     printk("ide_init done\n");
 }
