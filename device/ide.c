@@ -234,6 +234,7 @@ void ide_write(struct disk* hd, uint32_t lba, void* buf, uint32_t sec_cnt)
 }
 
 //将dst中len个相邻字节交换位置后存入buf
+//需要交换前后两字节的原因是：只有一种解释，那就是这个字符串在硬盘中本身存储的顺序就是反的，否则无法解释指令和数据读出来不用翻转直接就能用的现象
 static void swap_pairs_bytes(const char* dst, char* buf, uint32_t len)
 {
     uint8_t idx;
