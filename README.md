@@ -1,1 +1,1 @@
-# xos is a very simple operating system.
+# xos is a too young too simple operating system.
