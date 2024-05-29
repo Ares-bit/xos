@@ -16,7 +16,7 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
     $(BUILD_DIR)/switch.o  $(BUILD_DIR)/console.o $(BUILD_DIR)/sync.o \
 	$(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o $(BUILD_DIR)/tss.o \
 	$(BUILD_DIR)/process.o $(BUILD_DIR)/syscall.o $(BUILD_DIR)/syscall-init.o \
-	$(BUILD_DIR)/stdio.o
+	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio-kernel.o $(BUILD_DIR)/ide.o
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.s
@@ -29,7 +29,8 @@ $(BUILD_DIR)/loader.bin: boot/loader.s
 #C编译
 $(BUILD_DIR)/main.o: kernel/main.c lib/kernel/print.h \
 	lib/stdint.h kernel/init.h kernel/debug.h thread/thread.h \
-	kernel/interrupt.h device/console.h device/keyboard.h device/ioqueue.h
+	kernel/interrupt.h device/console.h device/keyboard.h device/ioqueue.h \
+	device/ide.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/init.o: kernel/init.c kernel/init.h lib/kernel/print.h \
@@ -106,6 +107,11 @@ $(BUILD_DIR)/stdio.o: lib/stdio.c lib/stdio.h kernel/global.h lib/user/syscall.h
 
 $(BUILD_DIR)/stdio-kernel.o: lib/kernel/stdio-kernel.c lib/kernel/stdio-kernel.h kernel/global.h \
 	device/console.h lib/stdio.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/ide.o: device/ide.c device/ide.h kernel/global.h lib/kernel/stdio-kernel.h kernel/global.h \
+	lib/stdio.h lib/stdint.h lib/kernel/io.h thread/sync.h kernel/memory.h device/console.h lib/stdio.h \
+	kernel/debug.h device/timer.h lib/string.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译

@@ -6,6 +6,9 @@
 #include "io.h"
 #include "sync.h"
 #include "memory.h"
+#include "debug.h"
+#include "timer.h"
+#include "string.h"
 
 //定义硬盘寄存器端口号
 #define reg_data(channel)           (channel->port_base + 0)
@@ -322,7 +325,7 @@ static void partition_scan(struct disk* hd, uint32_t ext_lba)
                 }
             }
         }
-        p++
+        p++;
     }
     sys_free(bs);
 }
@@ -337,36 +340,37 @@ static bool partition_info(struct list_elem* pelem, int arg UNUSED)
 }
 
 //硬盘中断处理程序
-void intr_hd_handler(uint8_t irq_no)
+static void intr_hd_handler(uint8_t irq_no)
 {
     //0x20+e为ide0通道的中断号，0x20+f为ide1通道的中断号
     ASSERT(irq_no == 0x2e || irq_no == 0x2f);
     //根据中断号获取通道数组下标来确定通道号
     uint8_t ch_no = irq_no - 0x2e;
-    struct ide_channel* channel = &channel[ch_no];
+    struct ide_channel* channel = &channels[ch_no];
     ASSERT(channel->irq_no == irq_no);
     //由于加锁保护的原因，expecting intr一定对应本次中断
     if (channel->expecting_intr) {
-        channel->expecting_intr == false;
+        channel->expecting_intr = false;
         sema_up(&channel->disk_done);
         //读取状态寄存器硬盘即认为此次中断被处理 从而可以执行新的读写
         inb(reg_status(channel));
     }
 }
 
-void ide_init()
+void ide_init(void)
 {
     printk("ide_init start\n");
     uint8_t hd_cnt = *(uint8_t*)(0x475);//BIOS会把硬盘数量存放在这里
     ASSERT(hd_cnt > 0);
-    channel_cnt = DIV_ROUND_UP(hd_cnt / 2);//根据硬盘数向上取整获得通道数
-
+    channel_cnt = DIV_ROUND_UP(hd_cnt / 2, 2);//根据硬盘数向上取整获得通道数
     struct ide_channel* channel;
     uint8_t channel_no = 0, dev_no = 0;
+
+    list_init(&partition_list);
     //不存在只开channel1的情况吗？这种情况channel_no从0开始岂不是错了？
     //这种情况应该是有问题，只是现在能用就行
     while (channel_no < channel_cnt) {
-        channel = &channel[channel_no];
+        channel = &channels[channel_no];
         sprintf(channel->name, "ide%d", channel_no);
         switch (channel_no) {
             case 0:
@@ -401,7 +405,7 @@ void ide_init()
 
         channel_no++;
     }
-    printk("all partition info\n");
+    printk("all partition info:\n");
     list_traversal(&partition_list, partition_info, (int)NULL);
     printk("ide_init done\n");
 }

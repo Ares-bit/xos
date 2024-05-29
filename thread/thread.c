@@ -107,7 +107,7 @@ static void make_main_thread(void)
     list_append(&thread_all_list, &main_thread->all_list_tag);
 }
 
-static void idle(void* arg UNUESD)
+static void idle(void* arg UNUSED)
 {
     while(1) {
         thread_block(TASK_BLOCKED);
@@ -181,7 +181,7 @@ void thread_unblock(struct task_struct* pthread)
 }
 
 //把当前线程挂到就绪队列 主动让出CPU 调度下一个线程上CPU
-void thread_yield()
+void thread_yield(void)
 {
     struct task_struct* cur = running_thread();
     enum intr_status old_status = intr_disable();
@@ -199,6 +199,6 @@ void thread_init(void)
     list_init(&thread_all_list);
     lock_init(&pid_lock);
     make_main_thread();
-    idle_thread = thread_create("idle", 10, idle, NULL);
+    idle_thread = thread_start("idle", 10, idle, NULL);
     put_str("thread_init done\n");
 }
