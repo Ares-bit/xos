@@ -35,15 +35,15 @@
 
 //定义硬盘操作指令
 #define CMD_IDENTIFY                0xec //硬盘识别指令
-#define CMD_READ_SECTOR             0x20
-#define CMD_WRITE_SECTOR            0x10
+#define CMD_READ_SECTOR             0x20 //读扇区
+#define CMD_WRITE_SECTOR            0x30 //写扇区
 
 //定义可读写的最大LBA地址 调试专用
 #define MAX_LBA                     (162 * 63 * 16 - 1)
 //((80 * 1024 * 1024 / 512) - 1)  //只支持80M硬盘163,839 实际应为162*63*16-1=163295
 
-uint8_t channel_cnt;//按硬盘数计算的通道数
-struct ide_channel channels[2];//有两个ide通道
+// uint8_t channel_cnt;//按硬盘数计算的通道数
+// struct ide_channel channels[2];//有两个ide通道
 
 int32_t ext_lba_base = 0;//用于记录总扩展分区的起始lba，初始为0，partition_scan时以此为标记
 uint8_t p_no = 0, l_no = 0;//用于记录硬盘主分区和逻辑分区的下标
@@ -75,7 +75,7 @@ struct boot_sector {
 static void select_disk(struct disk* hd)
 {
     uint8_t reg_device = BIT_DEV_MBS | BIT_DEV_LBA;
-    if (hd->dev_no) {
+    if (hd->dev_no == 1) {
         reg_device |= BIT_DEV_DEV;
     }
     //写reg dev寄存器高4位 reg dev的低4位没有看懂？
@@ -362,7 +362,7 @@ void ide_init(void)
     printk("ide_init start\n");
     uint8_t hd_cnt = *(uint8_t*)(0x475);//BIOS会把硬盘数量存放在这里
     ASSERT(hd_cnt > 0);
-    channel_cnt = DIV_ROUND_UP(hd_cnt / 2, 2);//根据硬盘数向上取整获得通道数
+    channel_cnt = DIV_ROUND_UP(hd_cnt, 2);//根据硬盘数向上取整获得通道数
     struct ide_channel* channel;
     uint8_t channel_no = 0, dev_no = 0;
 
@@ -402,7 +402,7 @@ void ide_init(void)
             p_no = 0, l_no = 0;
             dev_no++;
         }
-
+        dev_no = 0;
         channel_no++;
     }
     printk("all partition info:\n");

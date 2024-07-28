@@ -3,7 +3,7 @@ ENTRY_POINT = 0xc0001500
 AS = nasm
 CC = gcc
 LD = ld
-LIBS = -I lib/ -I lib/kernel/ -I lib/user/ -I device/ -I kernel/ -I thread/ -I userprog/
+LIBS = -I lib/ -I lib/kernel/ -I lib/user/ -I device/ -I kernel/ -I thread/ -I userprog/ -I fs/
 ASFLAGS = -f elf
 ASBINLIB = -I boot/include/
 CFLAGS = -m32 -Wall $(LIBS) -c -fno-builtin -W -Wstrict-prototypes \
@@ -16,7 +16,8 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
     $(BUILD_DIR)/switch.o  $(BUILD_DIR)/console.o $(BUILD_DIR)/sync.o \
 	$(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o $(BUILD_DIR)/tss.o \
 	$(BUILD_DIR)/process.o $(BUILD_DIR)/syscall.o $(BUILD_DIR)/syscall-init.o \
-	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio-kernel.o $(BUILD_DIR)/ide.o
+	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio-kernel.o $(BUILD_DIR)/ide.o \
+	$(BUILD_DIR)/fs.o
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.s
@@ -29,14 +30,13 @@ $(BUILD_DIR)/loader.bin: boot/loader.s
 #C编译
 $(BUILD_DIR)/main.o: kernel/main.c lib/kernel/print.h \
 	lib/stdint.h kernel/init.h kernel/debug.h thread/thread.h \
-	kernel/interrupt.h device/console.h device/keyboard.h device/ioqueue.h \
-	device/ide.h
+	kernel/interrupt.h device/console.h device/keyboard.h device/ioqueue.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/init.o: kernel/init.c kernel/init.h lib/kernel/print.h \
 	lib/stdint.h kernel/interrupt.h device/timer.h thread/thread.h \
 	device/console.h device/keyboard.h userprog/tss.h kernel/memory.h \
-	userprog/syscall-init.h
+	userprog/syscall-init.h device/ide.h fs/fs.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/interrupt.o: kernel/interrupt.c kernel/interrupt.h \
@@ -112,6 +112,10 @@ $(BUILD_DIR)/stdio-kernel.o: lib/kernel/stdio-kernel.c lib/kernel/stdio-kernel.h
 $(BUILD_DIR)/ide.o: device/ide.c device/ide.h kernel/global.h lib/kernel/stdio-kernel.h kernel/global.h \
 	lib/stdio.h lib/stdint.h lib/kernel/io.h thread/sync.h kernel/memory.h device/console.h lib/stdio.h \
 	kernel/debug.h device/timer.h lib/string.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/fs.o: fs/fs.c fs/fs.h fs/inode.h fs/dir.h fs/super_block.h lib/stdint.h kernel/global.h \
+	lib/kernel/stdio-kernel.h device/ide.h lib/string.h kernel/debug.h kernel/memory.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译

@@ -20,7 +20,7 @@ struct super_block {
     uint32_t inode_table_lba;//inode数组起始地址+大小
     uint32_t inode_table_sects;
 
-    uint32_t data_start_lba;//数据区开始的第一个扇区号
+    uint32_t data_start_lba;//数据区开始的第一个扇区号(根目录地址？？？)
 
     uint32_t root_inode_no;//根目录inode结点号
     uint32_t dir_entry_size;//目录项大小

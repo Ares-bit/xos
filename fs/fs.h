@@ -12,4 +12,6 @@ enum file_types {
     FT_DIRECTORY//目录
 };
 
+void filesys_init();
+
 #endif
