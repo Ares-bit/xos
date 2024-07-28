@@ -1,6 +1,8 @@
 #ifndef __FS_SUPER_BLOCK_H
 #define __FS_SUPER_BLOCK_h
 
+#include "stdint.h"
+
 struct super_block {
     uint32_t magic;//指明文件系统类型
 
