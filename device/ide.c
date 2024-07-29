@@ -42,8 +42,8 @@
 #define MAX_LBA                     (162 * 63 * 16 - 1)
 //((80 * 1024 * 1024 / 512) - 1)  //只支持80M硬盘163,839 实际应为162*63*16-1=163295
 
-// uint8_t channel_cnt;//按硬盘数计算的通道数
-// struct ide_channel channels[2];//有两个ide通道
+uint8_t channel_cnt;//按硬盘数计算的通道数
+struct ide_channel channels[2];//有两个ide通道
 
 int32_t ext_lba_base = 0;//用于记录总扩展分区的起始lba，初始为0，partition_scan时以此为标记
 uint8_t p_no = 0, l_no = 0;//用于记录硬盘主分区和逻辑分区的下标

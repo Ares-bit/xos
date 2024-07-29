@@ -276,8 +276,8 @@ busy_wait	device/ide.c	/^static bool busy_wait(struct disk* hd)$/;"	f	file:
 caps_lock_char	device/keyboard.c	26;"	d	file:
 caps_lock_make	device/keyboard.c	37;"	d	file:
 caps_lock_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
-channel_cnt	device/ide.h	/^uint8_t channel_cnt;\/\/按硬盘数计算的通道数$/;"	v
-channels	device/ide.h	/^struct ide_channel channels[2];\/\/有两个ide通道$/;"	v	typeref:struct:ide_channel
+channel_cnt	device/ide.c	/^uint8_t channel_cnt;\/\/按硬盘数计算的通道数$/;"	v
+channels	device/ide.c	/^struct ide_channel channels[2];\/\/有两个ide通道$/;"	v	typeref:struct:ide_channel
 char_invisible	device/keyboard.c	19;"	d	file:
 cmd_out	device/ide.c	/^static void cmd_out(struct ide_channel* channel, uint8_t cmd)$/;"	f	file:
 cnt	kernel/memory.c	/^    uint32_t cnt;$/;"	m	struct:arena	file:
@@ -300,6 +300,7 @@ ctrl_r_break	device/keyboard.c	36;"	d	file:
 ctrl_r_char	device/keyboard.c	21;"	d	file:
 ctrl_r_make	device/keyboard.c	35;"	d	file:
 ctrl_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
+cur_part	fs/fs.c	/^struct partition* cur_part;\/\/默认情况下操作的是哪个分区$/;"	v	typeref:struct:partition
 data_start_lba	fs/super_block.h	/^    uint32_t data_start_lba;\/\/数据区开始的第一个扇区号(根目录地址？？？)$/;"	m	struct:super_block
 dcount	kernel/interrupt.c	/^    uint8_t     dcount;\/\/门描述符高32位的低8位 固定全0$/;"	m	struct:gate_desc	file:
 delete	device/keyboard.c	16;"	d	file:
@@ -512,6 +513,7 @@ memcmp	lib/string.c	/^int memcmp(const void *a_, const void *b_, uint32_t size)$
 memcpy	lib/string.c	/^void memcpy(void *dst_, const void *src_, uint32_t size)$/;"	f
 memset	lib/string.c	/^void memset(void *dst_, uint8_t value, uint32_t size)$/;"	f
 mfree_page	kernel/memory.c	/^void mfree_page(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt)$/;"	f
+mount_partition	fs/fs.c	/^static bool mount_partition(struct list_elem* pelem, int arg)$/;"	f	file:
 mtime_sleep	device/timer.c	/^void mtime_sleep(uint32_t m_seconds)$/;"	f
 mul	boot/loader.s	/^     mul dx$/;"	d
 mul	boot/mbr.s	/^     mul dx$/;"	d
