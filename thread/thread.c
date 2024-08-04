@@ -71,6 +71,17 @@ void init_thread(struct task_struct* pthread, char* name, int prio)
     pthread->priority = prio;
     pthread->ticks = prio;
     pthread->elapsed_ticks = 0;
+
+    //初始化fd table
+    pthread->fd_table[0] = 0;
+    pthread->fd_table[1] = 1;
+    pthread->fd_table[2] = 2;
+    uint8_t fd_idx = 3;
+    while (fs_idx < MAX_FILES_OPEN_PER_PROC) {
+        pthread->fd_table[fs_idx] = -1;
+        fd_idx++;
+    }
+
     pthread->pgdir = NULL;
     pthread->stack_magic = 0x20001212;
 }
