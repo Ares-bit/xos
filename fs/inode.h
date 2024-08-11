@@ -14,4 +14,6 @@ struct inode {
     //怎么区分目录和文件？inode中加个标志不是更好？
 };
 
+struct inode* inode_open(struct partition* part, uint32_t inode_no);
+
 #endif
