@@ -1,5 +1,8 @@
+#include "fs.h"
 #include "file.h"
-#include "stdio-kernel.h"
+#include "stdio_kernel.h"
+#include "thread.h"
+#include "bitmap.h"
 
 //全局打开的文件表，全局就一个文件表
 struct file file_table[MAX_FILE_OPEN];
@@ -44,7 +47,7 @@ int32_t pcb_fd_install(int32_t global_fd_idx)
 //在分区中占用一个ionde：分配一个i结点，返回i结点号
 int32_t inode_bitmap_alloc(struct partition* part)
 {
-    int32_t bit_idx == bitmap_scan(&part->inode_bitmap, 1);
+    int32_t bit_idx = bitmap_scan(&part->inode_bitmap, 1);
     if (bit_idx == -1) {
         return -1;
     }
@@ -59,7 +62,7 @@ int32_t block_bitmap_alloc(struct partition* part)
     if (bit_idx == -1) {
         return -1;
     }
-    bitmap_set(&part->block_bitmap, 1);
+    bitmap_set(&part->block_bitmap, bit_idx, 1);
     return part->sb->data_start_lba + bit_idx;//第一个数据块地址+偏移地址
 }
 
@@ -83,4 +86,3 @@ void bitmap_sync(struct partition* part, uint32_t bit_idx, enum bitmap_type btmp
     }
     ide_write(part->my_disk, sec_lba, bitmap_off, 1);
 }
-

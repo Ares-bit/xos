@@ -3,8 +3,7 @@
 #include "global.h"
 #include "inode.h"
 #include "dir.h"
-#include "super_block.h"
-#include "stdio-kernel.h"
+#include "stdio_kernel.h"
 #include "ide.h"
 #include "string.h"
 #include "debug.h"
@@ -13,8 +12,6 @@
 extern uint8_t channel_cnt;//按硬盘数计算的通道数
 extern struct ide_channel channels[2];//有两个ide通道
 extern struct list partition_list;//分区队列
-
-struct partition* cur_part;//默认情况下操作的是哪个分区
 
 static bool mount_partition(struct list_elem* pelem, int arg)
 {

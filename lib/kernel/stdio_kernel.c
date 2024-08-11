@@ -1,6 +1,6 @@
 #include "stdio.h"
 #include "console.h"
-#include "stdio-kernel.h"
+#include "stdio_kernel.h"
 
 void printk(const char* format, ...)
 {

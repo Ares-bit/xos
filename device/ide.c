@@ -1,6 +1,6 @@
 #include "ide.h"
 #include "stdio.h"
-#include "stdio-kernel.h"
+#include "stdio_kernel.h"
 #include "stdint.h"
 #include "global.h"
 #include "io.h"

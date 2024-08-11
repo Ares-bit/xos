@@ -3,6 +3,7 @@
 
 #include "list.h"
 #include "stdint.h"
+#include "ide.h"
 
 struct inode {
     uint32_t i_no;//i结点号

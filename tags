@@ -223,7 +223,7 @@ __LIB_KERNEL_BITMAP_H	lib/kernel/bitmap.h	2;"	d
 __LIB_KERNEL_IO_H	lib/kernel/io.h	2;"	d
 __LIB_KERNEL_LIST_H	lib/kernel/list.h	2;"	d
 __LIB_KERNEL_PRINT_H	lib/kernel/print.h	2;"	d
-__LIB_KERNEL_STDIO_KERNEL_H	lib/kernel/stdio-kernel.h	2;"	d
+__LIB_KERNEL_STDIO_KERNEL_H	lib/kernel/stdio_kernel.h	2;"	d
 __LIB_STDINT_H	lib/stdint.h	2;"	d
 __LIB_STDIO_H	lib/stdio.h	2;"	d
 __LIB_STRING_H	lib/string.h	2;"	d
@@ -309,7 +309,7 @@ ctrl_r_break	device/keyboard.c	36;"	d	file:
 ctrl_r_char	device/keyboard.c	21;"	d	file:
 ctrl_r_make	device/keyboard.c	35;"	d	file:
 ctrl_status	device/keyboard.c	/^static bool ctrl_status, shift_status, caps_lock_status = false, alt_status;$/;"	v	file:
-cur_part	fs/fs.c	/^struct partition* cur_part;\/\/默认情况下操作的是哪个分区$/;"	v	typeref:struct:partition
+cur_part	fs/fs.h	/^struct partition* cur_part;\/\/默认情况下操作的是哪个分区$/;"	v	typeref:struct:partition
 data_start_lba	fs/super_block.h	/^    uint32_t data_start_lba;\/\/数据区开始的第一个扇区号(根目录地址？？？)$/;"	m	struct:super_block
 dcount	kernel/interrupt.c	/^    uint8_t     dcount;\/\/门描述符高32位的低8位 固定全0$/;"	m	struct:gate_desc	file:
 delete	device/keyboard.c	16;"	d	file:
@@ -452,7 +452,7 @@ inode_cnt	fs/super_block.h	/^    uint32_t inode_cnt;\/\/本分区inode数$/;"	m	
 inode_init	fs/inode.c	/^void inode_init(uint32_t inode_no, struct inode* new_inode)$/;"	f
 inode_locate	fs/inode.c	/^static void inode_locate(struct partition* part, uint32_t inode_no, struct inode_position* inode_pos)$/;"	f	file:
 inode_open	fs/inode.c	/^struct inode* inode_open(struct partition* part, uint32_t inode_no)$/;"	f
-inode_position	fs/inode.c	/^struct inode_position$/;"	s	file:
+inode_position	fs/inode.c	/^struct inode_position {$/;"	s	file:
 inode_sync	fs/inode.c	/^void inode_sync(struct partition* part, struct inode* inode, void* io_buf)$/;"	f
 inode_table_lba	fs/super_block.h	/^    uint32_t inode_table_lba;\/\/inode数组起始地址+大小$/;"	m	struct:super_block
 inode_table_sects	fs/super_block.h	/^    uint32_t inode_table_sects;$/;"	m	struct:super_block
@@ -592,7 +592,7 @@ port_base	device/ide.h	/^    uint16_t port_base;\/\/本通道的起始端口号$
 prev	lib/kernel/list.h	/^    struct list_elem* prev;$/;"	m	struct:list_elem	typeref:struct:list_elem::list_elem
 prim_parts	device/ide.h	/^    struct partition prim_parts[4];\/\/主分区最多4个$/;"	m	struct:disk	typeref:struct:disk::partition
 printf	lib/stdio.c	/^uint32_t printf(const char* format, ...)$/;"	f
-printk	lib/kernel/stdio-kernel.c	/^void printk(const char* format, ...)$/;"	f
+printk	lib/kernel/stdio_kernel.c	/^void printk(const char* format, ...)$/;"	f
 priority	thread/thread.h	/^    uint8_t priority;$/;"	m	struct:task_struct
 process_activate	userprog/process.c	/^void process_activate(struct task_struct* p_thread)$/;"	f
 process_execute	userprog/process.c	/^void process_execute(void* filename, char* name)$/;"	f

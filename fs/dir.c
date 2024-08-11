@@ -3,6 +3,8 @@
 #include "memory.h"
 #include "string.h"
 #include "file.h"
+#include "debug.h"
+#include "bitmap.h"
 
 struct dir root_dir;
 

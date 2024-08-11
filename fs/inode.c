@@ -1,12 +1,18 @@
 #include "inode.h"
 #include "fs.h"
+#include "debug.h"
+#include "string.h"
+#include "list.h"
+#include "thread.h"
+#include "ide.h"
+#include "interrupt.h"
+#include "stdint.h"
 
-struct inode_position
-{
+struct inode_position {
     bool two_sec;//inode是否跨扇区
     uint32_t sec_lba;//inode所在扇区号
     uint32_t off_size;//inode在扇区中的偏移量
-}
+};
 
 //获取inode所在扇区和偏移量
 static void inode_locate(struct partition* part, uint32_t inode_no, struct inode_position* inode_pos)
@@ -56,7 +62,7 @@ void inode_sync(struct partition* part, struct inode* inode, void* io_buf)
     pure_inode.write_deny = false;
     pure_inode.inode_tag.prev = pure_inode.inode_tag.next = NULL;
 
-    cahr* inode_buf = (char *)io_buf;
+    char* inode_buf = (char *)io_buf;
     if (inode_pos.two_sec) {
         //如果跨了两个扇区，需要将原硬盘的数据读出来，再和新的数据拼成一个扇区后写入，硬盘的读写单位是扇区
         ide_read(part->my_disk, inode_pos.sec_lba, inode_buf, 2);

@@ -16,8 +16,8 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
     $(BUILD_DIR)/switch.o  $(BUILD_DIR)/console.o $(BUILD_DIR)/sync.o \
 	$(BUILD_DIR)/keyboard.o $(BUILD_DIR)/ioqueue.o $(BUILD_DIR)/tss.o \
 	$(BUILD_DIR)/process.o $(BUILD_DIR)/syscall.o $(BUILD_DIR)/syscall-init.o \
-	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio-kernel.o $(BUILD_DIR)/ide.o \
-	$(BUILD_DIR)/fs.o
+	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio_kernel.o $(BUILD_DIR)/ide.o \
+	$(BUILD_DIR)/fs.o $(BUILD_DIR)/inode.o $(BUILD_DIR)/file.o $(BUILD_DIR)/dir.o
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.s
@@ -105,17 +105,28 @@ $(BUILD_DIR)/syscall-init.o: userprog/syscall-init.c thread/thread.h lib/stdint.
 $(BUILD_DIR)/stdio.o: lib/stdio.c lib/stdio.h kernel/global.h lib/user/syscall.h lib/stdint.h lib/string.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/stdio-kernel.o: lib/kernel/stdio-kernel.c lib/kernel/stdio-kernel.h kernel/global.h \
+$(BUILD_DIR)/stdio_kernel.o: lib/kernel/stdio_kernel.c lib/kernel/stdio_kernel.h kernel/global.h \
 	device/console.h lib/stdio.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/ide.o: device/ide.c device/ide.h kernel/global.h lib/kernel/stdio-kernel.h kernel/global.h \
+$(BUILD_DIR)/ide.o: device/ide.c device/ide.h kernel/global.h lib/kernel/stdio_kernel.h kernel/global.h \
 	lib/stdio.h lib/stdint.h lib/kernel/io.h thread/sync.h kernel/memory.h device/console.h lib/stdio.h \
 	kernel/debug.h device/timer.h lib/string.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/fs.o: fs/fs.c fs/fs.h fs/inode.h fs/dir.h fs/super_block.h lib/stdint.h kernel/global.h \
-	lib/kernel/stdio-kernel.h device/ide.h lib/string.h kernel/debug.h kernel/memory.h
+$(BUILD_DIR)/fs.o: fs/fs.c fs/fs.h fs/inode.h fs/dir.h lib/stdint.h kernel/global.h \
+	lib/kernel/stdio_kernel.h device/ide.h lib/string.h kernel/debug.h kernel/memory.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/inode.o: fs/inode.c fs/inode.h device/ide.h fs/fs.h lib/stdint.h kernel/debug.h thread/thread.h \
+	lib/string.h lib/kernel/list.h kernel/interrupt.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/file.o: fs/file.c fs/file.h fs/fs.h lib/kernel/stdio_kernel.h thread/thread.h lib/kernel/bitmap.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/dir.o: fs/dir.c fs/dir.h fs/file.h fs/inode.h lib/kernel/stdio_kernel.h device/ide.h \
+	lib/string.h kernel/debug.h kernel/memory.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译
