@@ -170,6 +170,44 @@ static void partition_format(struct partition* part)
     sys_free(buf);
 }
 
+//将最上层路径名称解析出来
+static char* path_parse(char* pathname, char* name_store)
+{
+    if (pathname[0] == '/') {//根目录不需要解析
+        while (*(++pathname) == '/');//如果开头连续出现多个/，跳过他们按一个处理
+    }
+
+    //拿/后目录名，遇到下一个/跳出去
+    while (*pathname != '/' && *pathname != 0) {
+        *name_store++ = *pathname++;
+    }
+
+    if (pathname[0] == 0) {
+        return NULL;
+    }
+    //返回下次要解析的首地址
+    return pathname;
+}
+
+//返回路径深度，/a/b/c深度为3
+int32_t path_depth_cnt(char* pathname)
+{
+    ASSERT(pathname != NULL);
+    char* p = pathname;
+    char name[MAX_FILE_NAME_LEN] = {0};
+
+    uint32_t depth = 0;
+    p = path_parse(p, name);
+    while (name[0]) {
+        depth++;
+        memset(name, 0, MAX_FILE_NAME_LEN);
+        if (p) {
+            p = path_parse(p, name);
+        }
+    }
+    return depth;
+}
+
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统
 void filesys_init()
 {
