@@ -21,4 +21,6 @@ struct dir_entry {
     enum file_types f_type;
 };
 
+bool search_dir_entry(struct partition* part, struct dir* pdir, const char* name, struct dir_entry* dir_e);
+
 #endif

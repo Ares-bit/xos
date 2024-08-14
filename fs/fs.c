@@ -208,6 +208,67 @@ int32_t path_depth_cnt(char* pathname)
     return depth;
 }
 
+//搜索文件，找到返回inode号，找不到返回-1（用循环代替递归）
+static int search_file(const char* pathname, struct path_search_record* searched_record)
+{
+    if (!strcmp(pathname, "/") || !strcmp(pathname, "/.") || !strcmp(pathname, "/..")) {
+        searched_record->parent_dir = &root_dir;
+        searched_record->file_type = FT_DIRECTORY;
+        searched_record->searched_path[0] = 0;//空
+        return 0;
+    }
+
+    uint32_t path_len = strlen(pathname);
+    //仅支持绝对路径，路径名开头必须是/
+    ASSERT(pathname[0] == '/' && path_len > 1 && path_len < MAX_PATH_LEN);//最后一位装/0结尾，所以不能小于等于
+    char* sub_path = (char*)pathname;
+    struct dir* parent_dir = &root_dir;
+    struct dir_entry dir_e;
+
+    //解析出的每级路径名称存放处
+    char name[MAX_FILE_NAME_LEN] = {0};
+    searched_record->parent_dir = parent_dir;
+    searched_record->file_type = FT_UNKNOWN;//现在还不确定根目录下的第一级能不能找到
+    uint32_t parent_inode_no = 0;//父目录的inode号
+
+    sub_path = path_parse(sub_path, name);
+    while (name[0]) {
+        ASSERT(strlen(searched_record->searched_path) < MAX_PATH_LEN);
+
+        //记录刚才已经走过的父路径
+        strcat(searched_record->searched_path, "/");//第一次表示是根目录，后续就是分隔符了
+        strcat(searched_record->searched_path, name);
+
+        //在根目录中找name
+        if (search_dir_entry(cur_part, parent_dir, name, &dir_e)) {
+            memset(name, 0, MAX_FILE_NAME_LEN);
+
+            if (sub_path) {
+                sub_path = path_parse(sub_path, name);
+            }
+
+            if (FT_DIRECTORY == dir_e.f_type) {//如果当前找到的是目录
+                parent_inode_no = parent_dir->inode->i_no;
+                dir_close(parent_dir);//关闭当前的父亲
+                parent_dir = dir_open(cur_part, dir_e.i_no);//以自己作为父亲，即从此在自己下级搜索
+                searched_record->parent_dir = parent_dir;
+                continue;
+            } else if (FT_REGULAR == dir_e.f_type) {//如果找到的是普通文件，则直接返回当前文件inode no
+                searched_record->file_type = FT_REGULAR;//它的父亲是自己所在目录
+                return dir_e.i_no;
+            }
+        } else {
+            return -1;//如果没找到返回-1
+        }
+    }
+
+    //如果遍历了完整路径还没出现-1，那就说明本次找的是最后一个目录
+    dir_close(searched_record->parent_dir);//关闭最后一次查找打开的自己，否则会内存泄漏
+    searched_record->parent_dir = dir_open(cur_part, parent_inode_no);//关闭自己后，将父目录改为自己的父目录，上面备份就是为了这里
+    searched_record->file_type = FT_DIRECTORY;
+    return dir_e.i_no;//返回自己的inode no
+}
+
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统
 void filesys_init()
 {
