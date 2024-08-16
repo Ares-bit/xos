@@ -1,4 +1,4 @@
-#include "syscall-init.h"
+#include "syscall_init.h"
 #include "syscall.h"
 #include "stdint.h"
 #include "print.h"
