@@ -8,7 +8,7 @@
 #include "console.h"
 #include "keyboard.h"
 #include "tss.h"
-#include "syscall-init.h"
+#include "syscall_init.h"
 #include "ide.h"
 #include "fs.h"
 
