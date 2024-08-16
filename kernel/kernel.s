@@ -115,7 +115,11 @@ syscall_handler:
     pushad
 
     push 0x80
-
+    ;handler不是经过C编译的函数，没有自己的栈，所以可以通过寄存器或一段内存去传递参数
+    ;对于C编译的函数，编译器会为其维护栈，只能栈传参
+    ;syscall传进来一个寄存器或一段内存，handler将他们压栈后
+    ;（因为最多push dword，所以寄存器传参可以直接push，内存的只能push地址）
+    ;再调用真正的系统调用sys_xxx，系统调用是C函数，编译后会为其维护栈，都通过内存取参数
     push edx
     push ecx
     push ebx
