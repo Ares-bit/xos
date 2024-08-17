@@ -69,7 +69,7 @@ int32_t block_bitmap_alloc(struct partition* part)
 //将bitmap第bit idx位所在的512字节同步到硬盘
 void bitmap_sync(struct partition* part, uint32_t bit_idx, enum bitmap_type btmp_type)
 {
-    uint32_t off_sec = bit_idx / (512 * 8);//查询当前bit idx位于第几块block
+    uint32_t off_sec = bit_idx / (SECTOR_SIZE * 8);//查询当前bit idx位于第几块block
     uint32_t off_size = off_sec * BLOCK_SIZE;
     uint32_t sec_lba;
     uint8_t* bitmap_off;
