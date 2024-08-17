@@ -86,3 +86,96 @@ void bitmap_sync(struct partition* part, uint32_t bit_idx, enum bitmap_type btmp
     }
     ide_write(part->my_disk, sec_lba, bitmap_off, 1);
 }
+
+//创建文件，成功则返回文件描述符，失败返回-1
+int32_t file_create(struct dir* parent_dir, char* filename, enum oflags flag)
+{
+    //先创建一个缓冲区供后续使用
+    //这有啥需要缓冲区的地方呢？？哦，读出来的目录块要用，要往里写目录项
+    //同步硬盘都需要先读出扇区数据，修改一部分后再整体写回去
+    void *io_buf = sys_malloc(1024);
+    if (io_buf == NULL) {
+        printk("in file_create: sys_malloc for io_buf failed\n");
+        return -1;
+    }
+
+    //用于操作失败时回滚各资源状态
+    uint8_t rollback_step = 0;
+
+    //为文件分配inode
+    int32_t inode_no = inode_bitmap_alloc(cur_part);
+    if (inode_no == -1) {
+        printk("in file_create: alloc inode_no failed\n");
+        goto rollback;//为0，只释放刚io_buf
+    }
+
+    //为新文件申请内存中的inode，要填写后写入硬盘
+    struct inode* new_file_inode = (struct inode*)sys_malloc(sizeof(struct inode));
+    if (new_file_inode == NULL) {
+        printk("in file_create: sys_malloc struct inode failed\n");
+        rollback_step = 1;
+        goto rollback;
+    }
+
+    //初始化i节点
+    inode_init(inode_no, new_file_inode);
+
+    //获取全局文件表下标
+    int fd_idx = get_free_slot_in_global();
+    if (fd_idx == -1) {
+        printk("exceed max open files\n");
+        rollback_step = 2;
+        goto rollback;
+    }
+
+    file_table[fd_idx].fd_inode = new_file_inode;
+    file_table[fd_idx].fd_pos = 0;
+    file_table[fd_idx].fd_flag = flag;
+    //file_table[fd_idx].fd_inode->write_deny = false; //inode_init中已经置过了
+
+    //为新文件创建目录项
+    struct dir_entry new_dir_entry;
+    memset(&new_dir_entry, 0, sizeof(struct dir_entry));
+
+    create_dir_entry(filename, inode_no, FT_REGULAR, &new_dir_entry);
+
+    //同步数据到硬盘，话说什么时候填写inode里的数据啊。。。
+    //同步目录项到当前目录文件
+    if (!sync_dir_entry(parent_dir, &new_dir_entry, io_buf)) {
+        printk("sync dir_entry to disk failed\n");
+        rollback_step = 3;
+        goto rollback;
+    }
+
+    //将当前目录的inode同步回硬盘，因为新建文件，大小有变
+    memset(io_buf, 0, 1024);
+    inode_sync(cur_part, parent_dir->inode, io_buf);
+
+    //将新文件的inode同步到硬盘，但是这个文件inode都没赋值呢啊。。。。
+    memset(io_buf, 0, 1024);
+    inode_sync(cur_part, new_file_inode, io_buf);
+
+    //将inode bitmap同步回硬盘bitmap应占据完整的扇区，所以不怕只占一部分扇区，不需要io_buf
+    bitmap_sync(cur_part, inode_no, INODE_BITMAP);
+
+    //将新文件inode挂到open_inode队列上，并将打开次数置1
+    list_push(&cur_part->open_inodes, &new_file_inode->inode_tag);
+    new_file_inode->i_open_cnts = 1;
+
+    sys_free(io_buf);
+    //返回新文件在当前进程pcb中的的fd
+    return pcb_fd_install(fd_idx);
+
+rollback:
+    switch (rollback_step) {
+        case 3:
+            memset(&file_table[fd_idx], 0, sizeof(struct file));
+        case 2:
+            sys_free(new_file_inode);
+        case 1:
+            bitmap_set(&cur_part->inode_bitmap, inode_no, 0);
+            break;
+    }
+    sys_free(io_buf);
+    return -1;
+}
