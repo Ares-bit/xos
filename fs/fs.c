@@ -255,6 +255,7 @@ static int search_file(const char* pathname, struct path_search_record* searched
                 continue;
             } else if (FT_REGULAR == dir_e.f_type) {//如果找到的是普通文件，则直接返回当前文件inode no
                 searched_record->file_type = FT_REGULAR;//它的父亲是自己所在目录
+                //为啥这里不关闭父目录？？？
                 return dir_e.i_no;
             }
         } else {
@@ -267,6 +268,66 @@ static int search_file(const char* pathname, struct path_search_record* searched
     searched_record->parent_dir = dir_open(cur_part, parent_inode_no);//关闭自己后，将父目录改为自己的父目录，上面备份就是为了这里
     searched_record->file_type = FT_DIRECTORY;
     return dir_e.i_no;//返回自己的inode no
+}
+
+//打开文件或创建文件成功后返回fd
+int32_t sys_open(const char* filename, enum oflags flags)
+{   
+    //这样也不行，目录也可以最后不带/啊，这样约束不住的，别急，下边还有拦截
+    if (pathname[strlen(pathname) - 1] == '/') {
+        printk("can't open a directory %s\n", pathname);
+        return -1;
+    }
+
+    ASSERT(flags <= O_RDONLY | O_WRONLY | O_RDWR | O_CREAT);//0+1+2+4=7
+    
+    int32_t fd = -1;
+
+    //必须清0，也可以初始化成全0，防止上次运行干扰
+    struct path_search_record searched_record;
+    memset(&searched_record, 0, sizeof(struct path_search_record));
+
+    //记录目录深度，用于判断中间某个目录不存在的情况
+    uint32_t pathname_depth = path_depth_cnt((char*)pathname);
+
+    //先判断这个文件是否已经创建或打开了，为什么不先去打开队列上查一遍，因为提前不知道inode没法查
+    //inode中存一个自己的路径？可不可行？这样找起来更快？
+    int inode_no = search_file(pathname, &searched_record);
+    bool found = inode_no != -1 ? true : false;
+
+    if (searched_record.file_type == FT_DIRECTORY) {
+        printk("can't open a directory with open(), use opendir() to instead\n");
+        dir_close(searched_record.parent_dir);//查找到目录后会自动打开，所以这里要关闭
+        return -1;
+    }
+
+    //这步是为了防止之前说的，如果输入/a/b/c，其中b是文件的情况，这种情况也会查找成功，只不过找到b就停了，但是返回的路径长度是不一样的，需要自己判断
+    uint32_t path_searched_depth = path_depth_cnt(searched_record.searched_path);
+    if (path_searched_depth != pathname_depth) {
+        printk("can't access %s: Not a directory, subpath %s isn't exist\n", pathname, searched_record.searched_path);
+        dir_close(searched_record.parent_dir);
+        return -1;
+    }
+
+    //如果没有找到，并且flag不是create，就报错，如果找到最后一个文件没找到，那么输出寻找路径是整个输入路径，所以取最后/后的字符串就是文件名
+    if (!found && !(flags & O_CREAT)) {
+        printk("in path %s, file %s isn't exist\n", searched_record.searched_path, strrchr(searched_record.searched_path, '/') + 1);
+        dir_close(searched_record.parent_dir);
+        return -1;
+    } else if (found && flags & O_CREAT) {//要创建的文件已存在则直接报错
+        printk("%s has already exist!\n", pathname);
+        dir_close(searched_record.parent_dir);
+        return -1;
+    }
+
+    switch(flags & O_CREAT) {
+        case O_CREAT:
+            printk("creating file\n");
+            fd = file_create(searched_record.parent_dir, strrchr(pathname, '/') + 1, flags);
+            dir_close(searched_record.parent_dir);
+    }
+
+    return fd;
 }
 
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统
@@ -322,4 +383,12 @@ void filesys_init()
     char default_part[8] = "sdb1";
     //ide init时会把所有分区都挂到partition list上
     list_traversal(&partition_list, mount_partition, (int)default_part);
+
+    //将当前分区根目录打开
+    open_root_dir(cur_part);
+
+    //初始化文件表
+    uint32_t fd_idx = 0;
+    while (fd_idx < MAX_FILE_OPEN) {
+        file_table[fd_idx++].fd_inode = NULL;
 }
