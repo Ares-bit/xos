@@ -391,4 +391,5 @@ void filesys_init()
     uint32_t fd_idx = 0;
     while (fd_idx < MAX_FILE_OPEN) {
         file_table[fd_idx++].fd_inode = NULL;
+    }
 }
