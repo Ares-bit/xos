@@ -13,7 +13,7 @@ ASFLAGS	makefile	/^ASFLAGS = -f elf$/;"	m
 ASSERT	kernel/debug.h	11;"	d
 ASSERT	kernel/debug.h	9;"	d
 BITMAP_MASK	lib/kernel/bitmap.h	5;"	d
-BITS_PER_SECTOR	fs/fs.h	5;"	d
+BITS_PER_SECTOR	fs/fs.h	6;"	d
 BIT_ALT_STAT_BSY	device/ide.c	27;"	d	file:
 BIT_ALT_STAT_DRDY	device/ide.c	28;"	d	file:
 BIT_ALT_STAT_DRQ	device/ide.c	29;"	d	file:
@@ -21,7 +21,7 @@ BIT_DEV_DEV	device/ide.c	34;"	d	file:
 BIT_DEV_LBA	device/ide.c	33;"	d	file:
 BIT_DEV_MBS	device/ide.c	32;"	d	file:
 BLOCK_BITMAP	fs/file.h	/^    BLOCK_BITMAP    \/\/块位图$/;"	e	enum:bitmap_type
-BLOCK_SIZE	fs/fs.h	7;"	d
+BLOCK_SIZE	fs/fs.h	8;"	d
 BUILD_DIR	makefile	/^BUILD_DIR = .\/build$/;"	m
 CC	makefile	/^CC = gcc$/;"	m
 CFLAGS	makefile	/^CFLAGS = -m32 -Wall $(LIBS) -c -fno-builtin -W -Wstrict-prototypes \\$/;"	m
@@ -88,15 +88,20 @@ LD	makefile	/^LD = ld$/;"	m
 LDFLAGS	makefile	/^LDFLAGS = -melf_i386 -Ttext $(ENTRY_POINT) -e main -Map $(BUILD_DIR)\/kernel.map$/;"	m
 LIBS	makefile	/^LIBS = -I lib\/ -I lib\/kernel\/ -I lib\/user\/ -I device\/ -I kernel\/ -I thread\/ -I userprog\/ -I fs\/$/;"	m
 MAX_FILES_OPEN_PER_PROC	thread/thread.h	8;"	d
-MAX_FILES_PER_PART	fs/fs.h	4;"	d
-MAX_FILE_NAME_LEN	fs/dir.h	8;"	d
-MAX_FILE_OPEN	fs/file.h	6;"	d
+MAX_FILES_PER_PART	fs/fs.h	5;"	d
+MAX_FILE_NAME_LEN	fs/fs.h	12;"	d
+MAX_FILE_OPEN	fs/fs.h	11;"	d
 MAX_LBA	device/ide.c	42;"	d	file:
+MAX_PATH_LEN	fs/fs.h	10;"	d
 MEM_BITMAP_BASE	kernel/memory.c	15;"	d	file:
 MIL_SECONDS_PER_INTR	device/timer.c	17;"	d	file:
 NULL	kernel/global.h	69;"	d
 NUMBER	lib/user/syscall.c	/^    : [number]"i"(NUMBER), [arg0]"b"(ARG1), [arg1]"c"(ARG2), [arg2]"d"(ARG3) \\$/;"	v
 OBJS	makefile	/^OBJS = $(BUILD_DIR)\/main.o $(BUILD_DIR)\/init.o $(BUILD_DIR)\/interrupt.o \\$/;"	m
+O_CREAT	fs/fs.h	/^    O_CREAT = 4\/\/如果是3就是0x11，没法跟其他的或在一起用了，所以是4 0x100$/;"	e	enum:oflags
+O_RDONLY	fs/fs.h	/^    O_RDONLY,$/;"	e	enum:oflags
+O_RDWR	fs/fs.h	/^    O_RDWR,$/;"	e	enum:oflags
+O_WRONLY	fs/fs.h	/^    O_WRONLY,$/;"	e	enum:oflags
 PANIC	kernel/debug.h	6;"	d
 PDE_IDX	kernel/memory.c	21;"	d	file:
 PF_KERNEL	kernel/memory.h	/^    PF_KERNEL = 1,$/;"	e	enum:pool_flags
@@ -123,7 +128,7 @@ RPL1	kernel/global.h	7;"	d
 RPL2	kernel/global.h	8;"	d
 RPL3	kernel/global.h	9;"	d
 SECTION	boot/mbr.s	/^SECTION MBR vstart=0x7c00$/;"	l
-SECTOR_SIZE	fs/fs.h	6;"	d
+SECTOR_SIZE	fs/fs.h	7;"	d
 SELECTOR_CODE	boot/loader.s	/^SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0$/;"	d
 SELECTOR_DATA	boot/loader.s	/^SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0$/;"	d
 SELECTOR_K_CODE	kernel/global.h	16;"	d
@@ -231,7 +236,7 @@ __LIB_USER_SYSCALL_H	lib/user/syscall.h	2;"	d
 __THREAD_SYNC_H	thread/sync.h	2;"	d
 __THREAD_THREAD_H	thread/thread.h	2;"	d
 __USERPROG_PROCESS_H	userprog/process.h	2;"	d
-__USERPROG_SYSCALLINIT_H	userprog/syscall-init.h	2;"	d
+__USERPROG_SYSCALLINIT_H	userprog/syscall_init.h	2;"	d
 __USERPROG_TSS_H	userprog/tss.h	2;"	d
 _syscall0	lib/user/syscall.c	3;"	d	file:
 _syscall1	lib/user/syscall.c	13;"	d	file:
@@ -379,12 +384,14 @@ f	makefile	/^	dd if=$(BUILD_DIR)\/kernel.bin \\$/;"	m
 f	makefile	/^	dd if=$(BUILD_DIR)\/loader.bin of=\/home\/xuxingyuan\/bochs\/hd60M.img \\$/;"	m
 f_type	fs/dir.h	/^    enum file_types f_type;$/;"	m	struct:dir_entry	typeref:enum:dir_entry::file_types
 false	kernel/global.h	74;"	d
-fd_flag	fs/file.h	/^    uint32_t fd_flag;\/\/标识文件可读可写$/;"	m	struct:file
+fd_flag	fs/file.h	/^    enum oflags fd_flag;\/\/标识文件可读可写$/;"	m	struct:file	typeref:enum:file::oflags
 fd_inode	fs/file.h	/^    struct inode* fd_inode;\/\/文件指向的inode$/;"	m	struct:file	typeref:struct:file::inode
 fd_pos	fs/file.h	/^    uint32_t fd_pos;\/\/记录当前文件操作偏移地址$/;"	m	struct:file
 fd_table	thread/thread.h	/^    int32_t fd_table[MAX_FILES_OPEN_PER_PROC];\/\/文件描述符数组$/;"	m	struct:task_struct
 file	fs/file.h	/^struct file {$/;"	s
+file_create	fs/file.c	/^int32_t file_create(struct dir* parent_dir, char* filename, enum oflags flag)$/;"	f
 file_table	fs/file.c	/^struct file file_table[MAX_FILE_OPEN];$/;"	v	typeref:struct:file
+file_type	fs/fs.h	/^    enum file_types file_type;\/\/找到的是普通文件还是目录，找不到的为未知类型$/;"	m	struct:path_search_record	typeref:enum:path_search_record::file_types
 file_types	fs/fs.h	/^enum file_types {$/;"	g
 filename	fs/dir.h	/^    char filename[MAX_FILE_NAME_LEN];$/;"	m	struct:dir_entry
 filesys_init	fs/fs.c	/^void filesys_init()$/;"	f
@@ -552,6 +559,7 @@ next	lib/kernel/list.h	/^    struct list_elem* next;$/;"	m	struct:list_elem	type
 next_pos	device/ioqueue.c	/^static int32_t next_pos(int32_t pos)$/;"	f	file:
 off_size	fs/inode.c	/^    uint32_t off_size;\/\/inode在扇区中的偏移量$/;"	m	struct:inode_position	file:
 offset	lib/kernel/list.h	5;"	d
+oflags	fs/fs.h	/^enum oflags {$/;"	g
 open_inodes	device/ide.h	/^    struct list open_inodes;\/\/本分区打开的i结点队列$/;"	m	struct:partition	typeref:struct:partition::list
 open_root_dir	fs/dir.c	/^void open_root_dir(struct partition* part)$/;"	f
 other	device/ide.c	/^    uint8_t other[446];\/\/引导代码$/;"	m	struct:boot_sector	file:
@@ -565,6 +573,7 @@ page_table_add	kernel/memory.c	/^static void page_table_add(void* _vaddr, void* 
 page_table_pte_remove	kernel/memory.c	/^static void page_table_pte_remove(uint32_t vaddr)$/;"	f	file:
 palloc	kernel/memory.c	/^static void* palloc(struct pool* m_pool)$/;"	f	file:
 panic_spin	kernel/debug.c	/^void panic_spin(char *file_name, int line, const char *func, const char *condition)$/;"	f
+parent_dir	fs/fs.h	/^    struct dir* parent_dir;\/\/文件或目录所在的直接父目录$/;"	m	struct:path_search_record	typeref:struct:path_search_record::dir
 part_lba_base	fs/super_block.h	/^    uint32_t part_lba_base;\/\/本分区的起始Lba地址，lba只有绝对地址$/;"	m	struct:super_block
 part_tag	device/ide.h	/^    struct list_elem part_tag;\/\/用于队列中的标记$/;"	m	struct:partition	typeref:struct:partition::list_elem
 partition	device/ide.h	/^struct partition {$/;"	s
@@ -574,6 +583,9 @@ partition_list	device/ide.c	/^struct list partition_list;\/\/分区队列$/;"	v	
 partition_scan	device/ide.c	/^static void partition_scan(struct disk* hd, uint32_t ext_lba)$/;"	f	file:
 partition_table	device/ide.c	/^    struct partition_table_entry partition_table[4];\/\/前面要求16对齐是因为这要精确512$/;"	m	struct:boot_sector	typeref:struct:boot_sector::partition_table_entry	file:
 partition_table_entry	device/ide.c	/^struct partition_table_entry {$/;"	s	file:
+path_depth_cnt	fs/fs.c	/^int32_t path_depth_cnt(char* pathname)$/;"	f
+path_parse	fs/fs.c	/^static char* path_parse(char* pathname, char* name_store)$/;"	f	file:
+path_search_record	fs/fs.h	/^struct path_search_record {$/;"	s
 pcb_fd_install	fs/file.c	/^int32_t pcb_fd_install(int32_t global_fd_idx)$/;"	f
 pde_ptr	kernel/memory.c	/^uint32_t* pde_ptr(uint32_t vaddr)$/;"	f
 pfree	kernel/memory.c	/^void pfree(uint32_t pg_phy_addr)$/;"	f
@@ -620,12 +632,14 @@ reg_lba_m	device/ide.c	18;"	d	file:
 reg_sect_cnt	device/ide.c	16;"	d	file:
 reg_status	device/ide.c	21;"	d	file:
 register_handler	kernel/interrupt.c	/^void register_handler(uint8_t vector_no, intr_handler function)$/;"	f
-root_dir	fs/dir.c	/^struct dir root_dir;$/;"	v	typeref:struct:dir
+root_dir	fs/dir.h	/^struct dir root_dir;$/;"	v	typeref:struct:dir
 root_inode_no	fs/super_block.h	/^    uint32_t root_inode_no;\/\/根目录inode结点号$/;"	m	struct:super_block
 running_thread	thread/thread.c	/^struct task_struct* running_thread()$/;"	f
 sb	device/ide.h	/^    struct super_block* sb;\/\/本分区的超级块$/;"	m	struct:partition	typeref:struct:partition::super_block
 schedule	thread/thread.c	/^void schedule(void)$/;"	f
 search_dir_entry	fs/dir.c	/^bool search_dir_entry(struct partition* part, struct dir* pdir, const char* name, struct dir_entry* dir_e)$/;"	f
+search_file	fs/fs.c	/^static int search_file(const char* pathname, struct path_search_record* searched_record)$/;"	f	file:
+searched_path	fs/fs.h	/^    char searched_path[MAX_PATH_LEN];\/\/查找过程中的父路径$/;"	m	struct:path_search_record
 sec_cnt	device/ide.c	/^    uint32_t sec_cnt;\/\/本分区的扇区数目$/;"	m	struct:partition_table_entry	file:
 sec_cnt	device/ide.h	/^    uint32_t sec_cnt;\/\/扇区数$/;"	m	struct:partition
 sec_cnt	fs/super_block.h	/^    uint32_t sec_cnt;\/\/本分区总共有多少扇区$/;"	m	struct:super_block
@@ -683,14 +697,15 @@ swap_pairs_bytes	device/ide.c	/^static void swap_pairs_bytes(const char* dst, ch
 switch_to	thread/switch.s	/^switch_to:$/;"	l
 sync_dir_entry	fs/dir.c	/^bool sync_dir_entry(struct dir* parent_dir, struct dir_entry* p_de, void* io_buf)$/;"	f
 sys_free	kernel/memory.c	/^void sys_free(void *ptr)$/;"	f
-sys_getpid	userprog/syscall-init.c	/^uint32_t sys_getpid(void) {$/;"	f
+sys_getpid	userprog/syscall_init.c	/^uint32_t sys_getpid(void) {$/;"	f
 sys_malloc	kernel/memory.c	/^void* sys_malloc(uint32_t size)$/;"	f
-sys_write	userprog/syscall-init.c	/^uint32_t sys_write(char* str) {$/;"	f
-syscall	userprog/syscall-init.c	/^typedef void* syscall;$/;"	t	file:
+sys_open	fs/fs.c	/^int32_t sys_open(const char* pathname, enum oflags flags)$/;"	f
+sys_write	userprog/syscall_init.c	/^uint32_t sys_write(char* str) {$/;"	f
+syscall	userprog/syscall_init.c	/^typedef void* syscall;$/;"	t	file:
 syscall_handler	kernel/kernel.s	/^syscall_handler:$/;"	l
-syscall_init	userprog/syscall-init.c	/^void syscall_init(void) {$/;"	f
-syscall_nr	userprog/syscall-init.c	10;"	d	file:
-syscall_table	userprog/syscall-init.c	/^syscall syscall_table[syscall_nr];$/;"	v
+syscall_init	userprog/syscall_init.c	/^void syscall_init(void) {$/;"	f
+syscall_nr	userprog/syscall_init.c	10;"	d	file:
+syscall_table	userprog/syscall_init.c	/^syscall syscall_table[syscall_nr];$/;"	v
 tab	device/keyboard.c	14;"	d	file:
 tail	device/ioqueue.h	/^    int32_t tail;\/\/队尾指针 数组下标$/;"	m	struct:ioqueue
 tail	lib/kernel/list.h	/^    struct list_elem tail;$/;"	m	struct:list	typeref:struct:list::list_elem

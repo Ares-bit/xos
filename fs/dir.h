@@ -5,7 +5,7 @@
 #include "inode.h"
 #include "stdint.h"
 
-#define MAX_FILE_NAME_LEN   16
+struct dir root_dir;
 
 //目录结构
 struct dir {

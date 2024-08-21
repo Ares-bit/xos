@@ -3,6 +3,7 @@
 #include "stdio_kernel.h"
 #include "thread.h"
 #include "bitmap.h"
+#include "dir.h"
 
 //全局打开的文件表，全局就一个文件表
 struct file file_table[MAX_FILE_OPEN];

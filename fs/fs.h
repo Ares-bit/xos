@@ -1,5 +1,6 @@
 #ifndef __FS_FS_H
 #define __FS_FS_H
+#include "stdint.h"
 
 #define MAX_FILES_PER_PART  4096//每个分区最大创建文件数
 #define BITS_PER_SECTOR     4096//每个扇区位数
@@ -7,8 +8,11 @@
 #define BLOCK_SIZE          SECTOR_SIZE//块字节数
 
 #define MAX_PATH_LEN        512//路径最大长度
+#define MAX_FILE_OPEN       32
+#define MAX_FILE_NAME_LEN   16
 
 struct partition* cur_part;//默认情况下操作的是哪个分区
+extern struct dir root_dir;
 
 enum file_types {
     FT_UNKNOWN,
@@ -31,6 +35,7 @@ struct path_search_record {
     enum file_types file_type;//找到的是普通文件还是目录，找不到的为未知类型
 };
 
+int32_t sys_open(const char* pathname, enum oflags flags);
 void filesys_init();
 
 #endif

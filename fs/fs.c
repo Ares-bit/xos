@@ -8,7 +8,9 @@
 #include "string.h"
 #include "debug.h"
 #include "memory.h"
+#include "file.h"
 
+extern struct file file_table[MAX_FILE_OPEN];
 extern uint8_t channel_cnt;//按硬盘数计算的通道数
 extern struct ide_channel channels[2];//有两个ide通道
 extern struct list partition_list;//分区队列
@@ -271,7 +273,7 @@ static int search_file(const char* pathname, struct path_search_record* searched
 }
 
 //打开文件或创建文件成功后返回fd
-int32_t sys_open(const char* filename, enum oflags flags)
+int32_t sys_open(const char* pathname, enum oflags flags)
 {   
     //这样也不行，目录也可以最后不带/啊，这样约束不住的，别急，下边还有拦截
     if (pathname[strlen(pathname) - 1] == '/') {
@@ -362,7 +364,7 @@ void filesys_init()
                     //读出分区的第2个扇区super
                     ide_read(hd, part->start_lba + 1, sb_buf, 1);
 
-                    //判断该分区是否存在文件系统
+                    //判断该分区是否存在文件系统，为了方便定位，这里改成不管怎么样都格式化硬盘，创建目录的时候写硬盘会填全0，所以会覆盖之前的目录项导致文件检测不出来之前是否存在
                     if (sb_buf->magic == 0x20001212) {
                         printk("%s has filesystem\n", part->name);
                     } else {

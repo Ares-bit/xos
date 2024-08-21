@@ -10,8 +10,9 @@
 #include "ioqueue.h"
 #include "process.h"
 #include "syscall.h"
-#include "syscall-init.h"
+#include "syscall_init.h"
 #include "stdio.h"
+#include "fs.h"
 
 void k_thread_a(void*);
 void k_thread_b(void*);
@@ -24,6 +25,7 @@ int main(void) {
     init_all();
     //打开时钟中断
 	intr_enable();
+    sys_open("/file4", O_CREAT);
     process_execute(u_prog_a, "u_prog_a");
     process_execute(u_prog_b, "u_prog_b");
     thread_start("k_thread_a", 31, k_thread_a, "I am thread_a");

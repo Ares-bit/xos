@@ -137,7 +137,7 @@ void inode_close(struct inode* inode)
 
         //因为inode分配在内核空间，所以还要将当前页目录地址置空后再释放
         struct task_struct* cur = running_thread();
-        uint32_t cur_pagedir_bak = cur->pgdir;
+        uint32_t* cur_pagedir_bak = cur->pgdir;
         cur->pgdir = NULL;
         sys_free(inode);
         cur->pgdir = cur_pagedir_bak;

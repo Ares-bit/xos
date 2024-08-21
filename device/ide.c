@@ -208,7 +208,7 @@ void ide_write(struct disk* hd, uint32_t lba, void* buf, uint32_t sec_cnt)
     lock_acquire(&hd->my_channel->lock);
     select_disk(hd);
     uint32_t secs_op;
-    uint32_t secs_done;
+    uint32_t secs_done = 0;//草了因为这个没赋初始值导致硬盘写不进去，我说文件怎么一直创建成功但是硬盘没东西呢
     while(secs_done < sec_cnt) {
         if (secs_done + 256 <= sec_cnt) {
             secs_op = 256;

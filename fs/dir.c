@@ -6,8 +6,6 @@
 #include "debug.h"
 #include "bitmap.h"
 
-struct dir root_dir;
-
 //打开根目录
 void open_root_dir(struct partition* part)
 {

@@ -4,8 +4,6 @@
 #include "inode.h"
 #include "fs.h"
 
-#define MAX_FILE_OPEN   32
-
 struct file {
     uint32_t fd_pos;//记录当前文件操作偏移地址
     enum oflags fd_flag;//标识文件可读可写
