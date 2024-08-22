@@ -4,6 +4,7 @@
 #include "thread.h"
 #include "bitmap.h"
 #include "dir.h"
+#include "interrupt.h"
 
 //全局打开的文件表，全局就一个文件表
 struct file file_table[MAX_FILE_OPEN];
@@ -179,4 +180,36 @@ rollback:
     }
     sys_free(io_buf);
     return -1;
+}
+
+//打开inode_no的文件，成功返回描述符
+int32_t file_open(uint32_t inode_no, uint8_t flag)
+{
+    int fd_idx = get_free_slot_in_global();
+    if (fd_idx == -1) {
+        printk("exceed max open files\n");
+        return -1;
+    }
+    //将inode打开后放到全局文件表中
+    file_table[fd_idx].fd_inode = inode_open(cur_part, inode_no);
+    //每次打开文件，要将pos置为0，文件指针指向文件头部
+    file_table[fd_idx].fd_pos = 0;
+    file_table[fd_idx].fd_flag = flag;
+    bool* write_deny = &file_table[fd_idx].fd_inode->write_deny;
+
+    if (flag & O_WRONLY || flag & O_RDWR) {
+        //如果文件可写，则必须考虑写文件的原子性
+        enum intr_status old_status = intr_disable();
+        if (!(*write_deny)) {
+            //如果文件未被打开，则将打开标志置为真
+            *write_deny = true;
+            intr_set_status(old_status);
+        } else {
+            //如果文件已经被别人打开，则返回错误，不允许再写
+            intr_set_status(old_status);
+            printk("file can't be write now, try again later\n");
+            return -1;
+        }
+    }
+    return pcb_fd_install(fd_idx);
 }

@@ -17,7 +17,7 @@ static void start_process(void* filename_)
 {
     void* function = filename_;
     struct task_struct* cur = running_thread();
-    cur->self_kstack += sizeof(struct thread_stack);
+    cur->self_kstack = (uint32_t*)((uint32_t)cur->self_kstack + sizeof(struct thread_stack));
     struct intr_stack* proc_stack = (struct intr_stack*)cur->self_kstack;
 
     proc_stack->edi = proc_stack->esi = \

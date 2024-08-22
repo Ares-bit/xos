@@ -8,6 +8,7 @@
 #include "print.h"
 #include "process.h"
 #include "sync.h"
+#include "stdio_kernel.h"
 
 #define PG_SIZE 4096
 
@@ -45,8 +46,8 @@ static pid_t allocate_pid(void)
 //在栈中预留线程需要的中断栈+线程栈空间，初始化线程栈
 void thread_create(struct task_struct* pthread, thread_func function, void* func_arg)
 {
-    pthread->self_kstack -= sizeof(struct intr_stack);
-    pthread->self_kstack -= sizeof(struct thread_stack);
+    pthread->self_kstack = (uint32_t*)((uint32_t)pthread->self_kstack - sizeof(struct intr_stack));
+    pthread->self_kstack = (uint32_t*)((uint32_t)pthread->self_kstack - sizeof(struct thread_stack));
     struct thread_stack* kthread_stack = (struct thread_stack*)pthread->self_kstack;
     kthread_stack->eip = kernel_thread;
     kthread_stack->function = function;

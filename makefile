@@ -122,7 +122,8 @@ $(BUILD_DIR)/inode.o: fs/inode.c fs/inode.h device/ide.h fs/fs.h lib/stdint.h ke
 	lib/string.h lib/kernel/list.h kernel/interrupt.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/file.o: fs/file.c fs/file.h fs/fs.h lib/kernel/stdio_kernel.h thread/thread.h lib/kernel/bitmap.h
+$(BUILD_DIR)/file.o: fs/file.c fs/file.h fs/fs.h lib/kernel/stdio_kernel.h thread/thread.h lib/kernel/bitmap.h \
+	kernel/interrupt.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/dir.o: fs/dir.c fs/dir.h fs/file.h fs/inode.h lib/kernel/stdio_kernel.h device/ide.h \

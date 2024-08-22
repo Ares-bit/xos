@@ -327,6 +327,11 @@ int32_t sys_open(const char* pathname, enum oflags flags)
             printk("creating file\n");
             fd = file_create(searched_record.parent_dir, strrchr(pathname, '/') + 1, flags);
             dir_close(searched_record.parent_dir);
+            break;
+        default:
+            //除创建操作都交给file_open处理
+            fd = file_open(inode_no, flags);
+            break;
     }
 
     return fd;

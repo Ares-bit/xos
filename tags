@@ -79,8 +79,8 @@ IDT_DESC_DPL3	kernel/global.h	30;"	d
 IDT_DESC_P	kernel/global.h	28;"	d
 INODE_BITMAP	fs/file.h	/^    INODE_BITMAP,   \/\/inode位图$/;"	e	enum:bitmap_type
 INPUT_FREQUENCY	device/timer.c	10;"	d	file:
-INTR_OFF	kernel/interrupt.h	/^    INTR_OFF,$/;"	e	enum:intr_status
-INTR_ON	kernel/interrupt.h	/^    INTR_ON$/;"	e	enum:intr_status
+INTR_OFF	kernel/interrupt.h	/^    INTR_OFF$/;"	e	enum:intr_status
+INTR_ON	kernel/interrupt.h	/^    INTR_ON = 1,$/;"	e	enum:intr_status
 IRQ0_FREQUENCY	device/timer.c	9;"	d	file:
 KBD_BUF_PORT	device/keyboard.c	9;"	d	file:
 K_HEAP_START	kernel/memory.c	18;"	d	file:
@@ -112,7 +112,7 @@ PG_RW_R	kernel/memory.h	22;"	d
 PG_RW_W	kernel/memory.h	23;"	d
 PG_SIZE	kernel/global.h	78;"	d
 PG_SIZE	kernel/memory.c	12;"	d	file:
-PG_SIZE	thread/thread.c	12;"	d	file:
+PG_SIZE	thread/thread.c	13;"	d	file:
 PG_SIZE	userprog/tss.c	8;"	d	file:
 PG_US_S	kernel/memory.h	24;"	d
 PG_US_U	kernel/memory.h	25;"	d
@@ -390,6 +390,7 @@ fd_pos	fs/file.h	/^    uint32_t fd_pos;\/\/记录当前文件操作偏移地址$
 fd_table	thread/thread.h	/^    int32_t fd_table[MAX_FILES_OPEN_PER_PROC];\/\/文件描述符数组$/;"	m	struct:task_struct
 file	fs/file.h	/^struct file {$/;"	s
 file_create	fs/file.c	/^int32_t file_create(struct dir* parent_dir, char* filename, enum oflags flag)$/;"	f
+file_open	fs/file.c	/^int32_t file_open(uint32_t inode_no, uint8_t flag)$/;"	f
 file_table	fs/file.c	/^struct file file_table[MAX_FILE_OPEN];$/;"	v	typeref:struct:file
 file_type	fs/fs.h	/^    enum file_types file_type;\/\/找到的是普通文件还是目录，找不到的为未知类型$/;"	m	struct:path_search_record	typeref:enum:path_search_record::file_types
 file_types	fs/fs.h	/^enum file_types {$/;"	g
