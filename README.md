@@ -1,1 +1,1 @@
-# xos is a too young too simple operating system.
+# xos is a sample of operating system, refer to 《操作系统真象还原》by 郑钢.
