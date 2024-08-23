@@ -9,6 +9,7 @@
 #include "debug.h"
 #include "memory.h"
 #include "file.h"
+#include "thread.h"
 
 extern struct file file_table[MAX_FILE_OPEN];
 extern uint8_t channel_cnt;//按硬盘数计算的通道数
@@ -335,6 +336,29 @@ int32_t sys_open(const char* pathname, enum oflags flags)
     }
 
     return fd;
+}
+
+//根据当前进程fd找到对应的全局文件表下标
+static uint32_t fd_local2glocal(uint32_t local_fd)
+{
+    struct task_struct* cur = running_thread();
+    int32_t global_fd = cur->fd_table[local_fd];
+    ASSERT(global_fd > 0 && global_fd < MAX_FILE_OPEN);
+    return (uint32_t)global_fd;
+}
+
+//关闭文件描述符fd指向的文件
+int32_t sys_close(uint32_t fd)
+{
+    int32_t ret = -1;
+    struct task_struct* cur = running_thread();
+
+    if (fd > 2) {
+        uint32_t _fd = fd_local2glocal(fd);
+        ret = file_close(&file_table[_fd]);
+        cur->fd_table[fd] = -1;
+    }
+    return ret;
 }
 
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统

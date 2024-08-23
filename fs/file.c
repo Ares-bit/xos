@@ -34,7 +34,7 @@ int32_t pcb_fd_install(int32_t global_fd_idx)
     while (local_fd_idx < MAX_FILES_OPEN_PER_PROC) {
         //进程可打开的最多文件个数8
         if (cur->fd_table[local_fd_idx] == -1) {
-            cur->fd_table[local_fd_idx] == global_fd_idx;
+            cur->fd_table[local_fd_idx] = global_fd_idx;
             break;
         }
         local_fd_idx++;
@@ -212,4 +212,17 @@ int32_t file_open(uint32_t inode_no, uint8_t flag)
         }
     }
     return pcb_fd_install(fd_idx);
+}
+
+//关闭文件
+int32_t file_close(struct file* file)
+{
+    if (file == NULL) {
+        return -1;
+    }
+
+    file->fd_inode->write_deny = false;
+    inode_close(file->fd_inode);
+    file->fd_inode = NULL;//使file可以指向新文件
+    return 0;
 }

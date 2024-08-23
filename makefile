@@ -114,7 +114,7 @@ $(BUILD_DIR)/ide.o: device/ide.c device/ide.h kernel/global.h lib/kernel/stdio_k
 	kernel/debug.h device/timer.h lib/string.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/fs.o: fs/fs.c fs/fs.h fs/inode.h fs/dir.h lib/stdint.h kernel/global.h \
+$(BUILD_DIR)/fs.o: fs/fs.c fs/fs.h fs/inode.h fs/dir.h lib/stdint.h kernel/global.h thread/thread.h \
 	lib/kernel/stdio_kernel.h device/ide.h lib/string.h kernel/debug.h kernel/memory.h
 	$(CC) $(CFLAGS) $< -o $@
 
