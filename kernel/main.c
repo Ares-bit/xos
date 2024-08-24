@@ -13,6 +13,7 @@
 #include "syscall_init.h"
 #include "stdio.h"
 #include "fs.h"
+#include "string.h"
 
 void k_thread_a(void*);
 void k_thread_b(void*);
@@ -34,10 +35,35 @@ int main(void) {
     sys_open("/file4", O_CREAT);
     uint32_t fd = sys_open("/file4", O_RDWR);
     printf("fd:%d\n", fd);
-    sys_write(fd, "hello, world\n", 13);
-    sys_close(fd);
-    printf("%d closed now\n", fd);
+    char buf[64] = {0};
+    int read_bytes = sys_read(fd, buf, 18);
+    printf("1 read %d bytes:\n%s\n", read_bytes, buf);
 
+    memset(buf, 0, 64);
+    read_bytes = sys_read(fd, buf, 6);
+    printf("2 read %d bytes:\n%s\n", read_bytes, buf);    
+
+    memset(buf, 0, 64);
+    read_bytes = sys_read(fd, buf, 6);
+    printf("3 read %d bytes:\n%s\n", read_bytes, buf);  
+
+    printf("--------close file and reopen---------\n");
+
+    sys_close(fd);
+    sys_open("/file4", O_RDWR);
+    memset(buf, 0, 64);
+    read_bytes = sys_read(fd, buf, 26);
+    printf("4 read %d bytes:\n%s\n", read_bytes, buf);  
+    //sys_write(fd, "hello, world\n", 13);
+
+    printf("--------lseek file SEEK_SET---------\n");
+    sys_lseek(fd, 0, SEEK_SET);
+    memset(buf, 0, 64);
+    read_bytes = sys_read(fd, buf, 26);
+    printf("5 read %d bytes:\n%s\n", read_bytes, buf);     
+
+    printf("%d closed now\n", fd);
+    sys_close(fd);
     while (1);
 
     return 0;

@@ -388,6 +388,50 @@ int32_t sys_write(int32_t fd, const void* buf, uint32_t count)
     }
 }
 
+//从fd指向的文件读取count字节到buf
+int32_t sys_read(int32_t fd, void* buf, uint32_t count)
+{
+    if (fd < 0) {
+        printk("sys_read: fd error!\n");
+        return -1;
+    }
+    ASSERT(buf != NULL);
+    uint32_t _fd = fd_local2glocal(fd);
+    return file_read(&file_table[_fd], buf, count);
+}
+
+//设置文件指针位置，成功时返回新偏移量
+int32_t sys_lseek(int32_t fd, int32_t offset, enum whence whence)
+{
+    if (fd < 0) {
+        printk("sys_lseek: fd error!\n");
+        return -1;       
+    }
+    ASSERT(whence > 0 && whence < 4);
+    uint32_t _fd = fd_local2glocal(fd);
+    struct file* pf = &file_table[_fd];
+    int32_t new_pos = 0;
+    int32_t file_size = (int32_t)pf->fd_inode->i_size;
+    switch (whence) {
+        case SEEK_SET:
+            new_pos = offset;//从文件起始处偏移Offset
+            break;
+        case SEEK_CUR:
+            new_pos = (int32_t)pf->fd_pos + offset;//从当前指针位置偏移offet
+            break;
+        case SEEK_END:
+            new_pos = file_size + offset;//从文件最后一字节下一字节偏移offset
+            break;
+    }
+    //新指针位置必须位于文件范围内，如果直接定位到SEEK_END offset = 0 也是返回-1
+    if (new_pos < 0 || new_pos > file_size - 1) {
+        return -1;
+    }
+
+    pf->fd_pos = new_pos;
+    return pf->fd_pos;
+}
+
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统
 void filesys_init()
 {

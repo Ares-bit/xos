@@ -28,6 +28,13 @@ enum oflags {
     O_CREAT = 4//如果是3就是0x11，没法跟其他的或在一起用了，所以是4 0x100
 };
 
+//文件读写位置偏移量
+enum whence {
+    SEEK_SET = 1,
+    SEEK_CUR,
+    SEEK_END
+};
+
 //用来记录查找文件过程中走过的地方，记录最先找不到的路径，即路径断裂的位置
 struct path_search_record {
     char searched_path[MAX_PATH_LEN];//查找过程中的父路径
@@ -38,6 +45,8 @@ struct path_search_record {
 int32_t sys_open(const char* pathname, enum oflags flags);
 int32_t sys_close(uint32_t fd);
 int32_t sys_write(int32_t fd, const void* buf, uint32_t count);
+int32_t sys_read(int32_t fd, void* buf, uint32_t count);
+int32_t sys_lseek(int32_t fd, int32_t offset, enum whence whence);
 void filesys_init();
 
 #endif

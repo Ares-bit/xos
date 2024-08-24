@@ -395,7 +395,7 @@ int32_t file_write(struct file* file, const void* buf, uint32_t count)
     bool first_write_block = true;//含有剩余空间的块标识
     file->fd_pos = file->fd_inode->i_size - 1;//置fd_pos，写数据时随时更新
     while (bytes_written < count) {
-        memset(io_buf, 0, BLOCK_SIZE);
+        memset(io_buf, 0, BLOCK_SIZE);//需要清零，因为如果最后一次写不满一块，那么剩余部分会残留上次写漫整块的数据
         sec_idx = file->fd_inode->i_size / BLOCK_SIZE;
         //文件最后一个可用块地址
         sec_lba = all_blocks[sec_idx];
@@ -428,4 +428,104 @@ int32_t file_write(struct file* file, const void* buf, uint32_t count)
     sys_free(all_blocks);
     sys_free(io_buf);
     return bytes_written;
+}
+
+//从文件中读取count个字节，返回读出的字节数
+int32_t file_read(struct file* file, void* buf, uint32_t count)
+{
+    uint8_t* buf_dst = (uint8_t*)buf;
+    uint32_t size = count, size_left = size;
+
+    //如果文件字节数小于Count，则把文件大小当做size，后边要支持pos定位读，所以不能直接比较count和i_size
+    if ((file->fd_pos + count) > file->fd_inode->i_size) {
+        size = file->fd_inode->i_size - file->fd_pos;//pos + count超了可以读，读的是文件从Pos开始到结尾的大小
+        size_left = size;
+        if (size == 0) {//如果pos本身超出文件实际就不该读了，应该是size <= 0
+            return -1;
+        }
+    }
+
+    uint8_t* io_buf = (uint8_t*)sys_malloc(SECTOR_SIZE);
+    if (io_buf == NULL) {
+        printk("file_read: sys_malloc for io_buf failed!\n");
+        return -1;
+    }
+
+    uint32_t* all_blocks = (uint32_t*)sys_malloc(SECTOR_SIZE + 12 * 4);
+    if (all_blocks == NULL) {
+        printk("file_read: sys_malloc for all_blocks failed!\n");
+        return -1;        
+    }
+
+    //读取的起始块idx，结束块idx
+    uint32_t block_read_start_idx = file->fd_pos / SECTOR_SIZE;
+    uint32_t block_read_end_idx = (file->fd_pos + size) / SECTOR_SIZE;
+
+    //要读取的块数-1
+    uint32_t read_blocks = block_read_end_idx - block_read_start_idx;
+    ASSERT(block_read_start_idx < 128 + 12 - 1 && block_read_end_idx < 128 + 12 - 1);
+    
+    int32_t indirect_block_table;
+    uint32_t block_idx;
+
+    //跟file write一样，先初始化all blocks
+    if (read_blocks == 0) {
+        //在起始块内读取即可
+        ASSERT(block_read_start_idx == block_read_end_idx);
+        if (block_read_end_idx < 12) {
+            //只读一个直接块
+            block_idx = block_read_end_idx;
+            all_blocks[block_idx] = file->fd_inode->i_sectors[block_idx];    
+        } else {
+            //只读一个间接块
+            indirect_block_table = file->fd_inode->i_sectors[12];
+            ide_read(cur_part->my_disk, indirect_block_table, all_blocks + 12, 1);
+        }
+    } else {
+        if (block_read_end_idx < 12) {
+            block_idx = block_read_start_idx;
+            while (block_idx < block_read_end_idx) {
+                all_blocks[block_idx] = file->fd_inode->i_sectors[block_idx];
+                block_idx++;
+            }
+        } else if (block_read_start_idx < 12 && block_read_end_idx >= 12) {
+            block_idx = block_read_start_idx;
+            while (block_idx < 12) {
+                all_blocks[block_idx] = file->fd_inode->i_sectors[block_idx];
+                block_idx++;
+            }
+            ASSERT(file->fd_inode->i_sectors[12] != 0);
+            indirect_block_table = file->fd_inode->i_sectors[12];
+            ide_read(cur_part->my_disk, indirect_block_table, all_blocks + 12, 1);
+        } else {
+            ASSERT(file->fd_inode->i_sectors[12] != 0);
+            indirect_block_table = file->fd_inode->i_sectors[12];
+            ide_read(cur_part->my_disk, indirect_block_table, all_blocks + 12, 1);
+        }
+    }
+
+    uint32_t sec_idx, sec_lba, sec_off_bytes, sec_left_bytes, chunk_size;
+    uint32_t bytes_read = 0;
+    while (bytes_read < size) {
+        sec_idx = file->fd_pos / SECTOR_SIZE;
+        sec_lba = all_blocks[sec_idx];
+        sec_off_bytes = file->fd_pos % SECTOR_SIZE;//pos所在扇区中的偏移量
+        sec_left_bytes = SECTOR_SIZE - sec_off_bytes;//一开始值为第一个扇区中要读的不满整个扇区的部分
+
+        chunk_size = size_left < sec_left_bytes ? size_left : sec_left_bytes;
+        
+        memset(io_buf, 0, BLOCK_SIZE);
+        ide_read(cur_part->my_disk, sec_lba, io_buf, 1);
+        //如果只需要读一个块的情况，这种会拷贝超了，比如只读一个块的一个字节，这个会直接把剩余扇区都拷贝过去
+        //不不不不不，不会拷贝超，你看512行，如果只读一个字节，那么size left会小于扇区中剩余字节，会使用size_left作为拷贝值
+        memcpy(buf_dst, io_buf + sec_off_bytes, chunk_size);
+
+        buf_dst += chunk_size;
+        file->fd_pos += chunk_size;
+        bytes_read += chunk_size;
+        size_left -= chunk_size;
+    }
+    sys_free(all_blocks);
+    sys_free(io_buf);
+    return bytes_read;
 }
