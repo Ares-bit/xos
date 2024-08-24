@@ -145,6 +145,89 @@ void inode_close(struct inode* inode)
     intr_set_status(old_status);
 }
 
+//将硬盘分区part上的inode清空
+void inode_delete(struct partition* part, uint32_t inode_no, void* io_buf)
+{
+    ASSERT(inode_no < MAX_FILES_PER_PART);
+    struct inode_position inode_pos;
+    //定位inode位置
+    inode_locate(part, inode_no, &inode_pos);
+    ASSERT(inode_pos.sec_lba <= part->start_lba + part->sec_cnt);
+
+    //如果inode跨扇区，要能装下两个扇区
+    char* inode_buf = (char*)io_buf;
+    if (inode_pos.two_sec == true) {
+        //如果inode跨扇区
+        ide_read(part->my_disk, inode_pos.sec_lba, inode_buf, 2);
+        //直接置空整个inode
+        memset(inode_buf + inode_pos.off_size, 0, sizeof(struct inode));
+        ide_write(part->my_disk, inode_pos.sec_lba, inode_buf, 2);
+    } else {
+        //如果inode不跨扇区
+        ide_read(part->my_disk, inode_pos.sec_lba, inode_buf, 1);
+        //直接置空整个inode
+        memset(inode_buf + inode_pos.off_size, 0, sizeof(struct inode));
+        ide_write(part->my_disk, inode_pos.sec_lba, inode_buf, 1);        
+    }
+}
+
+void inode_release(struct partition* part, uint32_t inode_no)
+{
+    struct inode* inode_to_del = inode_open(part, inode_no);
+    ASSERT(inode_to_del->inode_no == inode_no);
+
+    //回收inode所占块
+    uint8_t block_idx = 0, block_cnt = 12;
+    uint32_t block_bitmap_idx;
+    uint32_t all_blocks[12 + 128] = {0};//接收文件块地址
+
+    //先存直接块地址
+    while (block_idx < 12) {
+        all_blocks[block_idx] = inode_to_del->i_sectors[block_idx];
+        block_idx++;
+    }
+
+    //如果有间接块，则读取间接地址块获取所有间接块的地址
+    if (inode_to_del->i_sectors[12] != 0) {
+        ide_read(part->my_disk, inode_to_del->i_sectors[12], all_blocks + 12, 1);
+        block_cnt = 12 + 128;
+
+        //回收间接地址块的block，修改bitmap并同步到硬盘
+        block_bitmap_idx = inode_to_del->i_sectors[12] - part->sb->data_start_lba;
+        ASSERT(block_bitmap_idx > 0);
+        bitmap_set(&part->block_bitmap, block_bitmap_idx, 0);
+        bitmap_sync(part, block_bitmap_idx, BLOCK_BITMAP);
+    }
+
+    //已经获取了全部地址到all_blocks，开始逐个回收
+    block_idx = 0;
+    //对于普通文件，一定是连续的块，所以不需要遍历所有块地址检查是否为0后再回收，直接将地址为零作为循环结束条件即可；
+    //对于目录文件，块与块之间没有连续关系，需要对每个块都判断地址是否为空再决定是否回收
+    //无论如何，遍历140个块总是没有毛病的
+    while (block_idx < block_cnt) {
+        if (all_blocks[block_idx] != 0) {
+            block_bitmap_idx = all_blocks[block_idx] - part->sb->data_start_lba;
+            ASSERT(block_bitmap_idx > 0);
+            bitmap_set(&part->block_bitmap, block_bitmap_idx, 0);
+            bitmap_sync(part, block_bitmap_idx, BLOCK_BITMAP);
+        }
+        block_idx++;
+    }
+
+    //回收该inode所占用的inode
+    bitmap_set(&part->inode_bitmap, inode_no, 0);
+    bitmap_sync(part, inode_no, INODE_BITMAP);
+
+#if 0
+    //以下用调试inode_delete功能，本来再建新文件会覆盖原inode中的数据的
+    void *io_buf = sys_malloc(SECTOR_SIZE * 2);
+    inode_delete(part, inode_no, io_buf);
+    sys_free(io_buf);
+#endif
+    //最后关闭inode，彻底释放inode在内存中的占用
+    inode_close(inode_to_del);
+}
+
 //初始化新inode
 void inode_init(uint32_t inode_no, struct inode* new_inode)
 {
