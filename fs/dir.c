@@ -318,3 +318,66 @@ bool delete_dir_entry(struct partition* part, struct dir* pdir, uint32_t inode_n
     //遍历了所有目录文件块都没有找到inode_no文件
     return false;
 }
+
+//读取目录，返回其中一个目录项
+struct dir_entry* dir_read(struct dir* dir)
+{
+    struct dir_entry* dir_e = (struct dir_entry*)dir->dir_buf;//终于用到dir buf了
+    struct inode* dir_inode = dir->inode;
+    uint32_t all_blocks[12 + 128] = {0}, block_cnt = 12;
+    uint32_t block_idx = 0, dir_entry_idx = 0;
+
+    //典中典之保存所有文件块地址
+    while (block_idx < 12) {
+        all_blocks[block_idx] = dir_inode->i_sectors[block_idx];
+        block_idx++;
+    }
+
+    if (dir_inode->i_sectors[12] != 0) {
+        ide_read(cur_part->my_disk, dir_inode->i_sectors[12], all_blocks + 12, 1);
+        block_cnt = 140;
+    }
+
+    block_idx = 0;
+    //当前文件块的偏移
+    uint32_t cur_dir_entry_pos = 0;
+    uint32_t dir_entry_size = cur_part->sb->dir_entry_size;
+    uint32_t dir_entrys_per_sec = SECTOR_SIZE / dir_entry_size;
+
+    //遍历当前扇区的目录项
+    while (dir->dir_pos < dir_inode->i_size) {
+        if (dir->dir_pos >= dir_inode->i_size) {
+            return NULL;
+        }
+        //如果块地址为0则不遍历
+        if (all_blocks[block_idx] == 0) {
+            block_idx++;
+            continue;
+        }
+        memset(dir_e, 0, SECTOR_SIZE);
+        //读一个块到dir缓冲里
+        ide_read(cur_part->my_disk, all_blocks[block_idx], dir_e, 1);
+        dir_entry_idx = 0;
+        //刚才读出来了，现在开始遍历
+        while (dir_entry_idx < dir_entrys_per_sec) {
+            if ((dir_e + dir_entry_idx)->f_type != FT_UNKNOWN) {
+                //如果当前pos小于dir pos，表明之前已经返回过几条目录项了，要从上次返回的位置继续
+                if (cur_dir_entry_pos < dir->dir_pos) {
+                    //一直continue直到当前dir pos位置，把此处dir entry返回即可
+                    cur_dir_entry_pos += dir_entry_size;
+                    dir_entry_idx++;
+                    continue;
+                }
+                ASSERT(cur_dir_entry_pos == dir->dir_pos);
+                //修改dir pos后移一条
+                dir->dir_pos += dir_entry_size;
+                return dir_e + dir_entry_idx;
+            }
+            //为啥这里不让dir post后移？dir pos到底指向哪里，现在看是每找成功一条，dir pos就后移一条，但是成功这条不一定是dir pos指向的
+            //知道了，看348行，dir pos是把目录文件中的空洞去除后的文件指针，这下明白了，并无实际意义
+            dir_entry_idx++;
+        }
+        block_idx++;
+    }
+    return NULL;
+}
