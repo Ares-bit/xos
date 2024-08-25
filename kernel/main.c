@@ -40,7 +40,7 @@ int main(void) {
 
     printf("fd:%d\n", fd);
     char buf[64] = {0};
-    int read_bytes = sys_read(fd, buf, 18);
+    uint32_t read_bytes = sys_read(fd, buf, 18);
     printf("1 read %d bytes:\n%s\n", read_bytes, buf);
 
     memset(buf, 0, 64);
@@ -68,7 +68,20 @@ int main(void) {
     printf("%d closed now\n", fd);
     sys_close(fd);
 
-    printf("/file4 delete %s!\n", sys_unlink("/file4") == 0 ? "done" : "fail");
+    //printf("/file4 delete %s!\n", sys_unlink("/file4") == 0 ? "done" : "fail");
+    printf("/dir1/subdir1 create %s!\n", sys_mkdir("/dir1/subdir1") == 0 ? "done" : "fail");
+    printf("/dir1 create %s!\n", sys_mkdir("/dir1") == 0 ? "done" : "fail");
+    printf("/dir1/subdir1 create %s!\n", sys_mkdir("/dir1/subdir1") == 0 ? "done" : "fail");
+    sys_open("/dir1/subdir1/file1", O_CREAT);
+    uint32_t fd1 = sys_open("/dir1/subdir1/file1", O_RDWR);
+    if (fd1 > 0) {
+        sys_write(fd1, "aiyouwo\n", 8);
+        sys_lseek(fd1, 0, SEEK_SET);   
+        char buf[64] = {0};
+        sys_read(fd1, buf, 8);
+        printf("/dir1/subdir1/file1 says:\n%s", buf);
+        sys_close(fd1);
+    }
 
     while (1);
 

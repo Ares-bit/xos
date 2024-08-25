@@ -212,7 +212,7 @@ int32_t path_depth_cnt(char* pathname)
 }
 
 //搜索文件，找到返回inode号，找不到返回-1（用循环代替递归）
-static int search_file(const char* pathname, struct path_search_record* searched_record)
+static int32_t search_file(const char* pathname, struct path_search_record* searched_record)
 {
     if (!strcmp(pathname, "/") || !strcmp(pathname, "/.") || !strcmp(pathname, "/..")) {
         searched_record->parent_dir = &root_dir;
@@ -258,10 +258,11 @@ static int search_file(const char* pathname, struct path_search_record* searched
                 continue;
             } else if (FT_REGULAR == dir_e.f_type) {//如果找到的是普通文件，则直接返回当前文件inode no
                 searched_record->file_type = FT_REGULAR;//它的父亲是自己所在目录
-                //为啥这里不关闭父目录？？？
+                //为啥这里不关闭父目录？？？应该都放在主调函数做了
                 return dir_e.i_no;
             }
         } else {
+            //这里应该要关父目录，但不知为何没写
             return -1;//如果没找到返回-1
         }
     }
@@ -295,7 +296,7 @@ int32_t sys_open(const char* pathname, enum oflags flags)
 
     //先判断这个文件是否已经创建或打开了，为什么不先去打开队列上查一遍，因为提前不知道inode没法查
     //inode中存一个自己的路径？可不可行？这样找起来更快？
-    int inode_no = search_file(pathname, &searched_record);
+    uint32_t inode_no = search_file(pathname, &searched_record);
     bool found = inode_no != -1 ? true : false;
 
     if (searched_record.file_type == FT_DIRECTORY) {
@@ -441,7 +442,7 @@ int32_t sys_unlink(const char* pathname)
     struct path_search_record searched_record;
     memset(&searched_record, 0, sizeof(struct path_search_record));
 
-    int inode_no = search_file(pathname, &searched_record);
+    int32_t inode_no = search_file(pathname, &searched_record);
 
     ASSERT(inode_no != 0);
     if (inode_no == -1) {
@@ -488,6 +489,129 @@ int32_t sys_unlink(const char* pathname)
     sys_free(io_buf);
     dir_close(searched_record.parent_dir);
     return 0;
+}
+
+//创建目录pathname
+int32_t sys_mkdir(const char* pathname)
+{
+    uint8_t rollback_step = 0;
+    void* io_buf = sys_malloc(SECTOR_SIZE * 2);
+    if (io_buf == NULL) {
+        printk("sys_mkdir: sys_malloc for io_buf failed!\n");
+        return -1;
+    }
+
+    struct path_search_record searched_record;
+    memset(&searched_record, 0, sizeof(struct path_search_record));
+
+    int32_t inode_no = -1;
+    inode_no = search_file(pathname, &searched_record);
+    if (inode_no != -1) {
+        //找到同名则报错
+        printk("sys_mkdir: file or directory %s exist\n", pathname);
+        rollback_step = 1;
+        goto rollback;
+    } else {
+        //如果没找到也不能高兴创建，还要判断是否是中间某个路径断了
+        uint32_t pathname_depth = path_depth_cnt((char*)pathname);
+        uint32_t path_searched_depth = path_depth_cnt(searched_record.searched_path);
+        if (pathname_depth != path_searched_depth) {
+            printk("sys_mkdir: cannot access %s: Not a directory, subpath %s isn't exist\n", pathname, searched_record.searched_path);
+            rollback_step = 1;
+            goto rollback;
+        }
+    }
+
+    struct dir* parent_dir = searched_record.parent_dir;
+    //这里最好使用searched_path它不带末尾的/，因为输入pathname可能带末尾的/，下边这句就找不对位置了
+    //获取要创建的目录项名字
+    char* dirname = strrchr(searched_record.searched_path, '/') + 1;
+
+    //分配inode，成功后不能马上同步，要到所有异常处理都过去后再同步，如果提前写到硬盘上，还要再改回去
+    inode_no = inode_bitmap_alloc(cur_part);
+    if (inode_no == -1) {
+        printk("sys_mkdir: allocate inode failed\n");
+        rollback_step = 1;
+        goto rollback;
+    }
+
+    //初始化新的inode
+    struct inode new_dir_inode;
+    inode_init(inode_no, &new_dir_inode);
+
+    //分配文件块存储.和.. 因为要同步Bitmap，所以需要获取idx，alloc返回的是地址并非idx
+    uint32_t block_bitmap_idx = 0;
+    int32_t block_lba = -1;
+    block_lba = block_bitmap_alloc(cur_part);//该函数返回Lba
+    if (block_lba == -1) {
+        printk("sys_mkdir: block_bitmap_alloc for create directory failed\n");
+        rollback_step = 2;
+        goto rollback;
+    }
+    new_dir_inode.i_sectors[0] = block_lba;
+    block_bitmap_idx = block_lba - cur_part->sb->data_start_lba;
+    ASSERT(block_bitmap_idx != 0);
+    //bitmap_sync(cur_part, block_bitmap_idx, BLOCK_BITMAP);
+
+    //写入两个目录项
+    memset(io_buf, 0, SECTOR_SIZE * 2);
+    struct dir_entry* p_de = (struct dir_entry*)io_buf;
+
+    memcpy(p_de->filename, ".", 1);
+    p_de->i_no = inode_no;
+    p_de->f_type = FT_DIRECTORY;
+
+    p_de++;
+    memcpy(p_de->filename, "..", 2);
+    p_de->i_no = parent_dir->inode->i_no;
+    p_de->f_type = FT_DIRECTORY;
+    //目录文件块写入硬盘
+    ide_write(cur_part->my_disk, block_lba, io_buf, 1);
+
+    new_dir_inode.i_size = 2 * cur_part->sb->dir_entry_size;
+
+    //在父目录中添加自己的目录项
+    struct dir_entry new_dir_entry;
+    memset(&new_dir_entry, 0, sizeof(struct dir_entry));
+    create_dir_entry(dirname, inode_no, FT_DIRECTORY, &new_dir_entry);
+    memset(io_buf, 0, SECTOR_SIZE * 2);
+    //将新建目录项写入父目录
+    if (!sync_dir_entry(parent_dir, &new_dir_entry, io_buf)) {
+        printk("sys_mkdir: sync_dir_entry to disk failed!\n");
+        rollback_step = 3;
+        goto rollback;//如果554行还开着，那块block就收不回来，因为下边的rollback没回收它
+    }
+    //父目录inode大小发生变化，要同步回去
+    memset(io_buf, 0, SECTOR_SIZE * 2);
+    inode_sync(cur_part, parent_dir->inode, io_buf);
+
+    //同步自己的inode
+    memset(io_buf, 0, SECTOR_SIZE * 2);
+    inode_sync(cur_part, &new_dir_inode, io_buf);    
+
+    //同步inode位图
+    bitmap_sync(cur_part, inode_no, INODE_BITMAP);
+
+    //同步block位图
+    bitmap_sync(cur_part, block_bitmap_idx, BLOCK_BITMAP);
+
+    sys_free(io_buf);
+    //关闭父目录，总忘，记住吧只要search file就会打开父目录，得手动关闭
+    dir_close(searched_record.parent_dir);
+    return 0;
+
+rollback:
+    switch (rollback_step) {
+        case 3:
+            bitmap_set(&cur_part->block_bitmap, block_bitmap_idx, 0);//这个也要加，要不然回收不了block
+        case 2:
+            bitmap_set(&cur_part->inode_bitmap, inode_no, 0);
+        case 1:
+            dir_close(searched_record.parent_dir);
+            break;
+    }
+    sys_free(io_buf);
+    return -1;
 }
 
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统

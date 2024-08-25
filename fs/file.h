@@ -21,6 +21,7 @@ enum bitmap_type {
     BLOCK_BITMAP    //块位图
 };
 
+int32_t inode_bitmap_alloc(struct partition* part);
 int32_t block_bitmap_alloc(struct partition* part);
 void bitmap_sync(struct partition* part, uint32_t bit_idx, enum bitmap_type btmp_type);
 int32_t file_create(struct dir* parent_dir, char* filename, enum oflags flag);
