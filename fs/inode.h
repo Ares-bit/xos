@@ -16,5 +16,6 @@ struct inode {
 };
 
 struct inode* inode_open(struct partition* part, uint32_t inode_no);
-
+void inode_close(struct inode* inode);
+void inode_release(struct partition* part, uint32_t inode_no);
 #endif

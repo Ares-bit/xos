@@ -282,7 +282,7 @@ int32_t sys_open(const char* pathname, enum oflags flags)
         return -1;
     }
 
-    ASSERT(flags <= O_RDONLY | O_WRONLY | O_RDWR | O_CREAT);//0+1+2+4=7
+    ASSERT(flags <= (O_RDONLY | O_WRONLY | O_RDWR | O_CREAT));//0+1+2+4=7
     
     int32_t fd = -1;
 
@@ -430,6 +430,64 @@ int32_t sys_lseek(int32_t fd, int32_t offset, enum whence whence)
 
     pf->fd_pos = new_pos;
     return pf->fd_pos;
+}
+
+//删除文件（非目录）成功返回0
+int32_t sys_unlink(const char* pathname)
+{
+    ASSERT(strlen(pathname) < MAX_PATH_LEN);
+
+    //先判断文件是否存在
+    struct path_search_record searched_record;
+    memset(&searched_record, 0, sizeof(struct path_search_record));
+
+    int inode_no = search_file(pathname, &searched_record);
+
+    ASSERT(inode_no != 0);
+    if (inode_no == -1) {
+        printk("file %s not found!\n", pathname);
+        dir_close(&searched_record.parent_dir);//这一步又忘了，查完之后会自动打开目录的，一定要关闭
+        return -1;
+    }
+    //中间应该还少一步判断：如果输入是目录中间夹文件的路径，就会返回中间的文件inode，这个要判断返回和输入路径是否一致才行
+    //还要看查找目标是否是目录，如果是目录本函数不支持删除
+    if (searched_record.file_type == FT_DIRECTORY) {
+        printk("can't delete a directory with unlink(), use rmdir() to instead\n");
+        dir_close(&searched_record.parent_dir);
+        return -1;
+    }
+
+    //检查是否在已打开文件列表(全局文件表)中
+    uint32_t file_idx = 0;
+    while (file_idx < MAX_FILE_OPEN) {
+        if (file_table[file_idx].fd_inode != NULL && file_table[file_idx].fd_inode->i_no == (uint32_t)inode_no) {
+            //如果该文件再删除时已被打开，则不允许删除
+            break;
+        }
+        file_idx++;
+    }
+
+    if (file_idx < MAX_FILE_OPEN) {
+        dir_close(searched_record.parent_dir);
+        printk("file %s is in use, not allow to delete!\n", pathname);
+        return -1;
+    }
+
+    ASSERT(file_idx == MAX_FILE_OPEN);
+
+    void* io_buf = sys_malloc(SECTOR_SIZE * 2);//删除目录项会改变dir inode，要同步Inode，所以要两块
+    if (io_buf == NULL) {
+        dir_close(searched_record.parent_dir);
+        printk("sys_unlink: malloc for io_buf failed!\n", pathname);        
+        return -1;
+    }
+
+    struct dir* parent_dir = searched_record.parent_dir;
+    delete_dir_entry(cur_part, parent_dir, inode_no, io_buf);
+    inode_release(cur_part, inode_no);
+    sys_free(io_buf);
+    dir_close(searched_record.parent_dir);
+    return 0;
 }
 
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统

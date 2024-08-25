@@ -34,6 +34,10 @@ int main(void) {
 
     sys_open("/file4", O_CREAT);
     uint32_t fd = sys_open("/file4", O_RDWR);
+
+    sys_write(fd, "hello, world\n", 13);
+    sys_lseek(fd, 0, SEEK_SET);//写完文件pos跑到最后去了，需要给定位回去下边才能读到
+
     printf("fd:%d\n", fd);
     char buf[64] = {0};
     int read_bytes = sys_read(fd, buf, 18);
@@ -54,7 +58,6 @@ int main(void) {
     memset(buf, 0, 64);
     read_bytes = sys_read(fd, buf, 26);
     printf("4 read %d bytes:\n%s\n", read_bytes, buf);  
-    //sys_write(fd, "hello, world\n", 13);
 
     printf("--------lseek file SEEK_SET---------\n");
     sys_lseek(fd, 0, SEEK_SET);
@@ -64,6 +67,9 @@ int main(void) {
 
     printf("%d closed now\n", fd);
     sys_close(fd);
+
+    printf("/file4 delete %s!\n", sys_unlink("/file4") == 0 ? "done" : "fail");
+
     while (1);
 
     return 0;

@@ -7,6 +7,7 @@
 #include "ide.h"
 #include "interrupt.h"
 #include "stdint.h"
+#include "file.h"
 
 struct inode_position {
     bool two_sec;//inode是否跨扇区
@@ -171,10 +172,11 @@ void inode_delete(struct partition* part, uint32_t inode_no, void* io_buf)
     }
 }
 
+//这个名起的不好了，说是Inode release，起始释放文件的所有资源
 void inode_release(struct partition* part, uint32_t inode_no)
 {
     struct inode* inode_to_del = inode_open(part, inode_no);
-    ASSERT(inode_to_del->inode_no == inode_no);
+    ASSERT(inode_to_del->i_no == inode_no);
 
     //回收inode所占块
     uint8_t block_idx = 0, block_cnt = 12;
@@ -218,8 +220,9 @@ void inode_release(struct partition* part, uint32_t inode_no)
     bitmap_set(&part->inode_bitmap, inode_no, 0);
     bitmap_sync(part, inode_no, INODE_BITMAP);
 
-#if 0
+#if 1
     //以下用调试inode_delete功能，本来再建新文件会覆盖原inode中的数据的
+    //这里执行一下，到时候查看硬盘数据可以明显看到清零
     void *io_buf = sys_malloc(SECTOR_SIZE * 2);
     inode_delete(part, inode_no, io_buf);
     sys_free(io_buf);
