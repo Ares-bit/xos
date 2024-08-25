@@ -614,6 +614,46 @@ rollback:
     return -1;
 }
 
+//打开目录成功返回目录指针
+struct dir* sys_opendir(const char* name)
+{
+    ASSERT(strlen(name) < MAX_PATH_LEN);
+    //如果传入name是/或/.则返回根目录，根目录是常开不关的
+    if (name[0] == '/' && (name[1] == '\0' || name[1] == '.')) {
+        return &root_dir;
+    }
+
+    struct path_search_record searched_record = {0};
+
+    //查询目录inode是否存在
+    int32_t inode_no = search_file(name, &searched_record);
+    struct dir* ret = NULL;
+    if (inode_no == -1) {
+        printk("in %s, subdir %d not exist\n", name, searched_record.searched_path);
+    } else {
+        //成功了也要判断下深度是否正确，但是这里没写
+        if (searched_record.file_type == FT_REGULAR) {
+            //如果是文件则直接返回空
+            printk("%s is regular file!\n", name);
+        } else if (searched_record.file_type == FT_DIRECTORY) {
+            //如果目录存在则打开后返回指针
+            ret = dir_open(cur_part, inode_no);
+        }
+    }
+    dir_close(searched_record.parent_dir);
+    return ret;
+}
+
+//关闭目录
+int32_t sys_closedir(struct dir* dir)
+{
+    if (dir != NULL) {
+        dir_close(dir);
+        return 0;
+    }
+    return -1;
+}
+
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统
 void filesys_init()
 {
