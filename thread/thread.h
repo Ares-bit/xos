@@ -75,6 +75,7 @@ struct task_struct {
     uint32_t* pgdir;//进程页表虚拟地址
     struct virtual_addr userprog_vaddr;//用户进程虚拟地址空间
     struct mem_block_desc u_block_descs[DESC_CNT];//用户进程自己的内存块描述符
+    uint32_t cwd_inode_nr;//进程所在的工作目录inode编号
     uint32_t stack_magic;//检测栈溢出
 };
 

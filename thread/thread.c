@@ -84,6 +84,7 @@ void init_thread(struct task_struct* pthread, char* name, int prio)
     }
 
     pthread->pgdir = NULL;
+    pthread->cwd_inode_nr = 0;//以根目录为默认工作路径
     pthread->stack_magic = 0x20001212;
 }
 

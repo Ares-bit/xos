@@ -26,145 +26,18 @@ int main(void) {
     put_str("I am kernel\n");
     init_all();
 
-    struct dir* p_dir = NULL, *p_dir1 = NULL;
     sys_mkdir("/dir1");
     sys_mkdir("/dir1/subdir1");
-    uint32_t fd1 = sys_open("/dir1/subdir1/file1", O_CREAT);//创建的文件会直接加到file table中
-    sys_close(fd1);
+    uint32_t fd = sys_open("/dir1/subdir1/file1", O_CREAT);//创建的文件会直接加到file table中
+    sys_close(fd);
 
-    p_dir = sys_opendir("/");
-    if (p_dir) {
-        printf("/ open done!\n");
-        char* type = NULL;
-        struct dir_entry* dir_e = NULL;
-        while (dir_e = sys_readdir(p_dir)) {
-            if (dir_e->f_type == FT_REGULAR) {
-                type = "regular";
-            } else {
-                type = "directory";
-            }
-            printf("    %s  %s\n", type, dir_e->filename);
-        }
-        if (sys_closedir(p_dir) == 0) {
-            printf("/ close done!\n");
-        } else {
-            printf("/ close fail!\n");
-        }
-    } else {
-        printf("/ open fail!\n");
-    }
-
-    p_dir = sys_opendir("/dir1");
-    if (p_dir) {
-        printf("/dir1 open done!\n");
-        char* type = NULL;
-        struct dir_entry* dir_e = NULL;
-        while (dir_e = sys_readdir(p_dir)) {
-            if (dir_e->f_type == FT_REGULAR) {
-                type = "regular";
-            } else {
-                type = "directory";
-            }
-            printf("    %s  %s\n", type, dir_e->filename);
-        }
-
-        if (sys_closedir(p_dir) == 0) {
-            printf("/dir1 close done!\n");
-        } else {
-            printf("/dir1 close fail!\n");
-        }
-    } else {
-        printf("/dir1 open fail!\n");
-    }
-
-    p_dir1 = sys_opendir("/dir1/subdir1");
-    if (p_dir1) {
-        printf("/dir1/subdir1 open done!\n");
-        char* type = NULL;
-        struct dir_entry* dir_e = NULL;
-        while (dir_e = sys_readdir(p_dir1)) {
-            if (dir_e->f_type == FT_REGULAR) {
-                type = "regular";
-            } else {
-                type = "directory";
-            }
-            printf("    %s  %s\n", type, dir_e->filename);
-        }
-        sys_rewinddir(p_dir1);
-        if (sys_closedir(p_dir1) == 0) {
-            printf("/dir1/subdir1 close done!\n");
-        } else {
-            printf("/dir1/subdir1 close fail!\n");
-        }
-    } else {
-        printf("/dir1/subdir1 open fail!\n");
-    }
-
-    printf("delete non empty /dir1/subdir1\n");
-    if (sys_rmdir("/dir1/subdir1") == -1) {
-        printf("sys_rmdir: /dir1/subdir1 delete fail!\n");
-    }
-
-    printf("delete /dir1/subdir1/file1\n");
-    if (sys_rmdir("/dir1/subdir1/file1") == -1) {
-        printf("sys_rmdir: /dir1/subdir1/file1 delete fail!\n");
-    }
-
-    printf("delete /dir1/subdir1/file1\n");
-    if (sys_unlink("/dir1/subdir1/file1") == 0) {
-        printf("sys_unlink: /dir1/subdir1/file1 delete done!\n");
-    }
-
-    p_dir = sys_opendir("/dir1/subdir1");
-    if (p_dir) {
-        printf("/dir1/subdir1 open done!\n");
-        char* type = NULL;
-        struct dir_entry* dir_e = NULL;
-        while (dir_e = sys_readdir(p_dir)) {
-            if (dir_e->f_type == FT_REGULAR) {
-                type = "regular";
-            } else {
-                type = "directory";
-            }
-            printf("    %s  %s\n", type, dir_e->filename);
-        }
-        sys_rewinddir(p_dir);
-        if (sys_closedir(p_dir) == 0) {
-            printf("/dir1/subdir1 close done!\n");
-        } else {
-            printf("/dir1/subdir1 close fail!\n");
-        }
-    } else {
-        printf("/dir1/subdir1 open fail!\n");
-    }
-
-    printf("---------delete /dir1/subdir1\n");
-    if (sys_rmdir("/dir1/subdir1") == 0) {
-        printf("sys_rmdir: /dir1/subdir1 delete done!\n");
-    }
-
-    p_dir = sys_opendir("/dir1");
-    if (p_dir) {
-        printf("/dir1 open done!\n");
-        char* type = NULL;
-        struct dir_entry* dir_e = NULL;
-        while (dir_e = sys_readdir(p_dir)) {
-            if (dir_e->f_type == FT_REGULAR) {
-                type = "regular";
-            } else {
-                type = "directory";
-            }
-            printf("    %s  %s\n", type, dir_e->filename);
-        }
-        sys_rewinddir(p_dir);
-        if (sys_closedir(p_dir) == 0) {
-            printf("/dir1 close done!\n");
-        } else {
-            printf("/dir1 close fail!\n");
-        }
-    } else {
-        printf("/dir1 open fail!\n");
-    }
+    char cwd_buf[32] = {0};
+    sys_getcwd(cwd_buf, 32);
+    printf("cwd:%s\n", cwd_buf);
+    printf("change cwd now\n");
+    sys_chdir("/dir1");
+    sys_getcwd(cwd_buf, 32);
+    printf("cwd:%s\n", cwd_buf);    
 
     while (1);
 
