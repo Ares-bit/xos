@@ -360,7 +360,7 @@ int32_t file_write(struct file* file, const void* buf, uint32_t count)
                     //如果本次分配间接块，还要写间接地址表，这里先存在all blocks里，后续一把同步到硬盘
                     all_blocks[block_idx] = block_lba;
                 }
-                block_bitmap_idx = block_lba =- cur_part->sb->data_start_lba;
+                block_bitmap_idx = block_lba - cur_part->sb->data_start_lba;
                 //同步刚分配的文件块到硬盘
                 bitmap_sync(cur_part, block_bitmap_idx, BLOCK_BITMAP);
                 block_idx++;

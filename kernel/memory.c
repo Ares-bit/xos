@@ -168,7 +168,7 @@ void* get_kernel_pages(uint32_t pg_cnt)
     if (vaddr != NULL) {
         memset(vaddr, 0, pg_cnt * PG_SIZE);
     }
-   lock_release(&kernel_pool.lock);
+    lock_release(&kernel_pool.lock);
 
     return vaddr;
 }
@@ -209,6 +209,7 @@ void* get_a_page(enum pool_flags pf, uint32_t vaddr)
 
     void* page_phyaddr = palloc(mem_pool);
     if (page_phyaddr == NULL) {
+        lock_release(&mem_pool->lock);
         return NULL;
     }
     page_table_add((void*)vaddr, page_phyaddr);
@@ -421,7 +422,7 @@ static void page_table_pte_remove(uint32_t vaddr)
 
 static void vaddr_remove(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt)
 {
-    uint32_t bit_idx_start = 0, vaddr = (int32_t)_vaddr, cnt = 0;
+    uint32_t bit_idx_start = 0, vaddr = (uint32_t)_vaddr, cnt = 0;
 
     if (pf == PF_KERNEL) {
         bit_idx_start = (vaddr - kernel_vaddr.vaddr_start) / PG_SIZE;
@@ -464,7 +465,7 @@ void mfree_page(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt)
         while (page_cnt < pg_cnt) {
             vaddr += PG_SIZE;
             pg_phy_addr = addr_v2p(vaddr);
-            ASSERT((pg_phy_addr % PG_SIZE) == 0 && pg_phy_addr <= user_pool.phy_addr_start \
+            ASSERT((pg_phy_addr % PG_SIZE) == 0 && pg_phy_addr < user_pool.phy_addr_start \
                                                 && pg_phy_addr >= kernel_pool.phy_addr_start);
             pfree(pg_phy_addr);
             page_table_pte_remove(vaddr);

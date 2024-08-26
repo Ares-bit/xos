@@ -1,5 +1,5 @@
 #ifndef __FS_SUPER_BLOCK_H
-#define __FS_SUPER_BLOCK_h
+#define __FS_SUPER_BLOCK_H
 
 #include "stdint.h"
 

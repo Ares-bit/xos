@@ -349,7 +349,7 @@ static uint32_t fd_local2global(uint32_t local_fd)
 }
 
 //关闭文件描述符fd指向的文件
-int32_t sys_close(uint32_t fd)
+int32_t sys_close(int32_t fd)
 {
     int32_t ret = -1;
     struct task_struct* cur = running_thread();
@@ -425,7 +425,7 @@ int32_t sys_lseek(int32_t fd, int32_t offset, enum whence whence)
             break;
     }
     //新指针位置必须位于文件范围内，如果直接定位到SEEK_END offset = 0 也是返回-1
-    if (new_pos < 0 || new_pos > file_size - 1) {
+    if (new_pos < 0 || new_pos > (file_size - 1)) {
         return -1;
     }
 
@@ -447,14 +447,14 @@ int32_t sys_unlink(const char* pathname)
     ASSERT(inode_no != 0);
     if (inode_no == -1) {
         printk("file %s not found!\n", pathname);
-        dir_close(&searched_record.parent_dir);//这一步又忘了，查完之后会自动打开目录的，一定要关闭
+        dir_close(searched_record.parent_dir);//这一步又忘了，查完之后会自动打开目录的，一定要关闭
         return -1;
     }
     //中间应该还少一步判断：如果输入是目录中间夹文件的路径，就会返回中间的文件inode，这个要判断返回和输入路径是否一致才行
     //还要看查找目标是否是目录，如果是目录本函数不支持删除
     if (searched_record.file_type == FT_DIRECTORY) {
         printk("can't delete a directory with unlink(), use rmdir() to instead\n");
-        dir_close(&searched_record.parent_dir);
+        dir_close(searched_record.parent_dir);
         return -1;
     }
 
@@ -479,7 +479,7 @@ int32_t sys_unlink(const char* pathname)
     void* io_buf = sys_malloc(SECTOR_SIZE * 2);//删除目录项会改变dir inode，要同步Inode，所以要两块
     if (io_buf == NULL) {
         dir_close(searched_record.parent_dir);
-        printk("sys_unlink: malloc for io_buf failed!\n", pathname);        
+        printk("sys_unlink: malloc for io_buf failed!\n");
         return -1;
     }
 
@@ -629,7 +629,7 @@ struct dir* sys_opendir(const char* name)
     int32_t inode_no = search_file(name, &searched_record);
     struct dir* ret = NULL;
     if (inode_no == -1) {
-        printk("in %s, subdir %d not exist\n", name, searched_record.searched_path);
+        printk("in %s, subdir %s not exist\n", name, searched_record.searched_path);
     } else {
         //成功了也要判断下深度是否正确，但是这里没写
         if (searched_record.file_type == FT_REGULAR) {

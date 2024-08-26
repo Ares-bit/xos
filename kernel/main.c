@@ -26,26 +26,12 @@ int main(void) {
     put_str("I am kernel\n");
     init_all();
 
+    struct dir* p_dir = NULL, *p_dir1 = NULL;
     sys_mkdir("/dir1");
     sys_mkdir("/dir1/subdir1");
     uint32_t fd1 = sys_open("/dir1/subdir1/file1", O_CREAT);//创建的文件会直接加到file table中
     sys_close(fd1);
-    //printf("/file4 delete %s!\n", sys_unlink("/file4") == 0 ? "done" : "fail");
-    // printf("/dir1/subdir1 create %s!\n", sys_mkdir("/dir1/subdir1") == 0 ? "done" : "fail");
-    // printf("/dir1 create %s!\n", sys_mkdir("/dir1") == 0 ? "done" : "fail");
-    // printf("/dir1/subdir1 create %s!\n", sys_mkdir("/dir1/subdir1") == 0 ? "done" : "fail");
-    // sys_open("/dir1/subdir1/file1", O_CREAT);
-    // uint32_t fd1 = sys_open("/dir1/subdir1/file1", O_RDWR);
-    // if (fd1 > 0) {
-    //     sys_write(fd1, "aiyouwo\n", 8);
-    //     sys_lseek(fd1, 0, SEEK_SET);   
-    //     char buf[64] = {0};
-    //     sys_read(fd1, buf, 8);
-    //     printf("/dir1/subdir1/file1 says:\n%s", buf);
-    //     sys_close(fd1);
-    // }
 
-    struct dir* p_dir = NULL, *p_dir1 = NULL;
     p_dir = sys_opendir("/");
     if (p_dir) {
         printf("/ open done!\n");
@@ -59,7 +45,6 @@ int main(void) {
             }
             printf("    %s  %s\n", type, dir_e->filename);
         }
-        sys_rewinddir(p_dir);
         if (sys_closedir(p_dir) == 0) {
             printf("/ close done!\n");
         } else {
@@ -68,7 +53,7 @@ int main(void) {
     } else {
         printf("/ open fail!\n");
     }
-    
+
     p_dir = sys_opendir("/dir1");
     if (p_dir) {
         printf("/dir1 open done!\n");
@@ -82,7 +67,7 @@ int main(void) {
             }
             printf("    %s  %s\n", type, dir_e->filename);
         }
-        sys_rewinddir(p_dir);
+
         if (sys_closedir(p_dir) == 0) {
             printf("/dir1 close done!\n");
         } else {
@@ -114,7 +99,7 @@ int main(void) {
     } else {
         printf("/dir1/subdir1 open fail!\n");
     }
-#if 0
+
     printf("delete non empty /dir1/subdir1\n");
     if (sys_rmdir("/dir1/subdir1") == -1) {
         printf("sys_rmdir: /dir1/subdir1 delete fail!\n");
@@ -152,18 +137,11 @@ int main(void) {
     } else {
         printf("/dir1/subdir1 open fail!\n");
     }
-#endif
 
-#if 0
     printf("---------delete /dir1/subdir1\n");
     if (sys_rmdir("/dir1/subdir1") == 0) {
         printf("sys_rmdir: /dir1/subdir1 delete done!\n");
     }
-
-    // printf("delete /file1\n");
-    // if (sys_unlink("/file1") == 0) {
-    //     printf("sys_unlink: /file1 delete done!\n");
-    // }
 
     p_dir = sys_opendir("/dir1");
     if (p_dir) {
@@ -187,7 +165,7 @@ int main(void) {
     } else {
         printf("/dir1 open fail!\n");
     }
-#endif
+
     while (1);
 
     return 0;

@@ -17,7 +17,7 @@ void open_root_dir(struct partition* part)
 struct dir* dir_open(struct partition* part, uint32_t inode_no)
 {   
     //struct dir不再硬盘中，是个内存中的管理结构
-    struct dir* pdir = (struct dir*)sys_malloc(sizeof(struct dir*));
+    struct dir* pdir = (struct dir*)sys_malloc(sizeof(struct dir));
     pdir->inode = inode_open(part, inode_no);
     pdir->dir_pos = 0;
     return pdir;
@@ -170,13 +170,13 @@ bool sync_dir_entry(struct dir* parent_dir, struct dir_entry* p_de, void* io_buf
                 bitmap_sync(cur_part, block_bitmap_idx, BLOCK_BITMAP);
                 all_blocks[block_idx] = block_lba;
                 //把刚分配的间接块0地址写入一级间接块表
-                ide_write(cur_part->my_disk, dir_inode->i_sectors[block_idx], &all_blocks[block_idx], 1);
+                ide_write(cur_part->my_disk, dir_inode->i_sectors[block_idx], all_blocks + block_idx, 1);
             } else {
                 //block_idx12 == 0表示第一个间接块都没有，要把第一个间接块和间接地址表一起分配了
                 //如果idx > 12表示已经有第一个间接块了，不需要再分配地址块了
                 all_blocks[block_idx] = block_lba;
                 //其它间接块分配后，要立即更新地址表，从all blocks12开始的128个单元是一个地址块的扇区内容
-                ide_write(cur_part->my_disk, dir_inode->i_sectors[12], &all_blocks[12], 1);
+                ide_write(cur_part->my_disk, dir_inode->i_sectors[12], all_blocks + 12, 1);
             }
 
             memset(io_buf, 0, SECTOR_SIZE);
