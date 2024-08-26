@@ -72,7 +72,7 @@ int32_t block_bitmap_alloc(struct partition* part)
 //将bitmap第bit idx位所在的512字节同步到硬盘
 void bitmap_sync(struct partition* part, uint32_t bit_idx, enum bitmap_type btmp_type)
 {
-    uint32_t off_sec = bit_idx / (SECTOR_SIZE * 8);//查询当前bit idx位于第几块block
+    uint32_t off_sec = bit_idx / (BLOCK_SIZE * 8);//查询当前bit idx位于第几块block
     uint32_t off_size = off_sec * BLOCK_SIZE;
     uint32_t sec_lba;
     uint8_t* bitmap_off;
@@ -238,14 +238,14 @@ int32_t file_write(struct file* file, const void* buf, uint32_t count)
         return -1;
     }
 
-    uint8_t* io_buf = sys_malloc(SECTOR_SIZE);
+    uint8_t* io_buf = sys_malloc(BLOCK_SIZE);
     if (io_buf == NULL) {
         printk("file_write: sys_malloc for io_buf failed!\n");
         return -1;
     }
 
     //文件所有块的LBA 512B存储间接块的内容，里边全是地址，剩余12 * 4存12个直接块地址
-    uint32_t* all_blocks = (uint32_t*)sys_malloc(SECTOR_SIZE + 12 * 4);
+    uint32_t* all_blocks = (uint32_t*)sys_malloc(BLOCK_SIZE + 12 * 4);
     if (all_blocks == NULL) {
         printk("file_write: sys_malloc for all_blocks failed!\n");
         return -1;
@@ -284,7 +284,7 @@ int32_t file_write(struct file* file, const void* buf, uint32_t count)
     uint32_t file_has_used_blocks = file->fd_inode->i_size / BLOCK_SIZE + 1;
 
     //写入count字节后，文件占用的总块数
-    uint32_t file_will_use_blocks = (file->fd_inode->i_size + count) / SECTOR_SIZE + 1;
+    uint32_t file_will_use_blocks = (file->fd_inode->i_size + count) / BLOCK_SIZE + 1;
     ASSERT(file_will_use_blocks <= 140);
 
     //判断是否需要继续分配扇区 为0表示文件最后一个可用块足够容纳count字节
@@ -420,7 +420,7 @@ int32_t file_write(struct file* file, const void* buf, uint32_t count)
         src += chunk_size;
         file->fd_inode->i_size += chunk_size;
         file->fd_pos += chunk_size;
-        bytes_written = chunk_size;
+        bytes_written += chunk_size;
         size_left -= chunk_size;
     }
     //同步文件inode
@@ -445,21 +445,21 @@ int32_t file_read(struct file* file, void* buf, uint32_t count)
         }
     }
 
-    uint8_t* io_buf = (uint8_t*)sys_malloc(SECTOR_SIZE);
+    uint8_t* io_buf = (uint8_t*)sys_malloc(BLOCK_SIZE);
     if (io_buf == NULL) {
         printk("file_read: sys_malloc for io_buf failed!\n");
         return -1;
     }
 
-    uint32_t* all_blocks = (uint32_t*)sys_malloc(SECTOR_SIZE + 12 * 4);
+    uint32_t* all_blocks = (uint32_t*)sys_malloc(BLOCK_SIZE + 12 * 4);
     if (all_blocks == NULL) {
         printk("file_read: sys_malloc for all_blocks failed!\n");
         return -1;        
     }
 
     //读取的起始块idx，结束块idx
-    uint32_t block_read_start_idx = file->fd_pos / SECTOR_SIZE;
-    uint32_t block_read_end_idx = (file->fd_pos + size) / SECTOR_SIZE;
+    uint32_t block_read_start_idx = file->fd_pos / BLOCK_SIZE;
+    uint32_t block_read_end_idx = (file->fd_pos + size) / BLOCK_SIZE;
 
     //要读取的块数-1
     uint32_t read_blocks = block_read_end_idx - block_read_start_idx;
@@ -484,7 +484,7 @@ int32_t file_read(struct file* file, void* buf, uint32_t count)
     } else {
         if (block_read_end_idx < 12) {
             block_idx = block_read_start_idx;
-            while (block_idx < block_read_end_idx) {
+            while (block_idx <= block_read_end_idx) {
                 all_blocks[block_idx] = file->fd_inode->i_sectors[block_idx];
                 block_idx++;
             }
@@ -507,10 +507,10 @@ int32_t file_read(struct file* file, void* buf, uint32_t count)
     uint32_t sec_idx, sec_lba, sec_off_bytes, sec_left_bytes, chunk_size;
     uint32_t bytes_read = 0;
     while (bytes_read < size) {
-        sec_idx = file->fd_pos / SECTOR_SIZE;
+        sec_idx = file->fd_pos / BLOCK_SIZE;
         sec_lba = all_blocks[sec_idx];
-        sec_off_bytes = file->fd_pos % SECTOR_SIZE;//pos所在扇区中的偏移量
-        sec_left_bytes = SECTOR_SIZE - sec_off_bytes;//一开始值为第一个扇区中要读的不满整个扇区的部分
+        sec_off_bytes = file->fd_pos % BLOCK_SIZE;//pos所在扇区中的偏移量
+        sec_left_bytes = BLOCK_SIZE - sec_off_bytes;//一开始值为第一个扇区中要读的不满整个扇区的部分
 
         chunk_size = size_left < sec_left_bytes ? size_left : sec_left_bytes;
         

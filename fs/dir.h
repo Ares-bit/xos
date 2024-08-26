@@ -21,6 +21,8 @@ struct dir_entry {
     enum file_types f_type;
 };
 
+bool dir_is_empty(struct dir* dir);
+int32_t dir_remove(struct dir* parent_dir, struct dir* child_dir);
 struct dir_entry* dir_read(struct dir* dir);
 void dir_close(struct dir* dir);
 struct dir* dir_open(struct partition* part, uint32_t inode_no);

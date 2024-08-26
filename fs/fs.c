@@ -340,11 +340,11 @@ int32_t sys_open(const char* pathname, enum oflags flags)
 }
 
 //根据当前进程fd找到对应的全局文件表下标
-static uint32_t fd_local2glocal(uint32_t local_fd)
+static uint32_t fd_local2global(uint32_t local_fd)
 {
     struct task_struct* cur = running_thread();
     int32_t global_fd = cur->fd_table[local_fd];
-    ASSERT(global_fd > 0 && global_fd < MAX_FILE_OPEN);
+    ASSERT(global_fd >= 0 && global_fd < MAX_FILE_OPEN);
     return (uint32_t)global_fd;
 }
 
@@ -355,7 +355,7 @@ int32_t sys_close(uint32_t fd)
     struct task_struct* cur = running_thread();
 
     if (fd > 2) {
-        uint32_t _fd = fd_local2glocal(fd);
+        uint32_t _fd = fd_local2global(fd);
         ret = file_close(&file_table[_fd]);
         cur->fd_table[fd] = -1;
     }
@@ -378,7 +378,7 @@ int32_t sys_write(int32_t fd, const void* buf, uint32_t count)
         return count;
     }
 
-    uint32_t _fd = fd_local2glocal(fd);
+    uint32_t _fd = fd_local2global(fd);
     struct file* wr_file = &file_table[_fd];
     if (wr_file->fd_flag & O_WRONLY || wr_file->fd_flag & O_RDWR) {
         uint32_t bytes_written = file_write(wr_file, buf, count);
@@ -397,7 +397,7 @@ int32_t sys_read(int32_t fd, void* buf, uint32_t count)
         return -1;
     }
     ASSERT(buf != NULL);
-    uint32_t _fd = fd_local2glocal(fd);
+    uint32_t _fd = fd_local2global(fd);
     return file_read(&file_table[_fd], buf, count);
 }
 
@@ -409,7 +409,7 @@ int32_t sys_lseek(int32_t fd, int32_t offset, enum whence whence)
         return -1;       
     }
     ASSERT(whence > 0 && whence < 4);
-    uint32_t _fd = fd_local2glocal(fd);
+    uint32_t _fd = fd_local2global(fd);
     struct file* pf = &file_table[_fd];
     int32_t new_pos = 0;
     int32_t file_size = (int32_t)pf->fd_inode->i_size;
@@ -566,7 +566,7 @@ int32_t sys_mkdir(const char* pathname)
     p_de->i_no = parent_dir->inode->i_no;
     p_de->f_type = FT_DIRECTORY;
     //目录文件块写入硬盘
-    ide_write(cur_part->my_disk, block_lba, io_buf, 1);
+    ide_write(cur_part->my_disk, new_dir_inode.i_sectors[0], io_buf, 1);
 
     new_dir_inode.i_size = 2 * cur_part->sb->dir_entry_size;
 
@@ -667,6 +667,39 @@ void sys_rewinddir(struct dir* dir)
     dir->dir_pos = 0;
 }
 
+//删除空目录
+int32_t sys_rmdir(const char* pathname)
+{
+    struct path_search_record searched_record = {0};
+
+    //查询目录inode是否存在
+    int32_t inode_no = search_file(pathname, &searched_record);
+    ASSERT(inode_no != 0);//不许删除根目录
+    int retval = -1;
+    if (inode_no == -1) {
+        printk("in %s, sub path %s not exist\n", pathname, searched_record.searched_path);
+    } else {
+        //总是忘这块，可能会查出一个文件来
+        if (searched_record.file_type == FT_REGULAR) {
+            printk("%s is regular file!\n", pathname);
+        } else {
+            struct dir* dir = dir_open(cur_part, inode_no);
+            if (!dir_is_empty(dir)) {
+                //如果目录非空不允许删除
+                printk("dir %s is not empty, it is not allowed to delete a nonempty directory\n", pathname);
+            } else {
+                //如果是空则可以删除
+                if (!dir_remove(searched_record.parent_dir, dir)) {
+                    retval = 0;
+                }
+            }
+            dir_close(dir);
+        }
+    }
+    dir_close(searched_record.parent_dir);
+    return retval;
+}
+
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统
 void filesys_init()
 {
@@ -700,12 +733,12 @@ void filesys_init()
                     ide_read(hd, part->start_lba + 1, sb_buf, 1);
 
                     //判断该分区是否存在文件系统，为了方便定位，这里改成不管怎么样都格式化硬盘，创建目录的时候写硬盘会填全0，所以会覆盖之前的目录项导致文件检测不出来之前是否存在
-                    if (sb_buf->magic == 0x20001212) {
-                        printk("%s has filesystem\n", part->name);
-                    } else {
+                    //if (sb_buf->magic == 0x20001212) {
+                    //    printk("%s has filesystem\n", part->name);
+                    //} else {
                         printk("formatting %s's partition %s......\n", hd->name, part->name);
                         partition_format(part);
-                    }
+                    //}
                 }
                 part_idx++;
                 part++;

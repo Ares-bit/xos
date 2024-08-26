@@ -296,7 +296,7 @@ bool delete_dir_entry(struct partition* part, struct dir* pdir, uint32_t inode_n
                     ide_write(part->my_disk, dir_inode->i_sectors[12], all_blocks + 12, 1);
                 } else {
                     //如果只有这一个间接块，那么连地址块一起回收了
-                    block_bitmap_idx = all_blocks[12] - part->sb->data_start_lba;
+                    block_bitmap_idx = dir_inode->i_sectors[12] - part->sb->data_start_lba;
                     bitmap_set(&part->block_bitmap, block_bitmap_idx, 0);//直接回收整个块，目录项都不用清
                     bitmap_sync(part, block_bitmap_idx, BLOCK_BITMAP);
                     dir_inode->i_sectors[12] = 0;//不要忘了改inode的地址索引
@@ -345,7 +345,8 @@ struct dir_entry* dir_read(struct dir* dir)
     uint32_t dir_entrys_per_sec = SECTOR_SIZE / dir_entry_size;
 
     //遍历当前扇区的目录项
-    while (dir->dir_pos < dir_inode->i_size) {
+    while (block_idx < block_cnt) {
+    //while (dir->dir_pos < dir_inode->i_size) {
         if (dir->dir_pos >= dir_inode->i_size) {
             return NULL;
         }
@@ -380,4 +381,38 @@ struct dir_entry* dir_read(struct dir* dir)
         block_idx++;
     }
     return NULL;
+}
+
+//判断目录是否非空，1表示空，0表示非空
+bool dir_is_empty(struct dir* dir)
+{
+    struct inode* dir_inode = dir->inode;
+    //如果目录中只有.和.. 则表明目录已空
+    return (dir_inode->i_size == cur_part->sb->dir_entry_size * 2);
+}
+
+//在父目录中删除子目录
+int32_t dir_remove(struct dir* parent_dir, struct dir* child_dir)
+{
+    struct inode* child_dir_inode = child_dir->inode;
+    //空目录只在sector[0]有文件块，其它块都应该是空的
+    int32_t block_idx = 1;
+    while (block_idx < 13) {
+        ASSERT(child_dir_inode->i_sectors[block_idx] == 0);
+        block_idx++;
+    }
+
+    void* io_buf = sys_malloc(SECTOR_SIZE * 2);
+    if (io_buf == NULL) {
+        printk("dir_remove: malloc for io_buf failed\n");
+        return -1;
+    }
+
+    //在父目录中删除子目录项
+    delete_dir_entry(cur_part, parent_dir, child_dir_inode->i_no, io_buf);
+
+    //回收子目录唯一的文件块所占扇区以及Inode
+    inode_release(cur_part, child_dir_inode->i_no);
+    sys_free(io_buf);
+    return 0;
 }
