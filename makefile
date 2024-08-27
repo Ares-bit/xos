@@ -20,11 +20,11 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/fs.o $(BUILD_DIR)/inode.o $(BUILD_DIR)/file.o $(BUILD_DIR)/dir.o
 
 #mbr编译
-$(BUILD_DIR)/mbr.bin: boot/mbr.S
+$(BUILD_DIR)/mbr.bin: boot/mbr.s
 	$(AS) $(ASBINLIB) $< -o $@
 
 #loader编译
-$(BUILD_DIR)/loader.bin: boot/loader.S
+$(BUILD_DIR)/loader.bin: boot/loader.s
 	$(AS) $(ASBINLIB) $< -o $@
 
 #C编译
@@ -131,13 +131,13 @@ $(BUILD_DIR)/dir.o: fs/dir.c fs/dir.h fs/file.h fs/inode.h lib/kernel/stdio_kern
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译
-$(BUILD_DIR)/kernel.o: kernel/kernel.S
+$(BUILD_DIR)/kernel.o: kernel/kernel.s
 	$(AS) $(ASFLAGS) $< -o $@
 
-$(BUILD_DIR)/print.o: lib/kernel/print.S
+$(BUILD_DIR)/print.o: lib/kernel/print.s
 	$(AS) $(ASBINLIB) $(ASFLAGS) $< -o $@
 
-$(BUILD_DIR)/switch.o: thread/switch.S
+$(BUILD_DIR)/switch.o: thread/switch.s
 	$(AS) $(ASFLAGS) $< -o $@
 
 #链接
