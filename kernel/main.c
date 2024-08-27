@@ -31,14 +31,19 @@ int main(void) {
     uint32_t fd = sys_open("/dir1/subdir1/file1", O_CREAT);//创建的文件会直接加到file table中
     sys_close(fd);
 
-    char cwd_buf[32] = {0};
-    sys_getcwd(cwd_buf, 32);
-    printf("cwd:%s\n", cwd_buf);
-    printf("change cwd now\n");
-    sys_chdir("/dir1");
-    sys_getcwd(cwd_buf, 32);
-    printf("cwd:%s\n", cwd_buf);    
+    struct stat obj_stat;
 
+    sys_stat("/", &obj_stat);
+    printf("/ info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
+
+    sys_stat("/dir1/", &obj_stat);
+    printf("/dir1/ info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
+   
+    sys_stat("/dir1/subdir1", &obj_stat);
+    printf("/dir1/subdir1 info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
+   
+    sys_stat("/dir1/subdir1/file1", &obj_stat);
+    printf("/dir1/subdir1/file1 info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
     while (1);
 
     return 0;

@@ -42,6 +42,14 @@ struct path_search_record {
     enum file_types file_type;//找到的是普通文件还是目录，找不到的为未知类型
 };
 
+//文件属性结构体
+struct stat {
+    uint32_t st_ino;//inode
+    uint32_t st_size;
+    enum file_types st_filetype;
+};
+
+int32_t sys_stat(const char* path, struct stat* buf);
 int32_t sys_open(const char* pathname, enum oflags flags);
 int32_t sys_close(int32_t fd);
 int32_t sys_write(int32_t fd, const void* buf, uint32_t count);
