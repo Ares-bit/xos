@@ -225,6 +225,24 @@ uint32_t addr_v2p(uint32_t vaddr)
     return ((*pte & 0xfffff000) + (vaddr & 0x00000fff));
 }
 
+//为传入的虚拟地址安装一个物理页，此函数专用于fork，在虚拟地址位图拷贝自父进程后，故此函数不需再置虚拟地址位图
+void* get_a_page_without_opvaddrbitmap(enum pool_flags pf, uint32_t vaddr)
+{
+    //为什么要有内核池，不是完全分配的用户池地址码
+    struct pool* mem_pool = pf & PF_KERNEL ? &kernel_pool : &user_pool;
+    lock_acquire(&mem_pool->lock);
+    //分配一个物理页
+    void* page_phyaddr = palloc(mem_pool);
+    if (page_phyaddr == NULL) {
+        lock_release(&mem_pool->lock);
+        return NULL;
+    }
+    //将对应虚拟地址页表处添加这片物理页
+    page_table_add((void*)vaddr, page_phyaddr);
+    lock_release(&mem_pool->lock);
+    return (void*)vaddr;
+}
+
 static void mem_pool_init(uint32_t all_mem) {
     put_str("mem_pool_init start\n");
     //统计物理内存

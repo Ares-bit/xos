@@ -43,6 +43,11 @@ static pid_t allocate_pid(void)
     return next_pid;
 }
 
+pid_t fork_pid(void)
+{
+    return allocate_pid();
+}
+
 //在栈中预留线程需要的中断栈+线程栈空间，初始化线程栈
 void thread_create(struct task_struct* pthread, thread_func function, void* func_arg)
 {
@@ -85,6 +90,7 @@ void init_thread(struct task_struct* pthread, char* name, int prio)
 
     pthread->pgdir = NULL;
     pthread->cwd_inode_nr = 0;//以根目录为默认工作路径
+    pthread->parent_pid = -1;//表示没有父进程
     pthread->stack_magic = 0x20001212;
 }
 
