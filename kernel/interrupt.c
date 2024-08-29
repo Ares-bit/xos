@@ -12,7 +12,7 @@
 #define IDT_DESC_CNT 0x81 //支持的总中断数
 
 #define EFLAGS_IF   0x00000200
-#define GET_EFLAGS(EFLAGS_VAR)  asm volatile("pushfl; popl %0" : "=g"(EFLAGS_VAR))
+#define GET_EFLAGS(EFLAGS_VAR)  asm volatile("pushfl\n\t popl %0\n\t" : "=g"(EFLAGS_VAR))
 
 //中断门描述格式
 struct gate_desc {

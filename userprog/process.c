@@ -34,7 +34,7 @@ static void start_process(void* filename_)
     proc_stack->esp = (void *)((uint32_t)get_a_page(PF_USER, USER_STACK3_VADDR) + PG_SIZE);
     proc_stack->ss = SELECTOR_U_DATA;
 
-    asm volatile("movl %0, %%esp; jmp intr_exit" : : "g"(proc_stack) : "memory");
+    asm volatile("movl %0, %%esp\n\t jmp intr_exit\n\t" : : "g"(proc_stack) : "memory");
 }
 
 //激活线程或进程页表

@@ -25,7 +25,17 @@ int prog_a_pid = 0, prog_b_pid = 0;
 int main(void) {
     put_str("I am kernel\n");
     init_all();
-#if 0
+    intr_enable();
+    //两个消费者线程
+    process_execute(u_prog_a, "use_prog_a");
+    process_execute(u_prog_b, "use_prog_b");
+    console_put_str("main_pid:0x");
+    console_put_int(sys_getpid());
+    console_put_char('\n');
+    thread_start("consumer_a", 31, k_thread_a, "argA");
+    thread_start("consumer_b", 31, k_thread_b, "argB");   
+
+#if 1
     sys_mkdir("/dir1");
     sys_mkdir("/dir1/subdir1");
     uint32_t fd = sys_open("/dir1/subdir1/file1", O_CREAT);//创建的文件会直接加到file table中
