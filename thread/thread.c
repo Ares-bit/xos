@@ -132,7 +132,7 @@ static void idle(void* arg UNUSED)
     while(1) {
         thread_block(TASK_BLOCKED);
         //执行hlt时必须要保证目前处在开中断的情况下
-        asm volatile("sti\n\t hlt\n\t" : : : "memory");
+        asm volatile("sti; hlt" : : : "memory");
     }
 }
 

@@ -27,8 +27,8 @@ int main(void) {
     init_all();
     intr_enable();
     //两个消费者线程
-    process_execute(u_prog_a, "use_prog_a");
-    process_execute(u_prog_b, "use_prog_b");
+    process_execute(u_prog_a, "user_prog_a");
+    process_execute(u_prog_b, "user_prog_b");
     console_put_str("main_pid:0x");
     console_put_int(sys_getpid());
     console_put_char('\n');

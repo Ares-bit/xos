@@ -32,7 +32,7 @@ static int32_t copy_pcb_vaddrbitmap_stack0(struct task_struct* child_thread, str
     uint32_t bitmap_pg_cnt = DIV_ROUND_UP((0xc0000000 - USER_VADDR_START) / PG_SIZE / 8, PG_SIZE);
     void* vaddr_btmp = get_kernel_pages(bitmap_pg_cnt);
     //把父进程bitmap拷给子进程
-    memcpy(vaddr_btmp, parent_thread->userprog_vaddr.vaddr_bitmap.bits, bitmap_pg_cnt * PG_SIZE);
+    memcpy(vaddr_btmp, child_thread->userprog_vaddr.vaddr_bitmap.bits, bitmap_pg_cnt * PG_SIZE);
     //将子进程bitmap指向新分配的bitmap
     child_thread->userprog_vaddr.vaddr_bitmap.bits = vaddr_btmp;
     //为避免strcat越界，需要小于11
@@ -89,14 +89,14 @@ static int32_t build_child_stack(struct task_struct* child_thread)
     //这几行不必要，只是为了说明结构
     uint32_t* esi_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 2;
     uint32_t* edi_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 3;
-    uint32_t* ebi_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 4;
+    uint32_t* ebx_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 4;
     uint32_t* ebp_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 5;
 
     //子进程从switch_to返回时让他跳到intr_exit将中断栈弹出，从而接着fork继续执行
     *ret_addr_in_thread_stack = (uint32_t)intr_exit;
 
     //也不必要，只是使栈更清晰
-    *esi_ptr_in_thread_stack = *edi_ptr_in_thread_stack = *ebi_ptr_in_thread_stack = *ebp_ptr_in_thread_stack = 0;
+    *esi_ptr_in_thread_stack = *edi_ptr_in_thread_stack = *ebx_ptr_in_thread_stack = *ebp_ptr_in_thread_stack = 0;
 
     //让self_stack指向当前栈顶
     child_thread->self_kstack = ebp_ptr_in_thread_stack;
@@ -161,7 +161,7 @@ pid_t sys_fork(void)
     ASSERT(INTR_OFF == intr_get_status() && parent_thread->pgdir != NULL);
 
     //开始拷贝
-    if (copy_process(child_thread, parent_thread)) {
+    if (copy_process(child_thread, parent_thread) == -1) {
         return -1;
     }
 
