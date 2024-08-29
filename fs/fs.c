@@ -892,12 +892,12 @@ void filesys_init()
                     ide_read(hd, part->start_lba + 1, sb_buf, 1);
 
                     //判断该分区是否存在文件系统，为了方便定位，这里改成不管怎么样都格式化硬盘，创建目录的时候写硬盘会填全0，所以会覆盖之前的目录项导致文件检测不出来之前是否存在
-                    //if (sb_buf->magic == 0x20001212) {
-                    //    printk("%s has filesystem\n", part->name);
-                    //} else {
+                    if (sb_buf->magic == 0x20001212) {
+                        printk("%s has filesystem\n", part->name);
+                    } else {
                         printk("formatting %s's partition %s......\n", hd->name, part->name);
                         partition_format(part);
-                    //}
+                    }
                 }
                 part_idx++;
                 part++;

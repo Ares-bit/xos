@@ -47,4 +47,5 @@ void* get_a_page(enum pool_flags pf, uint32_t vaddr);
 void* get_user_pages(uint32_t pg_cnt);
 void* sys_malloc(uint32_t size);
 void sys_free(void *ptr);
+void mfree_page(enum pool_flags pf, void* _vaddr, uint32_t pg_cnt);
 #endif

@@ -38,7 +38,7 @@ static void start_process(void* filename_)
 }
 
 //激活线程或进程页表
-static void page_dir_activate(struct task_struct* p_thread)
+void page_dir_activate(struct task_struct* p_thread)
 {
     uint32_t pagedir_phy_addr = 0x100000;
 
@@ -62,7 +62,7 @@ void process_activate(struct task_struct* p_thread)
 }
 
 //创建用户进程页目录表，并将最后一项赋值为其物理地址，方便以后修改
-static uint32_t* create_page_dir(void)
+uint32_t* create_page_dir(void)
 {
     uint32_t* page_dir_vaddr = get_kernel_pages(1);
 

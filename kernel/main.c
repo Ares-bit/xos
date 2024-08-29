@@ -25,7 +25,7 @@ int prog_a_pid = 0, prog_b_pid = 0;
 int main(void) {
     put_str("I am kernel\n");
     init_all();
-
+#if 0
     sys_mkdir("/dir1");
     sys_mkdir("/dir1/subdir1");
     uint32_t fd = sys_open("/dir1/subdir1/file1", O_CREAT);//创建的文件会直接加到file table中
@@ -44,9 +44,21 @@ int main(void) {
    
     sys_stat("/dir1/subdir1/file1", &obj_stat);
     printf("/dir1/subdir1/file1 info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
+#endif
     while (1);
 
     return 0;
+}
+
+void init(void)
+{
+    uint32_t ret_pid = fork();
+    if (ret_pid) {
+        printf("i am father, my pid is:%d, child pid is:%d\n", getpid(), ret_pid);
+    } else {
+        printf("i am child, my pid is:%d, ret pid is:%d\n", getpid(), ret_pid);
+    }
+    while(1);
 }
 
 void k_thread_a(void* arg) {

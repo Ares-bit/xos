@@ -18,6 +18,7 @@ struct lock pid_lock;
 struct task_struct* idle_thread;
 
 extern void switch_to(struct task_struct* cur, struct task_struct* next);
+extern void init(void);
 
 //获取当前线程PCB起始地址
 struct task_struct* running_thread()
@@ -217,6 +218,7 @@ void thread_init(void)
     list_init(&thread_ready_list);
     list_init(&thread_all_list);
     lock_init(&pid_lock);
+    process_execute(init, "init");
     make_main_thread();
     idle_thread = thread_start("idle", 10, idle, NULL);
     put_str("thread_init done\n");

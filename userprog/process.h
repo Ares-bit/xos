@@ -7,4 +7,6 @@
 
 void process_activate(struct task_struct* p_thread);
 void process_execute(void* filename, char* name);
+void page_dir_activate(struct task_struct* p_thread);
+uint32_t* create_page_dir(void);
 #endif

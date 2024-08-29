@@ -1,10 +1,16 @@
 #include "fork.h"
 #include "string.h"
 #include "debug.h"
+#include "thread.h"
+#include "memory.h"
+#include "fs.h"
+#include "file.h"
+#include "interrupt.h"
+#include "process.h"
 
 //switch to时弹内核栈用
 extern void intr_exit(void);
-
+extern struct file file_table[MAX_FILE_OPEN];
 //将父进程的pcb所在页，包括内核栈拷贝给子进程
 static int32_t copy_pcb_vaddrbitmap_stack0(struct task_struct* child_thread, struct task_struct* parent_thread)
 {
@@ -68,4 +74,102 @@ static void copy_body_stack3(struct task_struct* child_thread, struct task_struc
         }
         idx_byte++;
     }
+}
+
+//构建子进程内核栈，从switch_to出来后，能接着父进程的位置继续运行
+static int32_t build_child_stack(struct task_struct* child_thread)
+{
+    //获取子进程在内核栈中的中断栈
+    struct intr_stack* intr_0_stack = (struct intr_stack*)((uint32_t)child_thread + PG_SIZE - sizeof(struct intr_stack));
+    //修改中断栈中的eax=0，fork返回给子进程0
+    intr_0_stack->eax = 0;
+
+    //构建thread_stack，紧挨着intr_stack
+    uint32_t* ret_addr_in_thread_stack = (uint32_t*)intr_0_stack - 1;
+    //这几行不必要，只是为了说明结构
+    uint32_t* esi_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 2;
+    uint32_t* edi_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 3;
+    uint32_t* ebi_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 4;
+    uint32_t* ebp_ptr_in_thread_stack = (uint32_t*)intr_0_stack - 5;
+
+    //子进程从switch_to返回时让他跳到intr_exit将中断栈弹出，从而接着fork继续执行
+    *ret_addr_in_thread_stack = (uint32_t)intr_exit;
+
+    //也不必要，只是使栈更清晰
+    *esi_ptr_in_thread_stack = *edi_ptr_in_thread_stack = *ebi_ptr_in_thread_stack = *ebp_ptr_in_thread_stack = 0;
+
+    //让self_stack指向当前栈顶
+    child_thread->self_kstack = ebp_ptr_in_thread_stack;
+    return 0;
+}
+
+//更新inode打开数，将父进程打开的文件，都让子进程计数加1
+static void update_inode_open_cnts(struct task_struct* thread)
+{
+    int32_t local_fd = 3, global_fd = 0;
+    while (local_fd < MAX_FILES_OPEN_PER_PROC) {
+        global_fd = thread->fd_table[local_fd];
+        ASSERT(global_fd < MAX_FILE_OPEN);
+        if (global_fd != -1) {
+            file_table[global_fd].fd_inode->i_open_cnts++;
+        }
+        local_fd++;
+    }
+}
+
+//开始拷贝父进程给子进程
+static int32_t copy_process(struct task_struct* child_thread, struct task_struct* parent_thread)
+{
+    //分配内核页作为拷贝缓冲
+    void* buf_page = get_kernel_pages(1);
+    if (buf_page == NULL) {
+        return -1;
+    }
+
+    //拷贝父进程PCB和内核栈
+    if (copy_pcb_vaddrbitmap_stack0(child_thread, parent_thread) == -1) {
+        return -1;
+    }
+
+    //为子进程创建页表
+    child_thread->pgdir = create_page_dir();
+    if (child_thread->pgdir == NULL) {
+        return -1;
+    }
+
+    //创建完页表了，可以将父进程体拷贝给子进程了
+    copy_body_stack3(child_thread, parent_thread, buf_page);
+
+    //构建子进程栈
+    build_child_stack(child_thread);
+
+    //更新indoe打开次数
+    update_inode_open_cnts(child_thread);
+
+    mfree_page(PF_KERNEL, buf_page, 1);
+    return 0;
+}
+
+pid_t sys_fork(void)
+{
+    struct task_struct* parent_thread = running_thread();
+    //为子进程在内核空间中分配PCB
+    struct task_struct* child_thread = get_kernel_pages(1);
+    if (child_thread == NULL) {
+        return -1;
+    }
+    ASSERT(INTR_OFF == intr_get_status() && parent_thread->pgdir != NULL);
+
+    //开始拷贝
+    if (copy_process(child_thread, parent_thread)) {
+        return -1;
+    }
+
+    //子进程刚创建，如果找到那肯定出错了
+    ASSERT(!elem_find(&thread_ready_list, &child_thread->general_tag));
+    list_append(&thread_ready_list, &child_thread->general_tag);
+    ASSERT(!elem_find(&thread_all_list, &child_thread->all_list_tag));
+    list_append(&thread_all_list, &child_thread->all_list_tag);
+
+    return child_thread->pid;//给父进程返回子进程pid
 }
