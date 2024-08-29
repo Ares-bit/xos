@@ -31,6 +31,9 @@ static int32_t copy_pcb_vaddrbitmap_stack0(struct task_struct* child_thread, str
     //虚拟地址池的总长度需要用多少个页的bitmap才能表示，从虚拟地址起始位置，直到内核地址起始，
     uint32_t bitmap_pg_cnt = DIV_ROUND_UP((0xc0000000 - USER_VADDR_START) / PG_SIZE / 8, PG_SIZE);
     void* vaddr_btmp = get_kernel_pages(bitmap_pg_cnt);
+    if (vaddr_btmp == NULL) {
+        return -1;
+    }
     //把父进程bitmap拷给子进程
     memcpy(vaddr_btmp, child_thread->userprog_vaddr.vaddr_bitmap.bits, bitmap_pg_cnt * PG_SIZE);
     //将子进程bitmap指向新分配的bitmap

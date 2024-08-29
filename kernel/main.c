@@ -35,7 +35,7 @@ int main(void) {
     thread_start("consumer_a", 31, k_thread_a, "argA");
     thread_start("consumer_b", 31, k_thread_b, "argB");   
 
-#if 1
+#if 0
     sys_mkdir("/dir1");
     sys_mkdir("/dir1/subdir1");
     uint32_t fd = sys_open("/dir1/subdir1/file1", O_CREAT);//创建的文件会直接加到file table中

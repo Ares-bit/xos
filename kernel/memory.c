@@ -218,13 +218,6 @@ void* get_a_page(enum pool_flags pf, uint32_t vaddr)
     return (void*)vaddr;
 }
 
-//虚拟地址映射到物理地址：找到虚拟地址所在页表，找到对应的页表项，其中存储的就是实际物理地址
-uint32_t addr_v2p(uint32_t vaddr)
-{
-    uint32_t* pte = pte_ptr(vaddr);
-    return ((*pte & 0xfffff000) + (vaddr & 0x00000fff));
-}
-
 //为传入的虚拟地址安装一个物理页，此函数专用于fork，在虚拟地址位图拷贝自父进程后，故此函数不需再置虚拟地址位图
 void* get_a_page_without_opvaddrbitmap(enum pool_flags pf, uint32_t vaddr)
 {
@@ -243,74 +236,11 @@ void* get_a_page_without_opvaddrbitmap(enum pool_flags pf, uint32_t vaddr)
     return (void*)vaddr;
 }
 
-static void mem_pool_init(uint32_t all_mem) {
-    put_str("mem_pool_init start\n");
-    //统计物理内存
-    //1页页目录表+255页内核页表
-    uint32_t page_table_size = PG_SIZE * 256;//也就是说页表并不在低端1MB中
-    uint32_t used_mem = page_table_size + 0x100000;//加1MB内核
-    uint32_t free_mem = all_mem - used_mem;
-    uint16_t all_free_pages = free_mem / PG_SIZE;//32位除法 商16位 用uint16_t存还剩多少页
-    uint16_t kernel_free_pages = all_free_pages / 2;
-    uint16_t user_free_pages = all_free_pages - kernel_free_pages;//剩的不一定整数个页
-    //kernel bitmap长度
-    uint32_t kbm_length = kernel_free_pages / 8;//余数不处理会丢最后几页内存 但是现在并不会 因为剩下整30MB kernel 15MB user 15MB
-    //user bitmap长度
-    uint32_t ubm_length = user_free_pages / 8;//余数不处理会丢最后几页内存
-    //kernel pool起始
-    uint32_t kp_start = used_mem;
-    //user pool起始
-    uint32_t up_start = kp_start + kernel_free_pages * PG_SIZE;
-
-    //kernel pool初始化
-    kernel_pool.phy_addr_start = kp_start;
-    kernel_pool.pool_size = kernel_free_pages * PG_SIZE;
-    kernel_pool.pool_bitmap.btmp_bytes_len = kbm_length;
-    kernel_pool.pool_bitmap.bits = (void*)MEM_BITMAP_BASE;
-    lock_init(&kernel_pool.lock);
-
-    //user pool初始化
-    user_pool.phy_addr_start = up_start;
-    user_pool.pool_size = user_free_pages * PG_SIZE;
-    user_pool.pool_bitmap.btmp_bytes_len = ubm_length;
-    user_pool.pool_bitmap.bits = (void*)(MEM_BITMAP_BASE + kbm_length);
-    lock_init(&user_pool.lock);
-
-    put_str("kernel_pool_bitmap_start:0x");
-    put_int((int)kernel_pool.pool_bitmap.bits);
-    put_str(" kernel_pool_phy_addr_start:0x");
-    put_int(kernel_pool.phy_addr_start);
-    put_char('\n');
-    put_str("user_pool_bitmap_start:0x");
-    put_int((int)user_pool.pool_bitmap.bits);
-    put_str(" user_pool_phy_addr_start:0x");
-    put_int(user_pool.phy_addr_start);
-    put_char('\n');
-    
-    //初始化物理bitmap
-    bitmap_init(&kernel_pool.pool_bitmap);
-    bitmap_init(&user_pool.pool_bitmap);
-
-    //初始化内核虚拟bitmap
-    kernel_vaddr.vaddr_bitmap.btmp_bytes_len = kbm_length;//虚拟bitmap跟物理bitmap大小一致但不必一一对应
-    //虚拟bitmap起始地址在user bitmap之后
-    kernel_vaddr.vaddr_bitmap.bits = (void*)(MEM_BITMAP_BASE + kbm_length + ubm_length);
-    kernel_vaddr.vaddr_start = K_HEAP_START;
-    bitmap_init(&kernel_vaddr.vaddr_bitmap);
-
-    put_str("mem_init done\n");
-}
-
-//初始化7种描述符
-void block_desc_init(struct mem_block_desc* desc_array)
+//虚拟地址映射到物理地址：找到虚拟地址所在页表，找到对应的页表项，其中存储的就是实际物理地址
+uint32_t addr_v2p(uint32_t vaddr)
 {
-    uint16_t desc_idx, block_size = 16;
-    for (desc_idx = 0; desc_idx < DESC_CNT; desc_idx++) {
-        desc_array[desc_idx].block_size = block_size;
-        desc_array[desc_idx].blocks_per_arena = (PG_SIZE - sizeof(struct arena)) / block_size;
-        list_init(&desc_array[desc_idx].free_list);
-        block_size *= 2;
-    }
+    uint32_t* pte = pte_ptr(vaddr);
+    return ((*pte & 0xfffff000) + (vaddr & 0x00000fff));
 }
 
 //返回arena中第idx个内存块地址
@@ -533,6 +463,76 @@ void sys_free(void *ptr)
             }
         }
         lock_release(&mem_pool->lock);
+    }
+}
+
+static void mem_pool_init(uint32_t all_mem) {
+    put_str("mem_pool_init start\n");
+    //统计物理内存
+    //1页页目录表+255页内核页表
+    uint32_t page_table_size = PG_SIZE * 256;//也就是说页表并不在低端1MB中
+    uint32_t used_mem = page_table_size + 0x100000;//加1MB内核
+    uint32_t free_mem = all_mem - used_mem;
+    uint16_t all_free_pages = free_mem / PG_SIZE;//32位除法 商16位 用uint16_t存还剩多少页
+    uint16_t kernel_free_pages = all_free_pages / 2;
+    uint16_t user_free_pages = all_free_pages - kernel_free_pages;//剩的不一定整数个页
+    //kernel bitmap长度
+    uint32_t kbm_length = kernel_free_pages / 8;//余数不处理会丢最后几页内存 但是现在并不会 因为剩下整30MB kernel 15MB user 15MB
+    //user bitmap长度
+    uint32_t ubm_length = user_free_pages / 8;//余数不处理会丢最后几页内存
+    //kernel pool起始
+    uint32_t kp_start = used_mem;
+    //user pool起始
+    uint32_t up_start = kp_start + kernel_free_pages * PG_SIZE;
+
+    //kernel pool初始化
+    kernel_pool.phy_addr_start = kp_start;
+    kernel_pool.pool_size = kernel_free_pages * PG_SIZE;
+    kernel_pool.pool_bitmap.btmp_bytes_len = kbm_length;
+    kernel_pool.pool_bitmap.bits = (void*)MEM_BITMAP_BASE;
+    lock_init(&kernel_pool.lock);
+
+    //user pool初始化
+    user_pool.phy_addr_start = up_start;
+    user_pool.pool_size = user_free_pages * PG_SIZE;
+    user_pool.pool_bitmap.btmp_bytes_len = ubm_length;
+    user_pool.pool_bitmap.bits = (void*)(MEM_BITMAP_BASE + kbm_length);
+    lock_init(&user_pool.lock);
+
+    put_str("kernel_pool_bitmap_start:0x");
+    put_int((int)kernel_pool.pool_bitmap.bits);
+    put_str(" kernel_pool_phy_addr_start:0x");
+    put_int(kernel_pool.phy_addr_start);
+    put_char('\n');
+    put_str("user_pool_bitmap_start:0x");
+    put_int((int)user_pool.pool_bitmap.bits);
+    put_str(" user_pool_phy_addr_start:0x");
+    put_int(user_pool.phy_addr_start);
+    put_char('\n');
+
+    //初始化物理bitmap
+    bitmap_init(&kernel_pool.pool_bitmap);
+    bitmap_init(&user_pool.pool_bitmap);
+
+    //初始化内核虚拟bitmap
+    kernel_vaddr.vaddr_bitmap.btmp_bytes_len = kbm_length;//虚拟bitmap跟物理bitmap大小一致但不必一一对应
+    //虚拟bitmap起始地址在user bitmap之后
+    kernel_vaddr.vaddr_bitmap.bits = (void*)(MEM_BITMAP_BASE + kbm_length + ubm_length);
+    kernel_vaddr.vaddr_start = K_HEAP_START;
+    bitmap_init(&kernel_vaddr.vaddr_bitmap);
+
+    put_str("mem_init done\n");
+}
+
+//初始化7种描述符
+void block_desc_init(struct mem_block_desc* desc_array)
+{
+    uint16_t desc_idx, block_size = 16;
+    for (desc_idx = 0; desc_idx < DESC_CNT; desc_idx++) {
+        desc_array[desc_idx].block_size = block_size;
+        desc_array[desc_idx].blocks_per_arena = (PG_SIZE - sizeof(struct arena)) / block_size;
+        list_init(&desc_array[desc_idx].free_list);
+        block_size *= 2;
     }
 }
 
