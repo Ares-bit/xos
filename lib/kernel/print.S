@@ -143,6 +143,41 @@ put_char:
 .put_char_done:
     popad
     ret
+;=========================================
+global cls_screen
+cls_screen:
+    pushad
+
+    ;用户程序cpl=3，显存dpl=0，从用户态切到内核态会将所有段描述符清0，每次进来都得重新赋值gs
+    mov ax, SELECTOR_VIDEO
+    mov gs, ax
+
+    ;给满屏画上黑底空格作为清屏
+    mov ebx, 0
+    mov ecx, 80*25
+.cls:
+    mov word [gs:ebx], 0x0720
+    add ebx, 2
+    loop .cls
+
+    mov ebx, 0;将光标置到屏幕左上角，直接用之前的.set_cursor
+.set_cursor:
+    mov dx,0x03d4
+    mov al,0x0e
+    out dx,al
+    mov dx,0x03d5
+    mov al,bh
+    out dx,al
+
+    mov dx,0x03d4
+    mov al,0x0f
+    out dx,al
+    mov dx,0x03d5
+    mov al,bl
+    out dx,al
+
+    popad
+    ret
 
 ;=========================================
 section .data

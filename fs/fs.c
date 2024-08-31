@@ -10,6 +10,8 @@
 #include "memory.h"
 #include "file.h"
 #include "thread.h"
+#include "ioqueue.h"
+#include "keyboard.h"
 
 extern struct file file_table[MAX_FILE_OPEN];
 extern uint8_t channel_cnt;//按硬盘数计算的通道数
@@ -392,13 +394,25 @@ int32_t sys_write(int32_t fd, const void* buf, uint32_t count)
 //从fd指向的文件读取count字节到buf
 int32_t sys_read(int32_t fd, void* buf, uint32_t count)
 {
-    if (fd < 0) {
-        printk("sys_read: fd error!\n");
-        return -1;
-    }
     ASSERT(buf != NULL);
-    uint32_t _fd = fd_local2global(fd);
-    return file_read(&file_table[_fd], buf, count);
+    int32_t ret = -1;
+    if (fd < 0 || fd == stdout_no || fd == stderr_no) {
+        printk("sys_read: fd error!\n");
+    } else if (fd == stdin_no) {
+        //增加从键盘读入字符
+        char* buffer = (char*)buf;
+        uint32_t bytes_read = 0;
+        while (bytes_read < count) {
+            *buffer = ioq_getchar(&kbd_buf);
+            bytes_read++;
+            buffer++;
+        }
+        ret = (bytes_read == 0 ? -1 : (int32_t)bytes_read);
+    } else {
+        uint32_t _fd = fd_local2global(fd);
+        ret = file_read(&file_table[_fd], buf, count);
+    }
+    return ret;
 }
 
 //设置文件指针位置，成功时返回新偏移量
