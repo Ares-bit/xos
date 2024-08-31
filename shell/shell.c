@@ -40,6 +40,19 @@ static void readline(char* buf, int32_t count)
                     putchar('\b');//回显字符
                 }
                 break;
+            case 'l' - 'a':
+                *pos = '\0';
+                clear();
+                print_prompt();
+                printf("%s", buf);
+                break;
+            case 'u' - 'a':
+                while (buf != pos) {
+                    putchar('\b');
+                    pos--;
+                    //*(pos--) = '\0';//这句没必要
+                }
+                break;
             default:
                 putchar(*pos);
                 pos++;

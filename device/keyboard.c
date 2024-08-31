@@ -172,6 +172,12 @@ static void intr_keyboard_handler(void)
         uint8_t index = (scancode &= 0x00ff);
 
         char cur_char = keymap[index][shift];
+
+        //不在中断中实现快捷键效果，中断只负责产生快捷键字符，快捷键效果由上级消费者读出后自己决定执行策略
+        if ((ctrl_down_last && cur_char == 'l') || (ctrl_down_last && cur_char == 'u')) {
+            cur_char -= 'a';
+        }
+
         //rshift和ralt也会走到这里，但是它们查表会取出对应的lshift和lalt，它们宏定义的ASCII码0
         if (cur_char) {
             if (!ioq_full(&kbd_buf)) {
