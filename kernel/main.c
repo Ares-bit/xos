@@ -15,6 +15,7 @@
 #include "fs.h"
 #include "string.h"
 #include "dir.h"
+#include "shell.h"
 
 void k_thread_a(void*);
 void k_thread_b(void*);
@@ -25,16 +26,21 @@ int prog_a_pid = 0, prog_b_pid = 0;
 int main(void) {
     put_str("I am kernel\n");
     init_all();
+
+    cls_screen();
+    console_put_str("[xxy@localhost /]$ ");
+
+#if 0
     //intr_enable();
     //两个消费者线程
-    process_execute(u_prog_a, "user_prog_a");
-    process_execute(u_prog_b, "user_prog_b");
-    console_put_str("main_pid:0x");
-    console_put_int(sys_getpid());
-    console_put_char('\n');
-    thread_start("consumer_a", 31, k_thread_a, "argA");
-    thread_start("consumer_b", 31, k_thread_b, "argB");   
-
+    // process_execute(u_prog_a, "user_prog_a");
+    // process_execute(u_prog_b, "user_prog_b");
+    // console_put_str("main_pid:0x");
+    // console_put_int(sys_getpid());
+    // console_put_char('\n');
+    // thread_start("consumer_a", 31, k_thread_a, "argA");
+    // thread_start("consumer_b", 31, k_thread_b, "argB");   
+#endif
 #if 0
     sys_mkdir("/dir1");
     sys_mkdir("/dir1/subdir1");
@@ -64,11 +70,11 @@ void init(void)
 {
     uint32_t ret_pid = fork();
     if (ret_pid) {
-        printf("i am father, my pid is:%d, child pid is:%d\n", getpid(), ret_pid);
+        while(1);
     } else {
-        printf("i am child, my pid is:%d, ret pid is:%d\n", getpid(), ret_pid);
+        my_shell();
     }
-    while(1);
+    PANIC("init: should not be here!");
 }
 
 void k_thread_a(void* arg) {

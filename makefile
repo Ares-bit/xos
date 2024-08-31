@@ -3,7 +3,8 @@ ENTRY_POINT = 0xc0001500
 AS = nasm
 CC = gcc
 LD = ld
-LIBS = -I lib/ -I lib/kernel/ -I lib/user/ -I device/ -I kernel/ -I thread/ -I userprog/ -I fs/
+LIBS = -I lib/ -I lib/kernel/ -I lib/user/ -I device/ -I kernel/ -I thread/ -I userprog/ -I fs/ \
+	   -I shell/
 ASFLAGS = -f elf
 ASBINLIB = -I boot/include/
 CFLAGS = -m32 -Wall $(LIBS) -c -fno-builtin -W -Wstrict-prototypes \
@@ -18,7 +19,7 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/process.o $(BUILD_DIR)/syscall.o $(BUILD_DIR)/syscall_init.o \
 	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio_kernel.o $(BUILD_DIR)/ide.o \
 	$(BUILD_DIR)/fs.o $(BUILD_DIR)/inode.o $(BUILD_DIR)/file.o $(BUILD_DIR)/dir.o \
-	$(BUILD_DIR)/fork.o
+	$(BUILD_DIR)/fork.o $(BUILD_DIR)/shell.o
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.S
@@ -133,6 +134,10 @@ $(BUILD_DIR)/dir.o: fs/dir.c fs/dir.h fs/file.h fs/inode.h lib/kernel/stdio_kern
 
 $(BUILD_DIR)/fork.o: userprog/fork.c userprog/fork.h lib/string.h kernel/debug.h thread/thread.h \
 	kernel/memory.h fs/fs.h kernel/interrupt.h userprog/process.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/shell.o: shell/shell.c shell/shell.h lib/string.h kernel/debug.h lib/user/syscall.h \
+	lib/stdio.h fs/file.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译

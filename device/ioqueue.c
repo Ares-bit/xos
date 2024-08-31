@@ -35,13 +35,12 @@ static void ioq_wait(struct task_struct** waiter)
 {
     ASSERT(*waiter == NULL && waiter != NULL);
     *waiter = running_thread();
-    put_int(*waiter);
     thread_block(TASK_BLOCKED);
 }
 
 static void ioq_wakeup(struct task_struct** waiter)
 {
-    ASSERT(*waiter != NULL && *waiter == running_thread());
+    ASSERT(*waiter != NULL);
     thread_unblock(*waiter);
     *waiter = NULL;
 }

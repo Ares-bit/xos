@@ -20,5 +20,6 @@ void* malloc(uint32_t size);
 void free(void* ptr);
 pid_t fork(void);
 int32_t read(int32_t fd, void* buf, uint32_t count);
-void sys_putchar(char char_asci);
+void putchar(char char_asci);
+void clear(void);
 #endif
