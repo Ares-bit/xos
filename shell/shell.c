@@ -129,6 +129,10 @@ void my_shell(void)
             printf("num of arguments exceed %d\n", MAX_ARG_NR);
             continue;
         }
+        
+        if (!strcmp(argv[0], "ps")) {
+            ps();
+        }
 
         int32_t arg_idx = 0;
         while (arg_idx < argc) {
