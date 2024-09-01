@@ -13,6 +13,11 @@ static char cmd_line[CMD_LEN] = {0};
 //用来记录当前目录，是当前目录的缓存，每次执行cd更新此内容
 char cwd_cache[64] = {0};
 
+//argv存储输入参数的首地址
+char* argv[MAX_ARG_NR];
+//argc记录输入参数个数
+int32_t argc = -1;
+
 //输出命令提示符
 void print_prompt(void)
 {
@@ -62,6 +67,50 @@ static void readline(char* buf, int32_t count)
     printf("readline: can't find enter-key in the cmd line, max num of char is 128\n");
 }
 
+//分析字符串cmd_str中以token为分隔符的单次，将各单词的指针存入argv数组
+static int32_t cmd_parse(char* cmd_str, char** argv, char token)
+{
+    ASSERT(cmd_str != NULL);
+    int32_t arg_idx = 0;
+    //每次分析前清空argv数组
+    while (arg_idx < MAX_ARG_NR) {
+        argv[arg_idx] = NULL;
+        arg_idx++;
+    }
+
+    char* next = cmd_str;
+    int32_t argc = 0;
+
+    while (*next) {
+        //过滤命令中多余的空格
+        while (*next == token) {
+            next++;
+        }
+        //如果上边的空格被过滤掉后直接变成了结尾，那就解析结束
+        if (*next == '\0') {
+            break;
+        }
+        //让argv[argc]指向对应参数字符串
+        argv[argc] = next;
+
+        //经过上面找到一个参数，然后往后移动到token，再重新开始下次参数寻找
+        while (*next && *next != token) {
+            next++;
+        }
+        //将当前参数后token置位\0形成单独的字符串
+        if (*next) {
+            *next++ = '\0';
+        }
+
+        if (argc > MAX_ARG_NR) {
+            return -1;
+        }
+
+        argc++;
+    }
+    return argc;
+}
+
 void my_shell(void)
 {
     cwd_cache[0] = '/';//将当前工作目录设置为根
@@ -73,6 +122,20 @@ void my_shell(void)
         if (cmd_line[0] == '\0') {
             continue;
         }
+
+        argc = -1;
+        argc = cmd_parse(cmd_line, argv, ' ');
+        if (argc == -1) {
+            printf("num of arguments exceed %d\n", MAX_ARG_NR);
+            continue;
+        }
+
+        int32_t arg_idx = 0;
+        while (arg_idx < argc) {
+            printf("%s ", argv[arg_idx]);
+            arg_idx++;
+        }
+        printf("\n");
     }
     PANIC("my_shell: should not be here!");
 }
