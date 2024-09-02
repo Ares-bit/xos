@@ -19,7 +19,8 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/process.o $(BUILD_DIR)/syscall.o $(BUILD_DIR)/syscall_init.o \
 	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio_kernel.o $(BUILD_DIR)/ide.o \
 	$(BUILD_DIR)/fs.o $(BUILD_DIR)/inode.o $(BUILD_DIR)/file.o $(BUILD_DIR)/dir.o \
-	$(BUILD_DIR)/fork.o $(BUILD_DIR)/shell.o $(BUILD_DIR)/buildin_cmd.o
+	$(BUILD_DIR)/fork.o $(BUILD_DIR)/shell.o $(BUILD_DIR)/assert.o \
+	$(BUILD_DIR)/buildin_cmd.o 
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.S
@@ -136,12 +137,15 @@ $(BUILD_DIR)/fork.o: userprog/fork.c userprog/fork.h lib/string.h kernel/debug.h
 	kernel/memory.h fs/fs.h kernel/interrupt.h userprog/process.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/shell.o: shell/shell.c shell/shell.h lib/string.h kernel/debug.h lib/user/syscall.h \
+$(BUILD_DIR)/shell.o: shell/shell.c shell/shell.h lib/string.h lib/user/assert.h lib/user/syscall.h \
 	lib/stdio.h fs/file.h
 	$(CC) $(CFLAGS) $< -o $@
 
+$(BUILD_DIR)/assert.o: lib/user/assert.c lib/user/assert.h lib/stdio.h
+	$(CC) $(CFLAGS) $< -o $@
+
 $(BUILD_DIR)/buildin_cmd.o: shell/buildin_cmd.c shell/buildin_cmd.h fs/fs.h lib/string.h lib/user/syscall.h \
-	kernel/debug.h
+	lib/user/assert.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译

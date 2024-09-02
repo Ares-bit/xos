@@ -1,6 +1,6 @@
 #include "shell.h"
 #include "syscall.h"
-#include "debug.h"
+#include "assert.h"
 #include "stdio.h"
 #include "file.h"
 #include "buildin_cmd.h"
@@ -28,7 +28,7 @@ void print_prompt(void)
 //从键盘缓冲区读字符到buffer
 static void readline(char* buf, int32_t count)
 {
-    ASSERT(buf != NULL && count > 0);
+    assert(buf != NULL && count > 0);
     char* pos = buf;
     //读取键盘输入，直到遇见回车，将之前输入作为一条命令
     while (read(stdin_no, pos, 1) != -1 && (pos - buf) < count) {
@@ -71,7 +71,7 @@ static void readline(char* buf, int32_t count)
 //分析字符串cmd_str中以token为分隔符的单次，将各单词的指针存入argv数组
 static int32_t cmd_parse(char* cmd_str, char** argv, char token)
 {
-    ASSERT(cmd_str != NULL);
+    assert(cmd_str != NULL);
     int32_t arg_idx = 0;
     //每次分析前清空argv数组
     while (arg_idx < MAX_ARG_NR) {
