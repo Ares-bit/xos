@@ -16,6 +16,7 @@
 #include "string.h"
 #include "dir.h"
 #include "shell.h"
+#include "assert.h"
 
 void k_thread_a(void*);
 void k_thread_b(void*);
@@ -74,7 +75,7 @@ void init(void)
     } else {
         my_shell();
     }
-    PANIC("init: should not be here!");
+    panic("init: should not be here!");
 }
 
 void k_thread_a(void* arg) {

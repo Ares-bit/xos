@@ -145,7 +145,7 @@ $(BUILD_DIR)/assert.o: lib/user/assert.c lib/user/assert.h lib/stdio.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/buildin_cmd.o: shell/buildin_cmd.c shell/buildin_cmd.h fs/fs.h lib/string.h lib/user/syscall.h \
-	lib/user/assert.h
+	lib/user/assert.h lib/stdio.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译
