@@ -13,7 +13,7 @@ static char cmd_line[CMD_LEN] = {0};
 //存储清洗后的路径
 char final_path[MAX_PATH_LEN] = {0};
 //用来记录当前目录，是当前目录的缓存，每次执行cd更新此内容
-char cwd_cache[64] = {0};
+char cwd_cache[MAX_PATH_LEN] = {0};
 
 //argv存储输入参数的首地址
 char* argv[MAX_ARG_NR];
@@ -138,7 +138,7 @@ void my_shell(void)
             buildin_ls(argc, argv);
         } else if (!strcmp("cd", argv[0])) {
             if (buildin_cd(argc, argv) != NULL) {
-                memset(cwd_cache, 0, MAX_PATH_LEN);
+                memset(cwd_cache, 0, MAX_PATH_LEN);//cwd一开始长度写的是cmd len，这里memset超了，应该是把rootdir给置成0了
                 strcpy(cwd_cache, final_path);
             }
         } else if (!strcmp("pwd", argv[0])) {
