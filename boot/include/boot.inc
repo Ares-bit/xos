@@ -28,7 +28,7 @@ DESC_TYPE_CODE      equ             1000_00000000b
 DESC_TYPE_DATA      equ             0010_00000000b
 
 ;定义描述符高4B
-;他妈的原来问题搁这呢，<<必须放括号里，要不然生成的高4B全是0
+;原来问题搁这呢，<<必须放括号里，要不然生成的高4B全是0
 DESC_CODE_HIGH4     equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + \
                         DESC_L + DESC_AVL + DESC_LIMIT_CODE2 + \
                         DESC_P + DESC_DPL_0 + DESC_S_CODE + \

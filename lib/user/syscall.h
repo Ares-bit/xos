@@ -4,6 +4,7 @@
 #include "thread.h"
 #include "dir.h"
 #include "fs.h"
+#include "exec.h"
 
 enum SYSCALL_NR {
     SYS_GETPID,
@@ -27,7 +28,8 @@ enum SYSCALL_NR {
     SYS_READDIR,
     SYS_REWINDDIR,
     SYS_STAT,
-    SYS_PS
+    SYS_PS,
+    SYS_EXECV
 };
 
 pid_t getpid(void);
@@ -52,5 +54,5 @@ void rewinddir(struct dir* dir);
 int32_t stat(const char* path, struct stat* buf);
 int32_t chdir(const char* path);
 void ps(void);
-
+int32_t execv(const char* path, char* argv[]);
 #endif

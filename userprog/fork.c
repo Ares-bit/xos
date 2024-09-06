@@ -41,7 +41,7 @@ static int32_t copy_pcb_vaddrbitmap_stack0(struct task_struct* child_thread, str
     //为避免strcat越界，需要小于11
     ASSERT(strlen(child_thread->name) < 11);
     //按理说父子进程应同名，但为了调试，最后把子进程名字改为：父进程名_fork，以示区别
-    strcat(child_thread->name, "_fork");
+    //strcat(child_thread->name, "_fork");
     return 0;
 }
 

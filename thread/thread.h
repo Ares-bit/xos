@@ -5,6 +5,7 @@
 #include "bitmap.h"
 #include "memory.h"
 
+#define TASK_NAME_LEN   16
 #define MAX_FILES_OPEN_PER_PROC 8
 
 typedef void thread_func(void*);
@@ -65,7 +66,7 @@ struct task_struct {
     uint32_t* self_kstack;//线程栈
     pid_t pid;
     enum task_status status;
-    char name[16];
+    char name[TASK_NAME_LEN];
     uint8_t priority;
     uint8_t ticks;//每次在处理器上执行的时间滴答数
     uint32_t elapsed_ticks;//此任务已经占用了多少滴答
