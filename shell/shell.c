@@ -154,7 +154,30 @@ void my_shell(void)
         } else if (!strcmp("rm", argv[0])) {
             buildin_rm(argc, argv);
         } else {
-            printf("external command\n");
+            //外部命令
+            int32_t pid = fork();
+            if (pid) {
+                //卡住父进程让他不要接受下一条命令
+                while(1);
+            } else {
+                //子进程
+                make_clear_abs_path(argv[0], final_path);
+                argv[0] = final_path;//让argv[0]指向清洗后的路径
+                struct stat file_stat = {0};
+                //用stat判断文件是否存在也是一种方法也
+                if (stat(argv[0], &file_stat) == -1) {
+                    printf("my_shell: cannot access %s: No such file or directory\n", argv[0]);
+                } else {
+                    execv(argv[0], argv);
+                }
+                while(1);
+            }
+        }
+        //这段不需要，cmd_parse里会清argv，这里是为了在执行外部命令前清除上次输入的argv参数
+        int32_t arg_idx = 0;
+        while (arg_idx < MAX_ARG_NR) {
+            argv[arg_idx] = NULL;
+            arg_idx++;
         }
     }
     panic("my_shell: should not be here!");
