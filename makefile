@@ -98,7 +98,8 @@ $(BUILD_DIR)/process.o: userprog/process.c userprog/process.h kernel/global.h ke
 	kernel/interrupt.h
 	$(CC) $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)/syscall.o: lib/user/syscall.c lib/user/syscall.h
+$(BUILD_DIR)/syscall.o: lib/user/syscall.c lib/user/syscall.h lib/stdint.h thread/thread.h \
+	fs/dir.h fs/fs.h userprog/exec.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/syscall_init.o: userprog/syscall_init.c thread/thread.h lib/stdint.h lib/string.h \
