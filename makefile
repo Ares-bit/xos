@@ -20,7 +20,7 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio_kernel.o $(BUILD_DIR)/ide.o \
 	$(BUILD_DIR)/fs.o $(BUILD_DIR)/inode.o $(BUILD_DIR)/file.o $(BUILD_DIR)/dir.o \
 	$(BUILD_DIR)/fork.o $(BUILD_DIR)/shell.o $(BUILD_DIR)/assert.o \
-	$(BUILD_DIR)/buildin_cmd.o 
+	$(BUILD_DIR)/buildin_cmd.o $(BUILD_DIR)/exec.o
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.S
@@ -146,6 +146,9 @@ $(BUILD_DIR)/assert.o: lib/user/assert.c lib/user/assert.h lib/stdio.h
 
 $(BUILD_DIR)/buildin_cmd.o: shell/buildin_cmd.c shell/buildin_cmd.h fs/fs.h lib/string.h lib/user/syscall.h \
 	lib/user/assert.h lib/stdio.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/exec.o: userprog/exec.c userprog/exec.h lib/stdint.h thread/thread.h kernel/memory.h fs/fs.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译

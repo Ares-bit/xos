@@ -2,6 +2,7 @@
 #include "stdint.h"
 #include "memory.h"
 #include "thread.h"
+#include "fs.h"
 
 extern void intr_exit(void);
 
@@ -59,8 +60,8 @@ static bool segment_load(int32_t fd, uint32_t offset, uint32_t filesz, uint32_t 
     uint32_t size_in_first_page = PG_SIZE - (vaddr & 0x00000fff);
     uint32_t occupy_pages = 0;
     if (filesz > size_in_first_page) {
-        uint32_t left_pages = filesz - size_in_first_page;
-        occupy_pages = DIV_ROUND_UP(left_pages, PG_SIZE) + 1;//算上第一页，本段总共要占多少页面
+        uint32_t left_size = filesz - size_in_first_page;
+        occupy_pages = DIV_ROUND_UP(left_size, PG_SIZE) + 1;//算上第一页，本段总共要占多少页面
     } else {
         occupy_pages = 1;
     }
@@ -74,7 +75,7 @@ static bool segment_load(int32_t fd, uint32_t offset, uint32_t filesz, uint32_t 
 
         //要先判断pde页目录项是不是存在，否则访问pte时会缺页错误
         //如果页表项页目录项不存在，则申请一页内存安装到虚拟地址对应的页表中
-        if (!(*pde & 0x00000001) && !(*pte & 0x00000001)) {
+        if (!(*pde & 0x00000001) || !(*pte & 0x00000001)) {
             if (get_a_page(PF_USER, vaddr_page) == NULL) {
                 return false;//如果失败了之前分配的页还没收回呢
             }
@@ -137,7 +138,7 @@ static int32_t load(const char* pathname)
 
         if (PT_LOAD == prog_header.p_type) {
             //将该段读到内存，p_offset指明段到文件头的偏移量
-            if (!segment_load(fd, prog_header.p_offset, prog_header.p_filesz, prog_header.vaddr)) {
+            if (!segment_load(fd, prog_header.p_offset, prog_header.p_filesz, prog_header.p_vaddr)) {
                 ret = -1;
                 goto done;
             }
@@ -183,6 +184,6 @@ int32_t sys_execv(const char* path, const char* argv[])
     intr_0_stack->esp = (void*)0xc0000000;//将新进程esp设置为用户栈栈底，因为它第一次执行，栈认为是空的
 
     //将esp指向内核中断栈后，直接jmp到intr_exit假装从中断返回，然后弹中断栈从而使新进程得到执行
-    asm volatile("movl %0, %%esp\n\tjmp intr_exit" : : g(intr_0_stack) : "memory");
+    asm volatile("movl %0, %%esp\n\tjmp intr_exit" : : "g"(intr_0_stack) : "memory");
     return 0;//make gcc happy
 }

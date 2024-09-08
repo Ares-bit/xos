@@ -17,6 +17,7 @@
 #include "dir.h"
 #include "shell.h"
 #include "assert.h"
+#include "stdio_kernel.h"
 
 void k_thread_a(void*);
 void k_thread_b(void*);
@@ -27,41 +28,23 @@ int prog_a_pid = 0, prog_b_pid = 0;
 int main(void) {
     put_str("I am kernel\n");
     init_all();
-
+#if 0
+    //写入prog_no_arg
+    uint32_t file_size = 5074;
+    uint32_t sec_cnt = DIV_ROUND_UP(file_size, 512);
+    struct disk* sda = &channels[0].devices[0];
+    void* prog_buf = sys_malloc(file_size);
+    ide_read(sda, 300, prog_buf, sec_cnt);
+    int32_t fd = sys_open("/prog_no_arg", O_CREAT|O_RDWR);
+    if (fd != -1) {
+        if (sys_write(fd, prog_buf, file_size) == -1) {
+            printk("file write error!\n");
+            while(1);
+        }
+    }
+#endif
     cls_screen();
     console_put_str("[xxy@localhost /]$ ");
-
-#if 0
-    //intr_enable();
-    //两个消费者线程
-    // process_execute(u_prog_a, "user_prog_a");
-    // process_execute(u_prog_b, "user_prog_b");
-    // console_put_str("main_pid:0x");
-    // console_put_int(sys_getpid());
-    // console_put_char('\n');
-    // thread_start("consumer_a", 31, k_thread_a, "argA");
-    // thread_start("consumer_b", 31, k_thread_b, "argB");   
-#endif
-#if 0
-    sys_mkdir("/dir1");
-    sys_mkdir("/dir1/subdir1");
-    uint32_t fd = sys_open("/dir1/subdir1/file1", O_CREAT);//创建的文件会直接加到file table中
-    sys_close(fd);
-
-    struct stat obj_stat;
-
-    sys_stat("/", &obj_stat);
-    printf("/ info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
-
-    sys_stat("/dir1/", &obj_stat);
-    printf("/dir1/ info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
-   
-    sys_stat("/dir1/subdir1", &obj_stat);
-    printf("/dir1/subdir1 info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
-   
-    sys_stat("/dir1/subdir1/file1", &obj_stat);
-    printf("/dir1/subdir1/file1 info:\ni_no:%d  size:%d  filetype:%s\n", obj_stat.st_ino, obj_stat.st_size, obj_stat.st_filetype == FT_REGULAR ? "regular" : "directory");
-#endif
     while (1);
 
     return 0;
