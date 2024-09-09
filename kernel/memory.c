@@ -344,7 +344,22 @@ void* sys_malloc(uint32_t size)
     }
 }
 
-//将物理地址回收到物理内存池
+//跟pfree一样，看来是重复了
+void free_a_phy_page(uint32_t pg_phy_addr)
+{
+    struct pool* mem_pool;
+    uint32_t bit_idx = 0;
+    if (pg_phy_addr >= user_pool.phy_addr_start) {
+        mem_pool = &user_pool;
+        bit_idx = (pg_phy_addr - user_pool.phy_addr_start) / PG_SIZE;
+    } else {
+        mem_pool = &kernel_pool;
+        bit_idx = (pg_phy_addr - kernel_pool.phy_addr_start) / PG_SIZE;
+    }
+    bitmap_set(&mem_pool->pool_bitmap, bit_idx, 0);
+}
+
+//将物理地址回收到物理内存池，跟free_a_phy_page完全一致
 void pfree(uint32_t pg_phy_addr)
 {
     struct pool* mem_pool;
