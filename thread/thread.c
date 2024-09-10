@@ -327,7 +327,7 @@ void sys_ps(void)
     list_traversal(&thread_all_list, elem2thread_info, 0);
 }
 
-//回收thread_over的pcb和页表，并将其从调度队列中去除
+//回收thread_over的pcb和页目录表，并将其从调度队列中去除
 void thread_exit(struct task_struct* thread_over, bool need_schedule)
 {
     //schedule要关中断
@@ -340,6 +340,8 @@ void thread_exit(struct task_struct* thread_over, bool need_schedule)
     }
 
     //如果是用户进程，回收其页目录表，退出的线程有可能是主线程不需要释放
+    //子进程的页表和进程体在exit中释放，只剩页目录表还未释放，因为子进程要用页目录表的768-1022项访问内核，去执行exit代码
+    //进系统调用后cr3仍然是用户进程的页目录表，访问内核还是要用用户的
     if (thread_over->pgdir) {
         mfree_page(PF_KERNEL, thread_over->pgdir, 1);
     }
