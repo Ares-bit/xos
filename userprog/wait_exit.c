@@ -1,5 +1,6 @@
 #include "wait_exit.h"
 #include "thread.h"
+#include "debug.h"
 
 //释放用户空间虚拟页 物理页 页表 页目录表项 关闭文件
 static void release_prog_resource(struct task_struct* release_thread)

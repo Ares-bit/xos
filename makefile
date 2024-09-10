@@ -20,7 +20,7 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio_kernel.o $(BUILD_DIR)/ide.o \
 	$(BUILD_DIR)/fs.o $(BUILD_DIR)/inode.o $(BUILD_DIR)/file.o $(BUILD_DIR)/dir.o \
 	$(BUILD_DIR)/fork.o $(BUILD_DIR)/shell.o $(BUILD_DIR)/assert.o \
-	$(BUILD_DIR)/buildin_cmd.o $(BUILD_DIR)/exec.o
+	$(BUILD_DIR)/buildin_cmd.o $(BUILD_DIR)/exec.o $(BUILD_DIR)/wait_exit.o
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.S
@@ -99,7 +99,7 @@ $(BUILD_DIR)/process.o: userprog/process.c userprog/process.h kernel/global.h ke
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/syscall.o: lib/user/syscall.c lib/user/syscall.h lib/stdint.h thread/thread.h \
-	fs/dir.h fs/fs.h userprog/exec.h
+	fs/dir.h fs/fs.h userprog/exec.h userprog/wait_exit.h
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/syscall_init.o: userprog/syscall_init.c thread/thread.h lib/stdint.h lib/string.h \
@@ -150,6 +150,9 @@ $(BUILD_DIR)/buildin_cmd.o: shell/buildin_cmd.c shell/buildin_cmd.h fs/fs.h lib/
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/exec.o: userprog/exec.c userprog/exec.h lib/stdint.h thread/thread.h kernel/memory.h fs/fs.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/wait_exit.o: userprog/wait_exit.c userprog/wait_exit.h thread/thread.h kernel/debug.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译

@@ -29,7 +29,9 @@ enum SYSCALL_NR {
     SYS_REWINDDIR,
     SYS_STAT,
     SYS_PS,
-    SYS_EXECV
+    SYS_EXECV,
+    SYS_WAIT,
+    SYS_EXIT
 };
 
 pid_t getpid(void);
