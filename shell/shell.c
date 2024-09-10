@@ -158,7 +158,13 @@ void my_shell(void)
             int32_t pid = fork();
             if (pid) {
                 //卡住父进程让他不要接受下一条命令
-                while(1);
+                //while(1);//实现了wait后可以去掉了
+                int32_t status;
+                int32_t child_pid = wait(&status);
+                if (child_pid == -1) {
+                    panic("myshell: no child\n");
+                }
+                printf("child_pid %d, it's status: %d\n", child_pid, status);
             } else {
                 //子进程
                 make_clear_abs_path(argv[0], final_path);
@@ -167,10 +173,11 @@ void my_shell(void)
                 //用stat判断文件是否存在也是一种方法也
                 if (stat(argv[0], &file_stat) == -1) {
                     printf("my_shell: cannot access %s: No such file or directory\n", argv[0]);
+                    exit(-1);
                 } else {
                     execv(argv[0], argv);
                 }
-                while(1);
+                //while(1);
             }
         }
         //这段不需要，cmd_parse里会清argv，这里是为了在执行外部命令前清除上次输入的argv参数

@@ -198,7 +198,7 @@ int32_t file_open(uint32_t inode_no, uint8_t flag)
     file_table[fd_idx].fd_flag = flag;
     bool* write_deny = &file_table[fd_idx].fd_inode->write_deny;
 
-    if (flag & O_WRONLY || flag & O_RDWR) {
+    if (flag == O_WRONLY || flag == O_RDWR) {
         //如果文件可写，则必须考虑写文件的原子性
         enum intr_status old_status = intr_disable();
         if (!(*write_deny)) {

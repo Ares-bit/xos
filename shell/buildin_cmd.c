@@ -188,7 +188,7 @@ void buildin_ls(uint32_t argc, char** argv)
                     printf("ls: cannot access %s: No such file or directory\n", dir_e->filename);
                     return;
                 }
-                printf("%c  %d  %d  %s\n", ftype, dir_e->i_no, file_stat.st_size, dir_e->filename);
+                printf("%c      %d      %d      %s\n", ftype, dir_e->i_no, file_stat.st_size, dir_e->filename);
             }
         } else {
             //如果不打印详细信息就只打印名

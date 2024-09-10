@@ -23,7 +23,7 @@ static void release_prog_resource(struct task_struct* release_thread)
         pde = *v_pde_ptr;//取出页目录表项的值
         if (pde & 0x00000001) {
             //一个页表可以表示4MB空间，pde_idx指向的页表所表示的虚拟空间首地址为pde_idx * 4M，再用此首地址得到页表0项的指针
-            first_pte_vaddr_in_pde = pte_ptr(pde_idx * 400000);
+            first_pte_vaddr_in_pde = pte_ptr(pde_idx * 0x400000);
             pte_idx = 0;
             //遍历页表所有表项
             while (pte_idx < user_pte_nr) {
@@ -47,7 +47,7 @@ static void release_prog_resource(struct task_struct* release_thread)
 
     //回收用户虚拟地址池占用的物理页面
     uint32_t bitmap_pg_cnt = release_thread->userprog_vaddr.vaddr_bitmap.btmp_bytes_len / PG_SIZE; //这个分配的时候就可以保证是整数了，不需再向上取整
-    uint8_t user_vaddr_pool_bitmap = release_thread->userprog_vaddr.vaddr_bitmap.bits;
+    uint8_t* user_vaddr_pool_bitmap = release_thread->userprog_vaddr.vaddr_bitmap.bits;
     //连物理地址带页表一起释放
     mfree_page(PF_KERNEL, user_vaddr_pool_bitmap, bitmap_pg_cnt);
 
