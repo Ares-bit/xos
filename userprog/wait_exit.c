@@ -55,6 +55,7 @@ static void release_prog_resource(struct task_struct* release_thread)
     uint8_t fd_idx = 3;
     while (fd_idx < MAX_FILES_OPEN_PER_PROC) {
         if (release_thread->fd_table[fd_idx] != -1) {
+            //sys_close中已支持关闭管道，此处不需重复写了
             sys_close(fd_idx);
         }
         fd_idx++;

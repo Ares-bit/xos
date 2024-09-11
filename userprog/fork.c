@@ -7,6 +7,7 @@
 #include "file.h"
 #include "interrupt.h"
 #include "process.h"
+#include "pipe.h"
 
 //switch to时弹内核栈用
 extern void intr_exit(void);
@@ -114,6 +115,9 @@ static void update_inode_open_cnts(struct task_struct* thread)
         global_fd = thread->fd_table[local_fd];
         ASSERT(global_fd < MAX_FILE_OPEN);
         if (global_fd != -1) {
+            if (is_pipe(global_fd)) {
+                file_table[global_fd].fd_pos++;
+            }
             file_table[global_fd].fd_inode->i_open_cnts++;
         }
         local_fd++;

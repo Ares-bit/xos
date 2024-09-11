@@ -174,3 +174,8 @@ void exit(int32_t status)
 {
     _syscall1(SYS_EXIT, status);
 }
+
+int32_t pipe(int32_t pipefd[2])
+{
+    return _syscall1(SYS_PIPE, pipefd);
+}

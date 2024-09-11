@@ -20,7 +20,8 @@ OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/init.o $(BUILD_DIR)/interrupt.o \
 	$(BUILD_DIR)/stdio.o $(BUILD_DIR)/stdio_kernel.o $(BUILD_DIR)/ide.o \
 	$(BUILD_DIR)/fs.o $(BUILD_DIR)/inode.o $(BUILD_DIR)/file.o $(BUILD_DIR)/dir.o \
 	$(BUILD_DIR)/fork.o $(BUILD_DIR)/shell.o $(BUILD_DIR)/assert.o \
-	$(BUILD_DIR)/buildin_cmd.o $(BUILD_DIR)/exec.o $(BUILD_DIR)/wait_exit.o
+	$(BUILD_DIR)/buildin_cmd.o $(BUILD_DIR)/exec.o $(BUILD_DIR)/wait_exit.o \
+	$(BUILD_DIR)/pipe.o
 
 #mbr编译
 $(BUILD_DIR)/mbr.bin: boot/mbr.S
@@ -153,6 +154,9 @@ $(BUILD_DIR)/exec.o: userprog/exec.c userprog/exec.h lib/stdint.h thread/thread.
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR)/wait_exit.o: userprog/wait_exit.c userprog/wait_exit.h thread/thread.h kernel/debug.h
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/pipe.o: shell/pipe.c shell/pipe.h lib/stdint.h device/ioqueue.h fs/fs.h fs/file.h
 	$(CC) $(CFLAGS) $< -o $@
 
 #汇编编译

@@ -4,7 +4,8 @@
 #include "sync.h"
 #include "thread.h"
 
-#define bufsize 64
+//从64改为2048，为了管道的大小
+#define bufsize 2048
 
 struct ioqueue {
     struct lock lock;
@@ -22,4 +23,5 @@ bool ioq_full(struct ioqueue* ioq);
 bool ioq_empty(struct ioqueue* ioq);
 char ioq_getchar(struct ioqueue* ioq);
 void ioq_putchar(struct ioqueue* ioq, char byte);
+uint32_t ioq_length(struct ioqueue* ioq);
 #endif
