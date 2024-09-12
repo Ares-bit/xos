@@ -66,6 +66,7 @@ char* sys_getcwd(char* buf, uint32_t size);
 int32_t sys_rmdir(const char* pathname);
 char* path_parse(char* pathname, char* name_store);
 uint32_t fd_local2global(uint32_t local_fd);
+void sys_help(void);
 void filesys_init(void);
 
 #endif

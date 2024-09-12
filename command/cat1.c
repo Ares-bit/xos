@@ -4,16 +4,9 @@
 
 int main(int argc, char** argv)
 {
-    if (argc > 2) {
+    if (argc > 2 || argc == 1) {
+        printf("cat: only support 1 argument.\ne.g.:cat filename\n");
         exit(-2);
-    }
-
-    //cat无参数时从标准输入读取，可能是键盘或管道
-    if (argc == 1) {
-        char buf[512] = {0};
-        read(0, buf, 512);
-        printf("%s",buf);
-        exit(0);
     }
 
     int buf_size = 1024;

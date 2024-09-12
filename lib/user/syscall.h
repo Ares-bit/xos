@@ -32,7 +32,9 @@ enum SYSCALL_NR {
     SYS_EXECV,
     SYS_WAIT,
     SYS_EXIT,
-    SYS_PIPE
+    SYS_PIPE,
+    SYS_FD_REDIRECT,
+    SYS_HELP
 };
 
 pid_t getpid(void);

@@ -887,6 +887,24 @@ int32_t sys_stat(const char* path, struct stat* buf)
     return ret;
 }
 
+//显示系统支持的内部命令
+void sys_help(void)
+{
+    printk("\
+buildin commands\n\
+    ls:     show directory or file information.\n\
+    cd:     change current work directory.\n\
+    mkdir:  create a directory.\n\
+    rmdir:  remove a empty directory.\n\
+    rm:     remove a regular file.\n\
+    pwd:    show current work directory\n\
+    ps:     show process information.\n\
+    clear:  clear screen.\n\n\
+shortcut keys\n\
+    ctrl+l: clear screen.\n\
+    ctrl+u: clear input.\n");
+}
+
 //在磁盘上搜索文件系统，若没有则格式化分区创建文件系统
 void filesys_init()
 {
