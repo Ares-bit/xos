@@ -217,6 +217,15 @@ void buildin_ps(uint32_t argc, char** argv UNUSED)
     ps();
 }
 
+void buildin_help(uint32_t argc, char** argv UNUSED)
+{
+    if (argc != 1) {
+        printf("help: no argument support!\n");
+        return;
+    }
+    help();
+}
+
 void buildin_clear(uint32_t argc, char** argv UNUSED)
 {
     if (argc != 1) {

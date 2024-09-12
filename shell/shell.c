@@ -127,6 +127,8 @@ static void cmd_execute(uint32_t argc, char** argv)
         buildin_pwd(argc, argv);
     } else if (!strcmp("ps", argv[0])) {
         buildin_ps(argc, argv);
+    } else if (!strcmp("help", argv[0])) {
+        buildin_help(argc, argv);
     } else if (!strcmp("clear", argv[0])) {
         buildin_clear(argc, argv);
     } else if (!strcmp("mkdir", argv[0])) {
@@ -189,8 +191,8 @@ void my_shell(void)
             fd_redirect(1, fd[1]);
 
             char* each_cmd = cmd_line;
-            pipe_symbol = strchr(cmd_line, '|');
-            pipe_symbol = '\0';//将管道符所在位置截断成前后两个字符串
+            pipe_symbol = strchr(each_cmd, '|');
+            *pipe_symbol = '\0';//将管道符所在位置截断成前后两个字符串
 
             //执行前半部分命令，其所有打印都将写入管道
             argc = -1;

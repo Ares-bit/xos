@@ -39,7 +39,7 @@ int32_t sys_pipe(int32_t pipefd[2])
 //重定位进程描述符，用用户描述符数组中一个元素的值覆盖另一个元素的值
 void sys_fd_redirect(uint32_t old_local_fd, uint32_t new_local_fd)
 {
-    struct task_struct* cur = runnig_thread();
+    struct task_struct* cur = running_thread();
     //如果传入的new < 3，则表示3个标准描述符，这个三个值在用户描述符数组还是全局都是012
     //而且怕用户已经把他们重定位过了，不是012了，所以不能用else里的语句，要直接赋值
     if (new_local_fd < 3) {

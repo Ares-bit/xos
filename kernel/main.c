@@ -29,15 +29,14 @@ int main(void) {
     put_str("I am kernel\n");
     init_all();
 
-    cls_screen();
 #if 0
     //写入prog_no_arg
-    uint32_t file_size = 5556;
+    uint32_t file_size = 5923;
     uint32_t sec_cnt = DIV_ROUND_UP(file_size, 512);
     struct disk* sda = &channels[0].devices[0];
     void* prog_buf = sys_malloc(file_size);
     ide_read(sda, 300, prog_buf, sec_cnt);
-    int32_t fd = sys_open("/pipe", O_CREAT|O_RDWR);
+    int32_t fd = sys_open("/cat", O_CREAT|O_RDWR);
     if (fd != -1) {
         if (sys_write(fd, prog_buf, file_size) == -1) {
             printk("file write error!\n");
@@ -60,6 +59,7 @@ int main(void) {
     }
     console_put_str("write end!\n");
 #endif
+    cls_screen();
     console_put_str("[xxy@localhost /]$ ");
     //while (1);
     thread_exit(running_thread(), true);

@@ -383,6 +383,9 @@ int32_t sys_write(int32_t fd, const void* buf, uint32_t count)
 
     //sys_write原功能，printk没有用到sys_write，它直接用put_str
     if (fd == stdout_no) {
+        if (is_pipe(fd)) {
+            return pipe_write(fd, buf, count);
+        }
         //count超过1024咋办，其他print位置也都没加保护，原来的sys write都没限制这个，原来传str
         char tmp_buf[1025] = {0};
         memcpy(tmp_buf, buf, count);
@@ -411,15 +414,19 @@ int32_t sys_read(int32_t fd, void* buf, uint32_t count)
     if (fd < 0 || fd == stdout_no || fd == stderr_no) {
         printk("sys_read: fd error!\n");
     } else if (fd == stdin_no) {
-        //增加从键盘读入字符
-        char* buffer = (char*)buf;
-        uint32_t bytes_read = 0;
-        while (bytes_read < count) {
-            *buffer = ioq_getchar(&kbd_buf);
-            bytes_read++;
-            buffer++;
+        if (is_pipe(fd)) {
+            ret = pipe_read(fd, buf, count);
+        } else {
+            //增加从键盘读入字符
+            char* buffer = (char*)buf;
+            uint32_t bytes_read = 0;
+            while (bytes_read < count) {
+                *buffer = ioq_getchar(&kbd_buf);
+                bytes_read++;
+                buffer++;
+            }
+            ret = (bytes_read == 0 ? -1 : (int32_t)bytes_read);
         }
-        ret = (bytes_read == 0 ? -1 : (int32_t)bytes_read);
     } else if (is_pipe(fd)) {
         ret = pipe_read(fd, buf, count);
     } else {
@@ -895,7 +902,7 @@ buildin commands\n\
     ls:     show directory or file information.\n\
     cd:     change current work directory.\n\
     mkdir:  create a directory.\n\
-    rmdir:  remove a empty directory.\n\
+    rmdir:  remove an empty directory.\n\
     rm:     remove a regular file.\n\
     pwd:    show current work directory\n\
     ps:     show process information.\n\
