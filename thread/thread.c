@@ -349,11 +349,12 @@ void thread_exit(struct task_struct* thread_over, bool need_schedule)
 
     //回收其pcb，主线程的pcb在栈中分配
     if (thread_over != main_thread) {
+        release_pid(thread_over->pid);//改正invlpg后，在这里才不会page fault
         mfree_page(PF_KERNEL, thread_over, 1);
     }
 
     //回收pid，前边thread_over PCB都释放了，再用pid，这里没问题？？
-    release_pid(thread_over->pid);
+    //release_pid(thread_over->pid);
 
     //如果不需要回到主调，则调度
     if (need_schedule) {
