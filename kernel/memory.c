@@ -381,6 +381,7 @@ static void page_table_pte_remove(uint32_t vaddr)
     *pte &= ~PG_P_1;
     //刷TLB
     //asm volatile("invlpg %0" : : "m"(vaddr) : "memory");//这种并未真正刷TLB，不会产生page fault
+    //asm volatile("invlpg %0" : : "m"(*(char *)vaddr) : "memory");
     asm volatile("invlpg (%0)" : : "r"(vaddr) : "memory");
 }
 

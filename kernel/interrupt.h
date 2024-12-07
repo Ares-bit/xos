@@ -7,7 +7,7 @@ typedef void* intr_handler;
 void idt_init(void);
 
 enum intr_status{
-    INTR_ON = 1,
+    INTR_ON,
     INTR_OFF
 };
 
